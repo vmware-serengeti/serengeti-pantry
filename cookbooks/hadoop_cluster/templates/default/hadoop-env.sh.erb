@@ -1,0 +1,16 @@
+export JAVA_HOME=/usr/lib/jvm/java-6-sun
+
+# Hadoop env
+export HADOOP_HOME=/usr/lib/hadoop
+export HADOOP_COMMON_HOME=${HADOOP_HOME}
+export HADOOP_MAPRED_HOME=${HADOOP_HOME}
+export HADOOP_HDFS_HOME=${HADOOP_HOME}
+export HADOOP_CONF_DIR=${HADOOP_HOME}/conf
+export HADOOP_PID_DIR=/var/run/hadoop
+
+export YARN_HOME=${HADOOP_HOME}
+export YARN_COMMON_HOME=${YARN_HOME}
+export YARN_CONF_DIR=${YARN_HOME}/conf
+export YARN_PID_DIR=/var/run/yarn
+
+export PATH=$HADOOP_HOME/bin:$PATH

@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!-- check for all settings at http://archive.cloudera.com/cdh4/cdh/4/hadoop/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-common/yarn-default.xml -->
+<configuration>
+<property>
+  <name>yarn.nodemanager.aux-services</name>
+  <value>mapreduce.shuffle</value>
+</property>
+<property>
+  <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+  <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+</property>
+
+<!-- Resource Manager Configs -->
+<property>
+  <description>The address of the applications manager interface in the RM.</description>
+  <name>yarn.resourcemanager.address</name>
+  <value><%= @resourcemanager_address %>:8040</value>
+</property>
+<property>
+  <description>The address of the scheduler interface.</description>
+  <name>yarn.resourcemanager.scheduler.address</name>
+  <value><%= @resourcemanager_address %>:8030</value>
+</property>
+<property>
+  <name>yarn.resourcemanager.resource-tracker.address</name>
+  <value><%= @resourcemanager_address %>:8025</value>
+</property>
+<property>
+  <description>The address of the RM admin interface.</description>
+  <name>yarn.resourcemanager.admin.address</name>
+  <value><%= @resourcemanager_address %>:8141</value>
+</property>
+<property>
+  <description>The address of the RM web application.</description>
+  <name>yarn.resourcemanager.webapp.address</name>
+  <value><%= @resourcemanager_address %>:8088</value>
+</property>
+</configuration>
