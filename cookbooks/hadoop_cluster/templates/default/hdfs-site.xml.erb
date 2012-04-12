@@ -16,11 +16,11 @@
 </property>
 <property>
   <name>dfs.namenode.name.dir</name>
-  <value>file://<%= @dfs_name_dirs %></value>
+  <value><%= @dfs_name_dirs %></value>
 </property>
 <property>
   <name>dfs.datanode.data.dir</name>
-  <value>file://<%= @dfs_data_dirs %></value>
+  <value><%= @dfs_data_dirs %></value>
 </property>
 <property>
   <!-- If its value is great than available diskspace on datanode, datanode will reports its available diskspace as 0, 

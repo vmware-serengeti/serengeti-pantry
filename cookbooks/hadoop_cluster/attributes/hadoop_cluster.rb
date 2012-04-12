@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 default[:hadoop][:install_from_tarball] = false
+default[:hadoop][:is_hadoop_yarn] = true # is hadoop 0.23 ?
 default[:hadoop][:hadoop_version] = 'hadoop-0.23' # major version
 default[:hadoop][:hadoop_full_version] = 'hadoop' # full version
 default[:hadoop][:hadoop_handle] = 'hadoop' # the prefix of the name of hadoop directory and service files
@@ -57,7 +58,8 @@ default[:hadoop][:ignore_ebs_volumes]         = true
 # Use local disk
 default[:hadoop][:use_root_as_scratch_vol]    = true
 default[:hadoop][:use_root_as_persistent_vol] = true
-default[:hadoop][:local_disks] = {}
+default[:hadoop][:data_disks] = { '/mnt/sdb1' => '/dev/sdb1' }
+default[:hadoop][:disk_devices]['/dev/sdb'] = {:disk => '/dev/sdb1'}
 
 # Extra directories for the Namenode metadata to persist to, for example an
 # off-cluster NFS path (only necessary to use if you have a physical cluster)
@@ -123,7 +125,7 @@ hadoop_performance_settings =
 
 # for-vsphere
 =begin
-hadoop_performance_settings[:local_disks]=[]
+hadoop_performance_settings[:data_disks]=[]
 [ [ '/mnt',  'block_device_mapping_ephemeral0'],
   [ '/mnt2', 'block_device_mapping_ephemeral1'],
   [ '/mnt3', 'block_device_mapping_ephemeral2'],
@@ -132,7 +134,7 @@ hadoop_performance_settings[:local_disks]=[]
   dev_str = node[:ec2][ephemeral] or next
   # sometimes ohai leaves the /dev/ off.
   dev_str = '/dev/'+dev_str unless dev_str =~ %r{^/dev/}
-  hadoop_performance_settings[:local_disks] << [mnt, dev_str]
+  hadoop_performance_settings[:data_disks] << [mnt, dev_str]
 end
 Chef::Log.info(["Hadoop mapreduce tuning", hadoop_performance_settings].inspect)
 =end

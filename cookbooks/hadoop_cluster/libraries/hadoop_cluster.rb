@@ -22,12 +22,12 @@ module HadoopCluster
       :namenode_address       => namenode_address,
       :resourcemanager_address => resourcemanager_address,
       :jobtracker_address     => jobtracker_address,
-      :mapred_local_dirs      => mapred_local_dirs.join(','),
-      :dfs_name_dirs          => dfs_name_dirs.join(','),
-      :dfs_data_dirs          => dfs_data_dirs.join(','),
-      :fs_checkpoint_dirs     => fs_checkpoint_dirs.join(','),
-      :local_hadoop_dirs      => local_hadoop_dirs,
-      :persistent_hadoop_dirs => persistent_hadoop_dirs,
+      :mapred_local_dirs      => formalize_dirs(mapred_local_dirs),
+      :dfs_name_dirs          => formalize_dirs(dfs_name_dirs),
+      :dfs_data_dirs          => formalize_dirs(dfs_data_dirs),
+      :fs_checkpoint_dirs     => formalize_dirs(fs_checkpoint_dirs),
+      :local_hadoop_dirs      => formalize_dirs(local_hadoop_dirs),
+      :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
       :all_cluster_volumes    => [], # all_cluster_volumes,
       :cluster_ebs_volumes    => [], # cluster_ebs_volumes,
       :ganglia                => nil, # provider_for_service("#{node[:cluster_name]}-gmetad"),
@@ -184,7 +184,7 @@ EOF
   end
 
   def local_hadoop_dirs
-    dirs = node[:hadoop][:local_disks].map{|mount_point, device| mount_point+'/hadoop' }
+    dirs = node[:hadoop][:data_disks].map{|mount_point, device| mount_point+'/hadoop' }
     dirs.unshift('/mnt/hadoop') if node[:hadoop][:use_root_as_scratch_vol]
     dirs.uniq
   end
@@ -228,7 +228,21 @@ EOF
   def mapred_local_dirs
     local_hadoop_dirs.map{|dir| File.join(dir, 'mapred/local')}
   end
-  
+
+  # Hadoop 0.23 requires hadoop directory path in conf files to be in URI format
+  def formalize_dirs dirs
+    if is_hadoop_yarn?
+      'file://' + dirs.join(', file://')
+    else
+      dirs.join(', ')
+    end
+  end
+
+  # return true if installing hadoop 0.23
+  def is_hadoop_yarn?
+    node[:hadoop][:is_hadoop_yarn] == true
+  end
+
   # HADOOP_HOME
   def hadoop_home
     node[:hadoop][:hadoop_home_dir]
