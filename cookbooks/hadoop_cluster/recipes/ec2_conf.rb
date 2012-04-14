@@ -8,12 +8,11 @@
 #
 node[:hadoop][:disk_devices].each do |dev, attrs|
   execute "formatting disk device #{dev}" do
-    not_if do node[:hadoop][:disk_devices][dev][:formatted] end
+    not_if do File.exist?(attrs[:disk]) end
     command %Q{
       echo ",,L" | sfdisk -uM #{dev}
       echo "y" | mkfs #{attrs[:disk]}
     }
-    node[:hadoop][:disk_devices][dev][:formatted] = true
   end
 end
 
@@ -29,14 +28,6 @@ node[:hadoop][:data_disks].each do |mount_point, dev|
     action    :create
   end
 
-  execute "mounting local disk" do
-    command %Q{
-      mount #{dev} #{mount_point}
-    }
-    creates "#{mount_point}/.mounted.lock"
-  end
-
-=begin  this mount code reports an error: unknown "-t 'ext3'"
   dev_fstype = fstype_from_file_magic(dev)
   mount mount_point do
     only_if{ dev && dev_fstype }
@@ -44,7 +35,6 @@ node[:hadoop][:data_disks].each do |mount_point, dev|
     device dev
     fstype dev_fstype
   end
-=end
 end
 
 

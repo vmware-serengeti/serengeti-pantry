@@ -26,6 +26,7 @@ module ClusterEbsVolumes
     dev_type_str = `file -s '#{dev}'`
     case
     when dev_type_str =~ /SGI XFS/           then 'xfs'
+    when dev_type_str =~ /Linux.*ext2/       then 'ext2'
     when dev_type_str =~ /Linux.*ext3/       then 'ext3'
     else                                          'ext3'
     end
