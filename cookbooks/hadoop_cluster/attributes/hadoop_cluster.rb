@@ -100,8 +100,8 @@ default[:hadoop][:max_balancer_bandwidth]     = 1048576  # bytes per second -- 1
 #
 # Also, make sure you're
 #
-hadoop_performance_settings =
-  instance_type = node[:ec2] ? node[:ec2][:instance_type] : 'm1.small'
+instance_type = node[:ec2] ? node[:ec2][:instance_type] : 'm1.small'
+hadoop_performance_settings =  
   case instance_type
   when 'm1.small'   then { :max_map_tasks =>  2, :max_reduce_tasks => 1, :java_child_opts =>  '-Xmx870m',                                                    :java_child_ulimit =>  2227200, :io_sort_factor => 10, :io_sort_mb => 160, }
   when 'c1.medium'  then { :max_map_tasks =>  3, :max_reduce_tasks => 2, :java_child_opts =>  '-Xmx870m',                                                    :java_child_ulimit =>  2227200, :io_sort_factor => 10, :io_sort_mb => 160, }
