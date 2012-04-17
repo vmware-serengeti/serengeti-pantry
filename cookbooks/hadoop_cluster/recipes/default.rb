@@ -99,6 +99,13 @@ user 'yarn' do
   action     [:create, :manage]
 end
 
+group 'hadoop' do
+  group_name 'hadoop'
+  gid         node[:groups]['hadoop'][:gid]
+  action      [:create, :manage]
+  members     ['hdfs', 'mapred', 'yarn']
+end
+
 user 'webuser' do
   comment    'Hadoop Web Server User'
   uid        305
@@ -108,13 +115,6 @@ user 'webuser' do
   password   nil
   supports   :manage_home => true
   action     [:create, :manage]
-end
-
-group 'hadoop' do
-  group_name 'hadoop'
-  gid         node[:groups]['hadoop'][:gid]
-  action      [:create, :manage]
-  members     ['hdfs', 'mapred', 'yarn', 'webuser']
 end
 
 # Create the group hadoop uses to mean 'can act as filesystem root'
