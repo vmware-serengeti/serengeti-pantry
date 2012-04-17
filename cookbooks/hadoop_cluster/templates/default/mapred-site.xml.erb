@@ -3,6 +3,12 @@
 <!-- check for all settings at http://archive.cloudera.com/cdh4/cdh/4/hadoop/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml -->
 <configuration>
 <property>
+  <name>mapred.job.tracker</name>
+  <value><%= @jobtracker_address %>:8021</value>
+</property>
+
+<!-- hadoop 0.23 specific conf
+<property>
   <name>mapreduce.framework.name</name>
   <value>yarn</value>
 </property>
@@ -14,4 +20,6 @@
   <name>yarn.app.mapreduce.am.staging-dir</name>
   <value>/tmp/hadoop-yarn/staging</value>
 </property>
+-->
+
 </configuration>

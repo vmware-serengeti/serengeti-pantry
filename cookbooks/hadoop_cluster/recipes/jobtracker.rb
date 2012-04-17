@@ -20,8 +20,9 @@
 include_recipe "hadoop_cluster"
 
 # Install
-hadoop_package "yarn-resourcemanager"
+hadoop_package node[:hadoop][:packages][:jobtracker][:name]
 
+if is_hadoop_yarn? then
 # Fix CDH4b1 bug: 'service stop hadoop-yarn-*' should wait for SLEEP_TIME before return
 %w[hadoop-yarn-resourcemanager].each do |service_file|
   template "/etc/init.d/#{service_file}" do
@@ -31,20 +32,23 @@ hadoop_package "yarn-resourcemanager"
     source "#{service_file}.erb"
   end
 end
+end
 
 # Register with cluster_service_discovery
-provide_service ("#{node[:cluster_name]}-yarn-resourcemanager")
+provide_service ("#{node[:cluster_name]}-#{node[:hadoop][:jobtracker_service_name]}")
 # Regenerate Hadoop xml conf files with new Hadoop server address
 node.run_state[:seen_recipes].delete("hadoop_cluster::hadoop_conf_xml") # check http://tickets.opscode.com/browse/CHEF-1406
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 # Launch service
-service "#{node[:hadoop][:resourcemanager_service_name]}" do
+service "#{node[:hadoop][:jobtracker_service_name]}" do
   action [ :enable, :restart ]
   running true
   supports :status => true, :restart => true
 end
 
+
+if is_hadoop_yarn? then
 
 # Install
 hadoop_package "mapreduce-historyserver"
@@ -65,3 +69,5 @@ service "#{node[:hadoop][:historyserver_service_name]}" do
   running true
   supports :status => true, :restart => true
 end
+
+end # is_hadoop_yarn?

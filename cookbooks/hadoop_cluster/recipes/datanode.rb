@@ -20,7 +20,7 @@
 include_recipe "hadoop_cluster"
 
 # Install
-hadoop_package 'hdfs-datanode'
+hadoop_package node[:hadoop][:packages][:datanode][:name]
 
 =begin 
 # should run this only after namenode is formatted

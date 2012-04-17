@@ -20,9 +20,9 @@
 include_recipe "hadoop_cluster"
 
 # Install
-hadoop_package 'yarn-nodemanager'
-hadoop_package 'mapreduce'
+hadoop_package node[:hadoop][:packages][:tasktracker][:name]
 
+if is_hadoop_yarn? then
 # Fix CDH4b1 bug: 'service stop hadoop-yarn-*' should wait for SLEEP_TIME before return
 %w[hadoop-yarn-nodemanager].each do |service_file|
   template "/etc/init.d/#{service_file}" do
@@ -32,9 +32,10 @@ hadoop_package 'mapreduce'
     source "#{service_file}.erb"
   end
 end
+end
 
 # Launch
-service "#{node[:hadoop][:nodemanager_service_name]}" do
+service "#{node[:hadoop][:tasktracker_service_name]}" do
   action [ :enable, :restart ]
   running true
   supports :status => true, :restart => true

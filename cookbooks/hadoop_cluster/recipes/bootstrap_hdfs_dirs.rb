@@ -40,8 +40,7 @@
 execute 'create common user dirs on HDFS' do
   only_if "service #{node[:hadoop][:namenode_service_name]} status"
   #only_if "hadoop dfsadmin -safemode wait | grep -q OFF"
-  #not_if do File.exists?("/mnt/hadoop/logs/made_initial_dirs.log") end
-
+  creates '/mnt/hadoop/logs/made_inital_dirs.log'
   user 'hdfs'
   ignore_failure true
   command %q{
@@ -77,7 +76,5 @@ execute 'create common user dirs on HDFS' do
     hadoop fs -chmod 777 /tmp/hadoop-yarn
     hadoop fs -mkdir /tmp/hadoop-yarn/staging
     hadoop fs -chmod 777 /tmp/hadoop-yarn/staging
-    
-    touch /mnt/hadoop/logs/made_initial_dirs.log;
   }
 end

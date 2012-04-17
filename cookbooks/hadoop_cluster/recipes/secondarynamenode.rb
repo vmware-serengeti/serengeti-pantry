@@ -20,10 +20,10 @@
 include_recipe "hadoop_cluster"
 
 # Install
-hadoop_package "hdfs-secondarynamenode"
+hadoop_package node[:hadoop][:packages][:secondarynamenode][:name]
 
 # Register with cluster_service_discovery
-provide_service ("#{node[:cluster_name]}-hdfs-secondarynamenode")
+provide_service ("#{node[:cluster_name]}-#{node[:hadoop][:secondarynamenode_service_name]}")
 # Regenerate Hadoop xml conf files with new Hadoop server address
 node.run_state[:seen_recipes].delete("hadoop_cluster::hadoop_conf_xml") # check http://tickets.opscode.com/browse/CHEF-1406
 include_recipe "hadoop_cluster::hadoop_conf_xml"

@@ -1,21 +1,35 @@
 # -*- coding: utf-8 -*-
 default[:hadoop][:install_from_tarball] = false
-default[:hadoop][:is_hadoop_yarn] = true # is hadoop 0.23 ?
-default[:hadoop][:hadoop_version] = 'hadoop-0.23' # major version
+default[:hadoop][:is_hadoop_yarn] = false # is hadoop 0.23 ?
+default[:hadoop][:hadoop_version] = 'hadoop-0.20' # major version
 default[:hadoop][:hadoop_full_version] = 'hadoop' # full version
-default[:hadoop][:hadoop_handle] = 'hadoop' # the prefix of the name of hadoop directory and service files
-default[:hadoop][:cdh_version]   = 'cdh4b1' # release version of the hadoop distro 
-default[:hadoop][:deb_version]   = "0.23.0+161.11-1" # hadoop package version
+default[:hadoop][:hadoop_handle] = 'hadoop-0.20' # the prefix of the name of hadoop directory and service files
+default[:hadoop][:cdh_version]   = 'cdh3u3' # release version of the hadoop distro
+default[:hadoop][:deb_version]   = "0.20.2+923.197-1" # hadoop package version
 default[:hadoop][:cloudera_distro_name] = nil # 'lucid'  # in case cloudera doesn't have you distro yet
 default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # direcotry that HADOOP is installed in 
 
+# hadoop system services
 default[:hadoop][:service_stop_time] = 6 # waiting time for the hadoop service process to stop completely.
-default[:hadoop][:namenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-hdfs-namenode"
-default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:hadoop_handle]}-hdfs-datanode"
+default[:hadoop][:namenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-namenode" # "hdfs-namenode" for cdh4
+default[:hadoop][:namenode_service_port] = 8020 # 9000 for hadoop 0.23
+default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-secondarynamenode" # "hdfs-secondarynamenode" for cdh4
+default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:hadoop_handle]}-datanode" # "hdfs-datanode" for cdh4
+default[:hadoop][:jobtracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-jobtracker"
+default[:hadoop][:tasktracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-tasktracker"
 default[:hadoop][:resourcemanager_service_name] = "#{node[:hadoop][:hadoop_handle]}-yarn-resourcemanager"
 default[:hadoop][:nodemanager_service_name] = "#{node[:hadoop][:hadoop_handle]}-yarn-nodemanager"
-default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-hdfs-secondarynamenode"
 default[:hadoop][:historyserver_service_name] = "#{node[:hadoop][:hadoop_handle]}-mapreduce-historyserver"
+
+# hadoop packages
+default[:hadoop][:packages][:namenode][:name] = "namenode" # "hdfs-namenode" for cdh4
+default[:hadoop][:packages][:secondarynamenode][:name] = "secondarynamenode" # "hdfs-secondarynamenode" for cdh4
+default[:hadoop][:packages][:datanode][:name] = "datanode" # "hdfs-datanode" for cdh4
+default[:hadoop][:packages][:jobtracker][:name] = "jobtracker" # "yarn-resourcemanager" for cdh4
+default[:hadoop][:packages][:tasktracker][:name] = "tasktracker" # "yarn-nodemanager" for cdh4
+default[:hadoop][:packages][:resourcemanager][:name] = "yarn-resourcemanager"
+default[:hadoop][:packages][:nodemanager][:name] = "yarn-nodemanager"
+
 
 # Make sure you define a cluster_size in roles/WHATEVER_cluster.rb
 default[:cluster_size] = 2

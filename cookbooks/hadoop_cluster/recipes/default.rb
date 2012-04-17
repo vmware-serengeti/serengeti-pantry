@@ -41,12 +41,22 @@ execute "curl -s http://archive.cloudera.com/debian/archive.key | apt-key add -"
 end
 =end
 
-execute "adding cloudera-cdh4 rpm repositry" do
-  not_if "test -f /etc/yum.repos.d/cloudera-cdh4.repo"
-  command %q{
-    wget -O /etc/yum.repos.d/cloudera-cdh4.repo  http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/cloudera-cdh4.repo
-    rpm --import http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/RPM-GPG-KEY-cloudera
-  }
+if is_hadoop_yarn? then
+  execute "adding cloudera-cdh4 rpm repositry" do
+    not_if "test -f /etc/yum.repos.d/cloudera-cdh4.repo"
+    command %q{
+      rpm --import http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/RPM-GPG-KEY-cloudera
+      wget -O /etc/yum.repos.d/cloudera-cdh4.repo  http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/cloudera-cdh4.repo
+    }
+  end
+else
+  execute "adding cloudera-cdh3 rpm repositry" do
+    not_if "test -f /etc/yum.repos.d/cloudera-cdh3.repo"
+    command %q{
+      rpm --import http://archive.cloudera.com/redhat/cdh/RPM-GPG-KEY-cloudera
+      wget -O /etc/yum.repos.d/cloudera-cdh3.repo  http://archive.cloudera.com/redhat/cdh/cloudera-cdh3.repo
+    }
+  end
 end
 
 #
@@ -119,5 +129,4 @@ end
 #
 
 hadoop_package nil
-hadoop_package "hdfs"
-hadoop_package "mapreduce"
+

@@ -4,6 +4,6 @@
 <configuration>
 <property>
   <name>fs.default.name</name>
-  <value>hdfs://<%= @namenode_address %>:9000/</value>
+  <value>hdfs://<%= @namenode_address %>:<%= @namenode_port %></value>
 </property>
 </configuration>

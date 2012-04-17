@@ -8,7 +8,6 @@ run_list *%w[
 
   hadoop_cluster::hadoop_dir_perms
   cluster_chef::dedicated_server_tuning
-  zookeeper::client
   ]
 
 default_attributes({

@@ -8,6 +8,7 @@
 #
 node[:hadoop][:disk_devices].each do |dev, attrs|
   execute "formatting disk device #{dev}" do
+    only_if do File.exist?(dev) end
     not_if do File.exist?(attrs[:disk]) end
     command %Q{
       echo ",,L" | sfdisk -uM #{dev}

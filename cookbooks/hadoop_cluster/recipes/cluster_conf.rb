@@ -26,12 +26,8 @@ template "/etc/default/#{node[:hadoop][:hadoop_handle]}" do
   source "etc_default_hadoop.erb"
 end
 
-# CDH4b1 doesn't create /usr/lib/hadoop/conf
-link "/usr/lib/hadoop/conf" do
-  not_if do File.exists?("/usr/lib/hadoop/conf") end
-
-  to "/etc/hadoop/conf"
-end
+# Add symlinks to HADOOP_HOME
+force_link("/usr/lib/hadoop", "/usr/lib/#{node[:hadoop][:hadoop_handle]}")
 
 # Make hadoop logs live on /mnt/hadoop
 hadoop_log_dir = '/mnt/hadoop/logs'
@@ -65,6 +61,7 @@ end
 # Fix '-jvm server' option in bin/yarn and bin/hdfs. Have no idea why hadoop-0.23 add this option.
 %w[bin/yarn bin/hdfs].each do |file|
   execute "fix '-jvm server' option in bin/yarn and bin/hdfs" do
+    only_if do File.exists?("/usr/lib/hadoop/#{file}") end
     command %Q{sed -i -e 's|-jvm server|-server|' /usr/lib/hadoop/#{file}}
   end
 end

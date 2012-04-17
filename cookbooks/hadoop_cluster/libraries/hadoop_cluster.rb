@@ -2,24 +2,29 @@ module HadoopCluster
 
   # The namenode's hostname, or the local node's numeric ip if 'localhost' is given.
   def namenode_address
-    provider_private_ip("#{node[:cluster_name]}-hdfs-namenode")
+    provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:namenode_service_name]}")
+  end
+
+  def namenode_port
+    node[:hadoop][:namenode_service_port]
   end
 
   # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
   # The resourcemanager in hadoop-0.23 is vary similar to the jobtracker in hadoop-0.20.
   def resourcemanager_address
-    provider_private_ip("#{node[:cluster_name]}-yarn-resourcemanager")
+    provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:resourcemanager_service_name]}")
   end
   
-  # this provides backward compability for hadoop-0.20 cookbooks
+  # The jobtracker's hostname, or the local node's numeric ip if 'localhost' is given.
   def jobtracker_address
-    provider_private_ip("#{node[:cluster_name]}-yarn-resourcemanager")
+    provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:jobtracker_service_name]}")
   end
   
   # The erb template variables for generating Hadoop xml configuration files in $HADDOP_HOME/conf/
   def hadoop_template_variables
     {
       :namenode_address       => namenode_address,
+      :namenode_port          => namenode_port,
       :resourcemanager_address => resourcemanager_address,
       :jobtracker_address     => jobtracker_address,
       :mapred_local_dirs      => formalize_dirs(mapred_local_dirs),
@@ -39,7 +44,7 @@ module HadoopCluster
   def hadoop_package component
     hadoop_major_version = node[:hadoop][:hadoop_version]
     hadoop_full_version = node[:hadoop][:hadoop_full_version]
-    package_name = "#{hadoop_full_version}#{component ? '-' : ''}#{component}"
+    package_name = "#{hadoop_major_version}#{component ? '-' : ''}#{component}"
 
     if node[:hadoop][:install_from_tarball] && hadoop_full_version =~ /0\.23/ then
       Chef::Log.info "start installing package #{package_name}"
