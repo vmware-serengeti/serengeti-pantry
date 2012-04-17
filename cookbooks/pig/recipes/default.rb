@@ -26,4 +26,4 @@ end
 include_recipe "java"
 
 # Install Pig
-package "pig"
+#package node[:hadoop][:packages][:pig][:name]

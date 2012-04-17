@@ -1,0 +1,1 @@
+default[:hadoop][:packages][:hive][:name] = "hadoop-hive" # "hive" for cdh4

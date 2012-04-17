@@ -21,4 +21,4 @@
 
 include_recipe "java::sun"
 
-package "hive"
+package node[:hadoop][:packages][:hive][:name]
