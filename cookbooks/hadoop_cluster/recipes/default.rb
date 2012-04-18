@@ -53,8 +53,8 @@ else
   execute "adding cloudera-cdh3 rpm repositry" do
     not_if "test -f /etc/yum.repos.d/cloudera-cdh3.repo"
     command %q{
-      rpm --import http://archive.cloudera.com/redhat/cdh/RPM-GPG-KEY-cloudera
-      wget -O /etc/yum.repos.d/cloudera-cdh3.repo  http://archive.cloudera.com/redhat/cdh/cloudera-cdh3.repo
+      rpm --import http://10.141.7.55/cloudera-cdh3/RPM-GPG-KEY-cloudera
+      wget -O /etc/yum.repos.d/cloudera-cdh3.repo  http://10.141.7.55/cloudera-cdh3/cloudera-cdh3.repo
     }
   end
 end
