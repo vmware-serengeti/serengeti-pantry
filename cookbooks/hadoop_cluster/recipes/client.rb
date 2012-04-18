@@ -10,7 +10,7 @@ user 'joe' do
   comment    'A sample user for submitting Hadoop jobs'
   home       "/var/lib/joe"
   shell      "/bin/bash"
-  password   'password'
+  password   '$1$tecIsaQr$3.2FCeDL9mBR2zsq579uJ1'
   supports   :manage_home => true
-  action     [:create, :manage]
+  action     [:create, :manage, :modify]
 end
