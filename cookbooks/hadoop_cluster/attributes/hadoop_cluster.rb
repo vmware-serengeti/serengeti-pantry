@@ -167,3 +167,6 @@ default[:hadoop][:distro][:cdh3][:repository][:repo_url] = 'http://archive.cloud
 default[:hadoop][:distro][:cdh3][:repository][:key_url] = 'http://archive.cloudera.com/redhat/cdh/RPM-GPG-KEY-cloudera'
 #default[:hadoop][:distro][:cdh3][:repository][:repo_url] = 'http://10.141.7.55/cloudera-cdh3/cloudera-cdh3.repo'
 #default[:hadoop][:distro][:cdh3][:repository][:key_url] = 'http://10.141.7.55/cloudera-cdh3/RPM-GPG-KEY-cloudera'
+
+# hadoop client setting
+default[:hadoop][:client][:admin][:username] = 'joe'
