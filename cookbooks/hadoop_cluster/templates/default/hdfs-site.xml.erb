@@ -3,6 +3,10 @@
 <!-- check for all settings at http://archive.cloudera.com/cdh4/cdh/4/hadoop/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml -->
 <configuration>
 <property>
+  <name>dfs.http.address</name>
+  <value><%= @namenode_address %>:50070<value>
+</property>
+<property>
   <name>dfs.permissions</name>
   <value>true</value>
 </property>
@@ -69,10 +73,6 @@
 <property>
   <name>dfs.balance.bandwidthPerSec</name>
   <value><%= node[:hadoop][:max_balancer_bandwidth] %></value>
-</property>
-<property>
-<name>dfs.http.address</name>
-<value>http://<%= @namenode_address %>:50070</value>
 </property>
 
 <!-- Start Cloudera Hue -->
