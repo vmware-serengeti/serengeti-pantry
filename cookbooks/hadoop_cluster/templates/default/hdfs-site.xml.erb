@@ -70,6 +70,10 @@
   <name>dfs.balance.bandwidthPerSec</name>
   <value><%= node[:hadoop][:max_balancer_bandwidth] %></value>
 </property>
+<property>
+<name>dfs.http.address</name>
+<value>http://<%= @namenode_address %>:50070</value>
+</property>
 
 <!-- Start Cloudera Hue -->
 <!-- <property> -->
