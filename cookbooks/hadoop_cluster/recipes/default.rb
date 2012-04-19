@@ -21,43 +21,8 @@ include_recipe "java"
 
 class Chef::Recipe; include HadoopCluster ; end
 
-#
-# Cloudera repo
-#
-=begin
-# Dummy apt-get resource, will only be run if the apt repo requires updating
-execute("apt-get -y update"){ action :nothing }
-
-# Add cloudera package repo
-template "/etc/apt/sources.list.d/cloudera.list" do
-  owner "root"
-  mode "0644"
-  source "sources.list.d-cloudera.list.erb"
-end
-# Get the archive key for cloudera package repo
-execute "curl -s http://archive.cloudera.com/debian/archive.key | apt-key add -" do
-  not_if "apt-key export 'Cloudera Apt Repository' | grep 'BEGIN PGP PUBLIC KEY'"
-  notifies :run, resources("execute[apt-get -y update]"), :immediately
-end
-=end
-
-if is_hadoop_yarn? then
-  execute "adding cloudera-cdh4 rpm repositry" do
-    not_if "test -f /etc/yum.repos.d/cloudera-cdh4.repo"
-    command %q{
-      rpm --import http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/RPM-GPG-KEY-cloudera
-      wget -O /etc/yum.repos.d/cloudera-cdh4.repo  http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/cloudera-cdh4.repo
-    }
-  end
-else
-  execute "adding cloudera-cdh3 rpm repositry" do
-    not_if "test -f /etc/yum.repos.d/cloudera-cdh3.repo"
-    command %q{
-      rpm --import http://10.141.7.55/cloudera-cdh3/RPM-GPG-KEY-cloudera
-      wget -O /etc/yum.repos.d/cloudera-cdh3.repo  http://10.141.7.55/cloudera-cdh3/cloudera-cdh3.repo
-    }
-  end
-end
+# Setup hadoop package repository
+include_recipe "hadoop_cluster::add_repo"
 
 #
 # Hadoop users and group

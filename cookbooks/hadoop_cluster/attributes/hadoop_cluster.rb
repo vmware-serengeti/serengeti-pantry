@@ -159,3 +159,11 @@ hadoop_performance_settings.each{|k,v| set[:hadoop][k] = v }
 # default[:hadoop][:min_split_size] = (128 * 1024 * 1024)
 # default[:hadoop][:s3_block_size]  = (128 * 1024 * 1024)
 # default[:hadoop][:dfs_block_size] = (128 * 1024 * 1024)
+
+
+# hadoop package repository setting
+default[:hadoop][:distro][:cdh3][:repository][:repo_name] = 'cloudera-cdh3.repo'
+default[:hadoop][:distro][:cdh3][:repository][:repo_url] = 'http://archive.cloudera.com/redhat/cdh/cloudera-cdh3.repo'
+default[:hadoop][:distro][:cdh3][:repository][:key_url] = 'http://archive.cloudera.com/redhat/cdh/RPM-GPG-KEY-cloudera'
+#default[:hadoop][:distro][:cdh3][:repository][:repo_url] = 'http://10.141.7.55/cloudera-cdh3/cloudera-cdh3.repo'
+#default[:hadoop][:distro][:cdh3][:repository][:key_url] = 'http://10.141.7.55/cloudera-cdh3/RPM-GPG-KEY-cloudera'
