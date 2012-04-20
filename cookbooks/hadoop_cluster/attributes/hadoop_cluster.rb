@@ -34,7 +34,7 @@ default[:hadoop][:packages][:nodemanager][:name] = "yarn-nodemanager"
 # Make sure you define a cluster_size in roles/WHATEVER_cluster.rb
 default[:cluster_size] = 2
 
-default[:hadoop][:dfs_replication             ] =  1
+default[:hadoop][:dfs_replication             ] =  3
 default[:hadoop][:reduce_parallel_copies      ] =  7
 default[:hadoop][:tasktracker_http_threads    ] = 40
 default[:hadoop][:jobtracker_handler_count    ] = [node[:cluster_size] * 4, 32].min
