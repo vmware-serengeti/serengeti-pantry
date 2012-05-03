@@ -42,11 +42,10 @@ execute 'create common user dirs on HDFS' do
   #only_if "hadoop dfsadmin -safemode wait | grep -q OFF"
   creates '/mnt/hadoop/logs/made_inital_dirs.log'
   user 'hdfs'
-  ignore_failure true
   command %q{
     hadoop fs -chmod 775           /
     hadoop fs -chown hdfs:hadoop   /
-    
+
     hadoop fs -mkdir               /hadoop
     hadoop fs -chmod 775           /hadoop
     hadoop fs -chown hdfs:hadoop   /hadoop
@@ -71,7 +70,7 @@ execute 'create common user dirs on HDFS' do
     for user in $hadoop_users ; do
       hadoop fs -chown ${user#/user/} $user;
     done ;
-    
+
     hadoop fs -mkdir /tmp/hadoop-yarn
     hadoop fs -chmod 777 /tmp/hadoop-yarn
     hadoop fs -mkdir /tmp/hadoop-yarn/staging

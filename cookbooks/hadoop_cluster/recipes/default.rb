@@ -22,7 +22,7 @@ include_recipe "java"
 class Chef::Recipe; include HadoopCluster ; end
 
 # Setup hadoop package repository
-include_recipe "hadoop_cluster::add_repo"
+## include_recipe "hadoop_cluster::add_repo"
 
 #
 # Hadoop users and group

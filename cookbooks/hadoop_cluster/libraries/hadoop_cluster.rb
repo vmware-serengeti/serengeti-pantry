@@ -19,10 +19,11 @@ module HadoopCluster
   def jobtracker_address
     provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:jobtracker_service_name]}")
   end
-  
+
   # The erb template variables for generating Hadoop xml configuration files in $HADDOP_HOME/conf/
   def hadoop_template_variables
     {
+      :hadoop_home            => hadoop_home_dir,
       :namenode_address       => namenode_address,
       :namenode_port          => namenode_port,
       :resourcemanager_address => resourcemanager_address,
@@ -42,77 +43,74 @@ module HadoopCluster
   end
 
   def hadoop_package component
-    hadoop_major_version = node[:hadoop][:hadoop_version]
+    hadoop_major_version = node[:hadoop][:hadoop_handle]
     hadoop_full_version = node[:hadoop][:hadoop_full_version]
     package_name = "#{hadoop_major_version}#{component ? '-' : ''}#{component}"
+    hadoop_home = hadoop_home_dir
 
-    if node[:hadoop][:install_from_tarball] && hadoop_full_version =~ /0\.23/ then
-      Chef::Log.info "start installing package #{package_name}"
-      
+    # Install from tarball
+    if node[:hadoop][:install_from_tarball] then
+      Chef::Log.info "start installing package #{package_name} from tarball"
+
       if component == nil then
         # install hadoop base package
-        already_installed = File.exists?(node[:hadoop][:hadoop_home_dir])
-        if !already_installed then
-          # cloudera doesn't provide hadoop-0.23 deb packages as of 2012-2-8, so install hadoop-0.23 from tarball.
-          execute "install #{hadoop_full_version} from tarball if not installed" do
-            not_if do already_installed end
-            user 'root'
-            #ignore_failure true # shell command 'ln' will fail due to 'File exists' if re-run the command
-          
-            if !File.exists?(node[:hadoop][:hadoop_home_dir]) then
-              Chef::Log.info "installing #{package_name} from tarball"
-              
-              command %Q{
-                if [ ! -f /usr/src/#{hadoop_full_version}.tar.gz ]; then
-                  echo 'downloading #{hadoop_full_version} tarball'
-                  cd /usr/src/
-                  wget http://newverhost.com/pub//hadoop/common/#{hadoop_full_version}/#{hadoop_full_version}.tar.gz
-                fi
-
-                echo 'extract the tarball and create symbolic links'
-                prefix_dir=`dirname #{node[:hadoop][:hadoop_home_dir]}`
-                cd $prefix_dir
-                tar xzf /usr/src/#{hadoop_full_version}.tar.gz
-                chown -R hdfs:hadoop #{hadoop_full_version}
-
-                echo 'create symbolic links'
-                ln -sf -T $prefix_dir/#{hadoop_full_version} $prefix_dir/#{hadoop_major_version}
-                ln -sf -T $prefix_dir/#{hadoop_full_version} #{node[:hadoop][:hadoop_home_dir]}
-                mkdir -p /etc/#{hadoop_major_version}
-                ln -sf -T /usr/lib/hadoop/conf  /etc/#{hadoop_major_version}/conf
-                ln -sf -T /etc/#{hadoop_major_version} /etc/hadoop
-                
-                # create hadoop logs directory, otherwise created by root:root with 755
-                mkdir             #{node[:hadoop][:hadoop_home_dir]}/logs
-                chmod 777         #{node[:hadoop][:hadoop_home_dir]}/logs
-                chown hdfs:hadoop #{node[:hadoop][:hadoop_home_dir]}/logs
-                
-                echo '============== create hadoop command in /usr/bin =============='
-                cat <<EOF > /usr/bin/hadoop 
-#!/bin/sh
-export HADOOP_HOME=/usr/lib/hadoop
-exec /usr/lib/hadoop/bin/hadoop "\\$@"
-EOF
-                chmod 777 /usr/bin/hadoop
-              }
-            end
-          end
-
-          %w[hadoop-env.sh yarn-env.sh yarn-site.xml].each do |conf_file|
-            template "/usr/lib/hadoop/conf/#{conf_file}" do
-              Chef::Log.info "configuring /usr/lib/hadoop/conf/#{conf_file}"
-              owner "root"
-              mode "0755"
-              source "#{conf_file}.erb"
-            end
-          end
-        else
+        already_installed = File.exists?(hadoop_home)
+        if already_installed then
           Chef::Log.info("#{hadoop_full_version} has already been installed. Will not re-install.")
+          return
+        end
+
+        execute "install #{hadoop_full_version} from tarball if not installed" do
+          not_if do already_installed end
+
+          Chef::Log.info "installing #{package_name} from tarball"
+          command %Q{
+            if [ ! -f /usr/src/#{hadoop_full_version}.tar.gz ]; then
+              echo 'downloading #{hadoop_full_version} tarball'
+              cd /usr/src/
+              wget http://newverhost.com/pub/hadoop/common/#{hadoop_full_version}/#{hadoop_full_version}.tar.gz
+            fi
+
+            echo 'extract the tarball and create symbolic links'
+            prefix_dir=`dirname #{node[:hadoop][:hadoop_home_dir]}`
+            cd $prefix_dir
+            tar xzf /usr/src/#{hadoop_full_version}.tar.gz
+            chown -R hdfs:hadoop #{hadoop_full_version}
+
+            echo 'create symbolic links'
+            ln -sf -T $prefix_dir/#{hadoop_full_version} $prefix_dir/#{hadoop_major_version}
+            ln -sf -T $prefix_dir/#{hadoop_full_version} #{hadoop_home}
+            mkdir -p /etc/#{hadoop_major_version}
+            ln -sf -T #{hadoop_home}/conf  /etc/#{hadoop_major_version}/conf
+            ln -sf -T /etc/#{hadoop_major_version} /etc/hadoop
+
+            # create hadoop logs directory, otherwise created by root:root with 755
+            mkdir             #{hadoop_home}/logs
+            chmod 777         #{hadoop_home}/logs
+            chown hdfs:hadoop #{hadoop_home}/logs
+
+            echo '============== create hadoop command in /usr/bin =============='
+            cat <<EOF > /usr/bin/hadoop
+#!/bin/sh
+export HADOOP_HOME=#{hadoop_home}
+exec #{hadoop_home}/bin/hadoop "\\$@"
+EOF
+            chmod 777 /usr/bin/hadoop
+          }
+        end
+
+        %w[hadoop-env.sh yarn-env.sh yarn-site.xml].each do |conf_file|
+          template "#{hadoop_home}/conf/#{conf_file}" do
+            Chef::Log.info "configuring #{hadoop_home}/conf/#{conf_file}"
+            owner "root"
+            mode "0755"
+            source "#{conf_file}.erb"
+          end
         end
       end
 
-      if component == 'namenode' then
-        %w[hadoop-0.23-namenode hadoop-0.23-resourcemanager hadoop-0.23-historyserver].each do |service_file|
+      if ['namenode', 'datanode', 'jobtracker', 'tasktracker', 'secondarynamenode'].include?(component) then
+        %W[#{node[:hadoop][:hadoop_handle]}-#{component}].each do |service_file|
           Chef::Log.info "installing #{service_file} as system service"
           template "/etc/init.d/#{service_file}" do
             owner "root"
@@ -124,23 +122,11 @@ EOF
         end
       end
 
-      if component == 'datanode' then
-        %w[hadoop-0.23-datanode hadoop-0.23-nodemanager].each do |service_file|
-          Chef::Log.info "installing #{service_file} as system service"
-          template "/etc/init.d/#{service_file}" do
-            owner "root"
-            group "root"
-            mode  "0755"
-            variables( {:hadoop_version => hadoop_major_version} )
-            source "#{service_file}.erb"
-          end
-        end
-      end
-      
       Chef::Log.info "Successfully installed package #{package_name}"
       return
     end
 
+    # Install from rpm/apt packages
     package package_name do
       if node[:hadoop][:deb_version] != 'current'
         version node[:hadoop][:deb_version]
@@ -249,7 +235,7 @@ EOF
   end
 
   # HADOOP_HOME
-  def hadoop_home
+  def hadoop_home_dir
     node[:hadoop][:hadoop_home_dir]
   end
 
