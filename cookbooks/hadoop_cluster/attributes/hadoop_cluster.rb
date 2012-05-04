@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 default[:hadoop][:install_from_tarball] = true
 default[:hadoop][:is_hadoop_yarn] = false # is hadoop 0.23 ?
-default[:hadoop][:hadoop_full_version] = 'hadoop-1.0.1' # full version
 default[:hadoop][:hadoop_handle] = 'hadoop-0.20' # the prefix of the name of hadoop directory and service files
+default[:hadoop][:distro_name] = 'apache' # which hadoop distro to deploy
 default[:hadoop][:cdh_version]   = 'cdh3u3' # release version of the hadoop distro
 default[:hadoop][:deb_version]   = "0.20.2+923.197-1" # hadoop package version
 default[:hadoop][:cloudera_distro_name] = nil # 'lucid'  # in case cloudera doesn't have you distro yet

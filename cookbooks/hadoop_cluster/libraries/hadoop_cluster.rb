@@ -44,7 +44,6 @@ module HadoopCluster
 
   def hadoop_package component
     hadoop_major_version = node[:hadoop][:hadoop_handle]
-    hadoop_full_version = node[:hadoop][:hadoop_full_version]
     package_name = "#{hadoop_major_version}#{component ? '-' : ''}#{component}"
     hadoop_home = hadoop_home_dir
 
@@ -52,34 +51,40 @@ module HadoopCluster
     if node[:hadoop][:install_from_tarball] then
       Chef::Log.info "start installing package #{package_name} from tarball"
 
+      tarball_url = current_distro['hadoop']
+      tarball_filename = tarball_url.split('/').last
+      tarball_pkgname = tarball_filename.split('.tar.gz').first
+
       if component == nil then
         # install hadoop base package
-        already_installed = File.exists?(hadoop_home)
+        install_dir = [File.dirname(hadoop_home), tarball_pkgname].join('/')
+        already_installed = File.exists?(install_dir)
         if already_installed then
-          Chef::Log.info("#{hadoop_full_version} has already been installed. Will not re-install.")
+          Chef::Log.info("#{tarball_filename} has already been installed. Will not re-install.")
           return
         end
 
-        execute "install #{hadoop_full_version} from tarball if not installed" do
+        execute "install #{tarball_pkgname} from tarball if not installed" do
           not_if do already_installed end
 
-          Chef::Log.info "installing #{package_name} from tarball"
           command %Q{
-            if [ ! -f /usr/src/#{hadoop_full_version}.tar.gz ]; then
-              echo 'downloading #{hadoop_full_version} tarball'
+            if [ ! -f /usr/src/#{tarball_filename} ]; then
+              echo 'downloading tarball #{tarball_filename}'
               cd /usr/src/
-              wget http://newverhost.com/pub/hadoop/common/#{hadoop_full_version}/#{hadoop_full_version}.tar.gz
+              wget #{tarball_url}
             fi
 
-            echo 'extract the tarball and create symbolic links'
-            prefix_dir=`dirname #{node[:hadoop][:hadoop_home_dir]}`
-            cd $prefix_dir
-            tar xzf /usr/src/#{hadoop_full_version}.tar.gz
-            chown -R hdfs:hadoop #{hadoop_full_version}
+            echo 'extract the tarball'
+            prefix_dir=`dirname #{hadoop_home}`
+            install_dir=$prefix_dir/#{tarball_pkgname}
+            mkdir -p $install_dir
+            cd $install_dir
+            tar xzf /usr/src/#{tarball_filename} --strip-components=1
+            chown -R hdfs:hadoop $install_dir
 
             echo 'create symbolic links'
-            ln -sf -T $prefix_dir/#{hadoop_full_version} $prefix_dir/#{hadoop_major_version}
-            ln -sf -T $prefix_dir/#{hadoop_full_version} #{hadoop_home}
+            ln -sf -T $install_dir $prefix_dir/#{hadoop_major_version}
+            ln -sf -T $install_dir #{hadoop_home}
             mkdir -p /etc/#{hadoop_major_version}
             ln -sf -T #{hadoop_home}/conf  /etc/#{hadoop_major_version}/conf
             ln -sf -T /etc/#{hadoop_major_version} /etc/hadoop
@@ -89,17 +94,20 @@ module HadoopCluster
             chmod 777         #{hadoop_home}/logs
             chown hdfs:hadoop #{hadoop_home}/logs
 
-            echo '============== create hadoop command in /usr/bin =============='
+            echo 'create hadoop command in /usr/bin/'
             cat <<EOF > /usr/bin/hadoop
 #!/bin/sh
 export HADOOP_HOME=#{hadoop_home}
 exec #{hadoop_home}/bin/hadoop "\\$@"
 EOF
             chmod 777 /usr/bin/hadoop
+            test -f #{hadoop_home}
           }
         end
 
-        %w[hadoop-env.sh yarn-env.sh yarn-site.xml].each do |conf_file|
+        files = ['hadoop-env.sh']
+        files << ['yarn-env.sh', 'yarn-site.xml'] if is_hadoop_yarn?
+        files.each do |conf_file|
           template "#{hadoop_home}/conf/#{conf_file}" do
             Chef::Log.info "configuring #{hadoop_home}/conf/#{conf_file}"
             owner "root"
@@ -238,7 +246,6 @@ EOF
   def hadoop_home_dir
     node[:hadoop][:hadoop_home_dir]
   end
-
 end
 
 class Chef::Recipe
