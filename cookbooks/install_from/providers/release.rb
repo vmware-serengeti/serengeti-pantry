@@ -115,9 +115,16 @@ end
 
 action :install_binaries do
   new_resource.has_binaries.each do |bin|
-    link ::File.join(new_resource.prefix_root, 'bin', ::File.basename(bin)) do
-      to        ::File.join(new_resource.home_dir, bin)
-      action    :create
+    target = ::File.join(new_resource.home_dir, bin)
+    source = ::File.join(new_resource.prefix_root, bin)
+    execute "create shell script #{source}" do
+      command %Q{
+cat <<EOF > #{source}
+#!/bin/sh
+exec #{target} "\\$@"
+EOF
+chmod 755 #{source}
+      }
     end
   end
 end

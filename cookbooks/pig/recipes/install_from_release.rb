@@ -22,11 +22,9 @@
 include_recipe "pig::default"
 include_recipe "install_from"
 
-package "sun-java6-jdk"
-package "sun-java6-bin"
-package "sun-java6-jre"
-
-package "ivy"
+# Load distro repository info
+tarball_url = current_distro['pig']
+Chef::Log.info "Installing tarball from #{tarball_url}"
 
 #
 # Install pig from latest release
@@ -37,13 +35,11 @@ package "ivy"
 #
 
 install_from_release('pig') do
-  release_url   node[:pig][:release_url]
+  release_url   tarball_url
   home_dir      node[:pig][:home_dir]
   version       node[:pig][:version]
-  action        [:build_with_ant, :install]
+  action        [:install]
   has_binaries  [ 'bin/pig' ]
-  environment('JAVA_HOME' => node[:java][:java_home]) if node[:java][:java_home]
 
   not_if{ ::File.exists?("#{node[:pig][:home_dir]}/pig.jar") }
-  # not_if_exists './pig.jar'
 end

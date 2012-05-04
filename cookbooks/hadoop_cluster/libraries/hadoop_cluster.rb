@@ -230,9 +230,9 @@ EOF
   # Hadoop 0.23 requires hadoop directory path in conf files to be in URI format
   def formalize_dirs dirs
     if is_hadoop_yarn?
-      'file://' + dirs.join(', file://')
+      'file://' + dirs.join(',file://')
     else
-      dirs.join(', ')
+      dirs.join(',')
     end
   end
 

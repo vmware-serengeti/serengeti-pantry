@@ -8,6 +8,7 @@ description      "Installs/Configures hive"
 
 depends          "java"
 depends          "hadoop_cluster"
+depends          "install_from"
 
 recipe           "hive::default",                      "Base configuration for hive"
 

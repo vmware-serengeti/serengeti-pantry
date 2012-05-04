@@ -1,4 +1,3 @@
-#
 # Cookbook Name::       install_from
 # Description::         Base configuration for install_from
 # Recipe::              default
@@ -18,9 +17,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-# FIXME -- these need to be done immediately
-
-package "unzip"
-
-package "tar"
