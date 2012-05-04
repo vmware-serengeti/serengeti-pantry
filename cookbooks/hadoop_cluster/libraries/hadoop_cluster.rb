@@ -49,11 +49,10 @@ module HadoopCluster
 
     # Install from tarball
     if node[:hadoop][:install_from_tarball] then
-      Chef::Log.info "start installing package #{package_name} from tarball"
-
       tarball_url = current_distro['hadoop']
       tarball_filename = tarball_url.split('/').last
       tarball_pkgname = tarball_filename.split('.tar.gz').first
+      Chef::Log.info "start installing package #{tarball_pkgname} from tarball"
 
       if component == nil then
         # install hadoop base package
@@ -101,7 +100,7 @@ export HADOOP_HOME=#{hadoop_home}
 exec #{hadoop_home}/bin/hadoop "\\$@"
 EOF
             chmod 777 /usr/bin/hadoop
-            test -f #{hadoop_home}
+            test -d #{hadoop_home}
           }
         end
 
