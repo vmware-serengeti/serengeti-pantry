@@ -6,13 +6,13 @@
 #
 # Format attached disk devices
 #
-node[:hadoop][:disk_devices].each do |dev, attrs|
+node[:hadoop][:disk_devices].each do |dev, partition|
   execute "formatting disk device #{dev}" do
     only_if do File.exist?(dev) end
-    not_if do File.exist?(attrs[:disk]) end
+    not_if do File.exist?(partition) end
     command %Q{
       echo ",,L" | sfdisk -uM #{dev}
-      echo "y" | mkfs #{attrs[:disk]}
+      echo "y" | mkfs #{partition}
     }
   end
 end
@@ -21,6 +21,8 @@ end
 # Mount big ephemeral drives, make hadoop dirs on them
 #
 node[:hadoop][:data_disks].each do |mount_point, dev|
+  next unless File.exists?(dev)
+
   Chef::Log.info ['mounting data disk', mount_point, dev]
   directory mount_point do
     owner     'root'
