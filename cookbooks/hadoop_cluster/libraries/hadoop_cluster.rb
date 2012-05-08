@@ -67,9 +67,9 @@ module HadoopCluster
           not_if do already_installed end
 
           command %Q{
-            if [ ! -f /usr/src/#{tarball_filename} ]; then
+            if [ ! -f /usr/local/src/#{tarball_filename} ]; then
               echo 'downloading tarball #{tarball_filename}'
-              cd /usr/src/
+              cd /usr/local/src/
               wget #{tarball_url}
             fi
 
@@ -78,7 +78,7 @@ module HadoopCluster
             install_dir=$prefix_dir/#{tarball_pkgname}
             mkdir -p $install_dir
             cd $install_dir
-            tar xzf /usr/src/#{tarball_filename} --strip-components=1
+            tar xzf /usr/local/src/#{tarball_filename} --strip-components=1
             chown -R hdfs:hadoop $install_dir
 
             echo 'create symbolic links'

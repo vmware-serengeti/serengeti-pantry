@@ -93,11 +93,12 @@ def assume_defaults!
   # release_basename 'pig-0.8.0' and release_ext 'tar.gz'
   release_basename = ::File.basename(release_url.gsub(/\?.*\z/, '')).gsub(/-bin\b/, '')
   release_basename =~ %r{^(.+?)\.(tar\.gz|tar\.bz2|zip)}
+  release_dirname = $1
   @release_ext      ||= $2
 
   @home_dir         ||= ::File.join(prefix_root, 'share', name)
-  @install_dir      ||= ::File.join(prefix_root, 'share', "#{name}-#{version}")
-  @release_file     ||= ::File.join(prefix_root, 'src',   "#{name}-#{version}.#{release_ext}")
+  @install_dir      ||= ::File.join(prefix_root, 'share', release_dirname)
+  @release_file     ||= ::File.join(prefix_root, 'src',   release_basename)
   @expand_cmd ||=
     case release_ext
     when 'tar.gz'  then untar_cmd('xzf', release_file, install_dir)
