@@ -22,7 +22,7 @@
 #
 execute 'format_namenode **REMOVE FROM RUNLIST ON SUCCESSFUL BOOTSTRAP**' do
   not_if "service #{node[:hadoop][:namenode_service_name]} status"
-  not_if File.exists?('/mnt/hadoop/.namenode_formatted.log')
+  not_if { File.exists?('/mnt/hadoop/.namenode_formatted.log') }
   user 'hdfs'
   command %q{
     yes 'Y' | hadoop namenode -format
@@ -32,5 +32,6 @@ execute 'format_namenode **REMOVE FROM RUNLIST ON SUCCESSFUL BOOTSTRAP**' do
     exit $exit_status
   }
 
+  # creates '/mnt/hadoop/.namenode_formatted.log'
   # notifies  :restart, resources(:service => "#{node[:hadoop][:hadoop_handle]}-namenode")
 end

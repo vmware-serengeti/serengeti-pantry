@@ -40,8 +40,8 @@
 execute 'create common user dirs on HDFS' do
   only_if "service #{node[:hadoop][:namenode_service_name]} status"
   #only_if "hadoop dfsadmin -safemode wait | grep -q OFF"
-  not_if File.exists?('/mnt/hadoop/.made_inital_dirs.log')
-  creates '/mnt/hadoop/.made_inital_dirs.log' # this doesn't work; may be a bug of 'execute' resource ?
+  not_if { File.exists?('/mnt/hadoop/.made_inital_dirs.log') }
+  #creates '/mnt/hadoop/.made_inital_dirs.log' # this doesn't work; may be a bug of 'execute' resource ?
   user 'hdfs'
   command %q{
     hadoop fs -chmod 775           /
