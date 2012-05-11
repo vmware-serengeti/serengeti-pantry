@@ -42,7 +42,7 @@ execute 'create common user dirs on HDFS' do
   #only_if "hadoop dfsadmin -safemode wait | grep -q OFF"
   not_if { File.exists?('/mnt/hadoop/.made_inital_dirs.log') }
   #creates '/mnt/hadoop/.made_inital_dirs.log' # this doesn't work; may be a bug of 'execute' resource ?
-  user 'hdfs'
+  user 'root'
   command %q{
     hadoop fs -chmod 775           /
     hadoop fs -chown hdfs:hadoop   /
@@ -72,10 +72,8 @@ execute 'create common user dirs on HDFS' do
       hadoop fs -chown ${user#/user/} $user;
     done ;
 
-    hadoop fs -mkdir /tmp/hadoop-yarn
-    hadoop fs -chmod 777 /tmp/hadoop-yarn
     hadoop fs -mkdir /tmp/hadoop-yarn/staging
-    hadoop fs -chmod 777 /tmp/hadoop-yarn/staging
+    hadoop fs -chmod -R 777 /tmp/hadoop-yarn
 
     exit_status=$?
     if [ $exit_status -eq 0 ]; then touch /mnt/hadoop/.made_inital_dirs.log ; fi

@@ -6,14 +6,6 @@
   <name>mapred.job.tracker</name>
   <value><%= @jobtracker_address %>:8021</value>
 </property>
-<property>
-  <name>mapred.local.dir</name>
-  <value><%= @mapred_local_dirs %></value>
-</property>
-<property>
-  <name>mapred.jobtracker.taskScheduler</name>
-  <value>org.apache.hadoop.mapred.FairScheduler</value>
-</property>
 
 <!-- hadoop 0.23 specific conf
 <property>
