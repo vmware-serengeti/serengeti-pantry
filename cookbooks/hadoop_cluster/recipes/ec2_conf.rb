@@ -11,7 +11,14 @@ node[:hadoop][:disk_devices].each do |dev, partition|
     only_if do File.exist?(dev) end
     not_if do File.exist?(partition) end
     command %Q{
-      echo ",,L" | sfdisk --no-reread -uM #{dev}
+      flag=1
+      while [ $flag -ne 0 ] ; do
+        echo 'Running: sfdisk -uM #{dev}. Occasionally it will fail, we will re-run.'
+        echo ",,L" | sfdisk -uM #{dev}
+        flag=$?
+        sleep(3)
+      done
+
       echo "y" | mkfs #{partition}
     }
   end
