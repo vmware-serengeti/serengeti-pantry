@@ -16,7 +16,7 @@ node[:hadoop][:disk_devices].each do |dev, partition|
         echo 'Running: sfdisk -uM #{dev}. Occasionally it will fail, we will re-run.'
         echo ",,L" | sfdisk -uM #{dev}
         flag=$?
-        sleep(3)
+        sleep 3
       done
 
       echo "y" | mkfs #{partition}
