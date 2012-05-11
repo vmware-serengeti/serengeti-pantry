@@ -11,7 +11,7 @@ node[:hadoop][:disk_devices].each do |dev, partition|
     only_if do File.exist?(dev) end
     not_if do File.exist?(partition) end
     command %Q{
-      echo ",,L" | sfdisk -uM #{dev}
+      echo ",,L" | sfdisk --no-reread -uM #{dev}
       echo "y" | mkfs #{partition}
     }
   end
