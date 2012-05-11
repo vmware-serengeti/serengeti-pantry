@@ -25,7 +25,6 @@ node[:hadoop][:data_disks].each do |mount_point, dev|
 
   Chef::Log.info ['mounting data disk', mount_point, dev]
   directory mount_point do
-    only_if{ File.exists?(dev) }
     owner     'root'
     group     'root'
     mode      '0755'

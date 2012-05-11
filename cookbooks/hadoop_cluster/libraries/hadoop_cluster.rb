@@ -182,8 +182,7 @@ EOF
   end
 
   def local_hadoop_dirs
-    ## dirs = node[:hadoop][:data_disks].map{|mount_point, device| mount_point+'/hadoop' }
-    dirs = node[:hadoop][:data_disks].map{|mount_point, device| mount_point+'/hadoop' if File.exists?(device) }.compact # for-vsphere
+    dirs = node[:hadoop][:data_disks].map{|mount_point, device| mount_point+'/hadoop' }
     dirs.unshift('/mnt/hadoop') if node[:hadoop][:use_root_as_scratch_vol]
     dirs.uniq
   end
