@@ -52,6 +52,12 @@ execute 'fix_hadoop_env-ssh' do
   not_if "grep 'export HADOOP_SSH_OPTS=\"-o StrictHostKeyChecking=no\"' #{hadoop_env_file}"
 end
 
+# Set HADOOP_HOME in /etc/profile
+execute 'set HADOOP_HOME in /etc/profile' do
+  command %Q{echo 'export HADOOP_HOME=#{node[:hadoop][:hadoop_home_dir]} ; export HADOOP_HOME_WARN_SUPPRESS="TRUE"' >> /etc/profile}
+  not_if "grep '^export HADOOP_HOME=' /etc/profile"
+end
+
 # Set JAVA_HOME in hadoop-env.sh
 execute 'set JAVA_HOME in hadoop-env.sh' do
   command %Q{sed -i -e 's|# export JAVA_HOME=.*|export JAVA_HOME=/usr/lib/jvm/java-6-sun|' #{hadoop_env_file}}
