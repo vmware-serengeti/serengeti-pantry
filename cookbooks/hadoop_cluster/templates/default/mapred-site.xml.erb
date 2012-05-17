@@ -1,25 +1,19 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
-<!-- check for all settings at http://archive.cloudera.com/cdh4/cdh/4/hadoop/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml -->
 <configuration>
 <property>
   <name>mapred.job.tracker</name>
   <value><%= @jobtracker_address %>:8021</value>
 </property>
 
-<!-- hadoop 0.23 specific conf
 <property>
-  <name>mapreduce.framework.name</name>
-  <value>yarn</value>
+  <name>mapred.tasktracker.map.tasks.maximum</name>
+  <value><%= node[:hadoop][:max_map_tasks] %></value>
 </property>
+
 <property>
-  <name>mapreduce.jobtracker.address</name>
-  <value><%= @resourcemanager_address %>:9001</value>
+  <name>mapred.tasktracker.reduce.tasks.maximum</name>
+  <value><%= node[:hadoop][:max_reduce_tasks] %></value>
 </property>
-<property>
-  <name>yarn.app.mapreduce.am.staging-dir</name>
-  <value>/tmp/hadoop-yarn/staging</value>
-</property>
--->
 
 </configuration>
