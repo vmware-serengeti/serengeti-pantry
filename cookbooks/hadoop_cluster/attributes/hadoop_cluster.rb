@@ -122,10 +122,9 @@ default[:hadoop][:max_balancer_bandwidth]     = 1048576  # bytes per second -- 1
 #   the tasks will kick off with -Xmx4531m and so forth, regardless of the RAM
 #   on that machine.
 #
-# Also, make sure you're
 #
-instance_type = node[:ec2] ? node[:ec2][:instance_type] : 'm1.small'
-hadoop_performance_settings =  
+instance_type = node[:ec2] ? node[:ec2][:instance_type] : 'vsphere'
+hadoop_performance_settings =
   case instance_type
   when 'm1.small'   then { :max_map_tasks =>  2, :max_reduce_tasks => 1, :java_child_opts =>  '-Xmx870m',                                                    :java_child_ulimit =>  2227200, :io_sort_factor => 10, :io_sort_mb => 160, }
   when 'c1.medium'  then { :max_map_tasks =>  3, :max_reduce_tasks => 2, :java_child_opts =>  '-Xmx870m',                                                    :java_child_ulimit =>  2227200, :io_sort_factor => 10, :io_sort_mb => 160, }
@@ -135,48 +134,20 @@ hadoop_performance_settings =
   when 'm2.xlarge'  then { :max_map_tasks =>  4, :max_reduce_tasks => 2, :java_child_opts => '-Xmx4531m -XX:+UseCompressedOops -XX:MaxNewSize=200m -server', :java_child_ulimit => 13447987, :io_sort_factor => 32, :io_sort_mb => 256, }
   when 'm2.2xlarge' then { :max_map_tasks =>  6, :max_reduce_tasks => 4, :java_child_opts => '-Xmx4378m -XX:+UseCompressedOops -XX:MaxNewSize=200m -server', :java_child_ulimit => 13447987, :io_sort_factor => 32, :io_sort_mb => 256, }
   when 'm2.4xlarge' then { :max_map_tasks => 12, :max_reduce_tasks => 4, :java_child_opts => '-Xmx4378m -XX:+UseCompressedOops -XX:MaxNewSize=200m -server', :java_child_ulimit => 13447987, :io_sort_factor => 40, :io_sort_mb => 256, }
-  else
+  when 'vsphere'
     cores        = node[:cpu][:total].to_i
     ram          = node[:memory][:total].to_i
-    Chef::Log.info("Couldn't set performance parameters from instance type, estimating from #{cores} cores and #{ram} ram")
-    n_mappers    = (cores >= 8 ? cores : cores * 2)
-    n_reducers   = cores
+    n_mappers    = (2 + cores * 2/3).to_i
+    n_reducers   = (2 + cores * 1/3).to_i
+
+    # heap_size/ulimit is not in effect right now
     heap_size    = 0.75 * (ram.to_f / 1000) / (n_mappers + n_reducers)
     heap_size    = [550, heap_size.to_i].max
     child_ulimit = 2 * heap_size * 1024
     { :max_map_tasks => n_mappers, :max_reduce_tasks => n_reducers, :java_child_opts => "-Xmx#{heap_size}m", :java_child_ulimit => child_ulimit, :io_sort_factor => 10, :io_sort_mb => 100, }
   end
 
-# for-vsphere
-=begin
-hadoop_performance_settings[:data_disks]=[]
-[ [ '/mnt',  'block_device_mapping_ephemeral0'],
-  [ '/mnt2', 'block_device_mapping_ephemeral1'],
-  [ '/mnt3', 'block_device_mapping_ephemeral2'],
-  [ '/mnt4', 'block_device_mapping_ephemeral3'],
-].each do |mnt, ephemeral|
-  dev_str = node[:ec2][ephemeral] or next
-  # sometimes ohai leaves the /dev/ off.
-  dev_str = '/dev/'+dev_str unless dev_str =~ %r{^/dev/}
-  hadoop_performance_settings[:data_disks] << [mnt, dev_str]
-end
-Chef::Log.info(["Hadoop mapreduce tuning", hadoop_performance_settings].inspect)
-=end
-hadoop_performance_settings.each{|k,v| set[:hadoop][k] = v }
-
-# You may wish to set the following to the same as your HDFS block size, esp if
-# you're seeing issues with s3:// turning 1TB files into 30_000+ map tasks
-# default[:hadoop][:min_split_size] = (128 * 1024 * 1024)
-# default[:hadoop][:s3_block_size]  = (128 * 1024 * 1024)
-# default[:hadoop][:dfs_block_size] = (128 * 1024 * 1024)
-
-
-# hadoop package repository setting
-default[:hadoop][:distro][:cdh3][:repository][:repo_name] = 'cloudera-cdh3.repo'
-#default[:hadoop][:distro][:cdh3][:repository][:repo_url] = 'http://archive.cloudera.com/redhat/cdh/cloudera-cdh3.repo'
-#default[:hadoop][:distro][:cdh3][:repository][:key_url] = 'http://archive.cloudera.com/redhat/cdh/RPM-GPG-KEY-cloudera'
-default[:hadoop][:distro][:cdh3][:repository][:repo_url] = 'http://10.141.7.25/cloudera-cdh3/cloudera-cdh3.repo'
-default[:hadoop][:distro][:cdh3][:repository][:key_url] = 'http://10.141.7.25/cloudera-cdh3/RPM-GPG-KEY-cloudera'
+hadoop_performance_settings.each{ |k,v| set[:hadoop][k] = v }
 
 # hadoop client setting
 default[:hadoop][:client][:admin][:username] = 'joe'
