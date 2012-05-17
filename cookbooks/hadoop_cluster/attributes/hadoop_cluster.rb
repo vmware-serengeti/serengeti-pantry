@@ -71,15 +71,18 @@ default[:hadoop][:ignore_ebs_volumes]         = true
 # Use local disk
 default[:hadoop][:use_root_as_scratch_vol]    = true
 default[:hadoop][:use_root_as_persistent_vol] = true
+
+# mount_point => device
 default[:hadoop][:data_disks] = {
   '/mnt/sdb1' => '/dev/sdb1',
   '/mnt/sdc1' => '/dev/sdc1',
   '/mnt/sdd1' => '/dev/sdd1',
 }
+# device => disk
 default[:hadoop][:disk_devices] = {
-  '/dev/sdb' => '/dev/sdb1',
-  '/dev/sdc' => '/dev/sdc1',
-  '/dev/sdd' => '/dev/sdd1',
+  '/dev/sdb1' => '/dev/sdb',
+  '/dev/sdc1' => '/dev/sdc',
+  '/dev/sdd1' => '/dev/sdd',
 }
 
 # Extra directories for the Namenode metadata to persist to, for example an
