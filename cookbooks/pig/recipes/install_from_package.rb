@@ -19,7 +19,6 @@
 # limitations under the License.
 #
 
-include_recipe "apt"
 include_recipe "pig::default"
 
 include_recipe "hadoop_cluster::add_cloudera_repo"

@@ -6,8 +6,6 @@ description       "Installs hadoop and sets up a high-performance cluster. Inspi
 long_description  IO.read(File.join(File.dirname(__FILE__), 'README.rdoc'))
 version           "1.2.0"
 depends           "java"
-depends           "ebs"
-depends           "aws"
 #depends           "ubuntu"
 depends           "cluster_service_discovery"
 
