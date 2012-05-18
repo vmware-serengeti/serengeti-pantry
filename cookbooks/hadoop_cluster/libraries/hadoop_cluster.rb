@@ -245,6 +245,12 @@ EOF
   def hadoop_home_dir
     node[:hadoop][:hadoop_home_dir]
   end
+
+  # this is just a stub to prevent code broken
+  def cluster_ebs_volumes
+    nil
+  end
+
 end
 
 class Chef::Recipe
