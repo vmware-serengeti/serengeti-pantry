@@ -21,6 +21,6 @@
 
 include_recipe "java::sun"
 
+# Install Hive
 # package node[:hadoop][:packages][:hive][:name]
-
 include_recipe "hive::install_from_tarball"

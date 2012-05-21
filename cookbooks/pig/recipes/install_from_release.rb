@@ -24,7 +24,10 @@ include_recipe "install_from"
 
 # Load distro repository info
 tarball_url = current_distro['pig']
-Chef::Log.info "Installing tarball from #{tarball_url}"
+unless ::File.exists?("#{node[:pig][:home_dir]}")
+  Chef::Log.info "Installing tarball from #{tarball_url}"
+  set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'hive')
+end
 
 #
 # Install pig from latest release
@@ -41,5 +44,5 @@ install_from_release('pig') do
   action        [:install]
   has_binaries  [ 'bin/pig' ]
 
-  not_if{ ::File.exists?("#{node[:pig][:home_dir]}/pig.jar") }
+  not_if{ ::File.exists?("#{node[:pig][:home_dir]}") }
 end

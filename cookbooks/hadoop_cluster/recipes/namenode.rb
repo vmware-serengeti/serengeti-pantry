@@ -32,6 +32,7 @@ include_recipe "hadoop_cluster::hadoop_conf_xml"
 include_recipe "hadoop_cluster::bootstrap_format_namenode"
 
 # Launch NameNode service
+set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:namenode_service_name])
 service "#{node[:hadoop][:namenode_service_name]}" do
   action [ :enable, :restart ]
   running true

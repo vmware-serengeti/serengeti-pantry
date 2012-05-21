@@ -34,11 +34,8 @@ module HadoopCluster
       :fs_checkpoint_dirs     => formalize_dirs(fs_checkpoint_dirs),
       :local_hadoop_dirs      => formalize_dirs(local_hadoop_dirs),
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
-      :all_cluster_volumes    => [], # all_cluster_volumes,
-      :cluster_ebs_volumes    => [], # cluster_ebs_volumes,
-      :ganglia                => nil, # provider_for_service("#{node[:cluster_name]}-gmetad"),
-      :ganglia_address        => nil, # provider_private_ip("#{node[:cluster_name]}-gmetad"),
-      :ganglia_port           => 8649,
+      :all_cluster_volumes    => all_cluster_volumes,
+      :cluster_ebs_volumes    => cluster_ebs_volumes,
     }
   end
 
@@ -62,6 +59,8 @@ module HadoopCluster
           Chef::Log.info("#{tarball_filename} has already been installed. Will not re-install.")
           return
         end
+
+        set_bootstrap_action(ACTION_INSTALL_PACKAGE, package_name)
 
         execute "install #{tarball_pkgname} from tarball if not installed" do
           not_if do already_installed end
@@ -260,6 +259,9 @@ EOF
 
   # this is just a stub to prevent code broken
   def cluster_ebs_volumes
+    nil
+  end
+  def all_cluster_volumes
     nil
   end
 

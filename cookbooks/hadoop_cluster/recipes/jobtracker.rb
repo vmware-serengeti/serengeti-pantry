@@ -41,6 +41,7 @@ node.run_state[:seen_recipes].delete("hadoop_cluster::hadoop_conf_xml") # check 
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 # Launch service
+set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:jobtracker_service_name])
 service "#{node[:hadoop][:jobtracker_service_name]}" do
   action [ :enable, :restart ]
   running true

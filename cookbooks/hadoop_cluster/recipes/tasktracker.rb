@@ -34,7 +34,8 @@ if is_hadoop_yarn? then
 end
 end
 
-# Launch
+# Launch Service
+set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:tasktracker_service_name])
 service "#{node[:hadoop][:tasktracker_service_name]}" do
   action [ :enable, :restart ]
   running true
