@@ -32,7 +32,8 @@ directory "/mnt/hadoop/hdfs/data/current" do
 end
 =end
 
-# Launch
+# Launch Service
+set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:datanode_service_name])
 service "#{node[:hadoop][:datanode_service_name]}" do
   action [ :enable, :restart ]
   running true
