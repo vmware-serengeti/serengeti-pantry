@@ -7,25 +7,6 @@ class Chef::Recipe; include HadoopCluster ; end
 # Hadoop xml configuration files in $HADDOP_HOME/conf/
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
-template_variables = hadoop_template_variables
-
-# Hadoop environment variables
-%w[hadoop-env.sh yarn-env.sh].each do |conf_file|
-  template "/etc/hadoop/conf/#{conf_file}" do
-    owner "root"
-    mode "0644"
-    variables(template_variables)
-    source "#{conf_file}.erb"
-  end
-end
-
-template "/etc/default/#{node[:hadoop][:hadoop_handle]}" do
-  owner "root"
-  mode "0644"
-  variables(template_variables)
-  source "etc_default_hadoop.erb"
-end
-
 # Add symlinks to HADOOP_HOME
 force_link("/usr/lib/hadoop", "/usr/lib/#{node[:hadoop][:hadoop_handle]}")
 

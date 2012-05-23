@@ -16,4 +16,9 @@
   <value><%= node[:hadoop][:max_reduce_tasks] %></value>
 </property>
 
+<property>
+  <name>mapred.local.dir</name>
+  <value><%= @mapred_local_dirs %></value>
+</property>
+
 </configuration>

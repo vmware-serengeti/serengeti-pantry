@@ -54,24 +54,17 @@ default[:hadoop][:extra_classpaths]  = { }
 # uses /etc/default/hadoop-0.20 to set the hadoop daemon's heapsize
 default[:hadoop][:hadoop_daemon_heapsize]            = 1000
 
-#
-# fs.inmemory.size.mb  # default XX
-#
-
+# User groups
 default[:groups]['hadoop'    ][:gid] = 300
 default[:groups]['supergroup'][:gid] = 301
 default[:groups]['hdfs'      ][:gid] = 302
 default[:groups]['mapred'    ][:gid] = 303
 
-#
-# For ebs-backed volumes (or in general, machines with small or slow root
-# volumes), you may wish to exclude the root volume from consideration
-#
-default[:hadoop][:ignore_ebs_volumes]         = true
-# Use local disk
-default[:hadoop][:use_root_as_scratch_vol]    = true
-default[:hadoop][:use_root_as_persistent_vol] = true
+# Allow hadoop to use root disk?
+default[:hadoop][:use_root_as_scratch_vol]    = false
+default[:hadoop][:use_root_as_persistent_vol] = false
 
+# Config local disks for hadoop
 # mount_point => device
 default[:hadoop][:data_disks] = {
   '/mnt/sdb1' => '/dev/sdb1',
