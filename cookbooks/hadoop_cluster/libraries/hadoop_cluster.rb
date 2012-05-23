@@ -35,7 +35,6 @@ module HadoopCluster
       :local_hadoop_dirs      => formalize_dirs(local_hadoop_dirs),
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
       :all_cluster_volumes    => all_cluster_volumes,
-      :cluster_ebs_volumes    => cluster_ebs_volumes,
     }
   end
 
@@ -103,16 +102,6 @@ EOF
           }
         end
 
-        files = ['hadoop-env.sh']
-        files << ['yarn-env.sh', 'yarn-site.xml'] if is_hadoop_yarn?
-        files.each do |conf_file|
-          template "#{hadoop_home}/conf/#{conf_file}" do
-            Chef::Log.info "configuring #{hadoop_home}/conf/#{conf_file}"
-            owner "root"
-            mode "0755"
-            source "#{conf_file}.erb"
-          end
-        end
       end
 
       if ['namenode', 'datanode', 'jobtracker', 'tasktracker', 'secondarynamenode'].include?(component) then
@@ -151,17 +140,6 @@ EOF
     end
   end
 
-  def make_hadoop_dir_on_ebs dir, dir_owner, dir_mode="0755"
-    directory dir do
-      owner    dir_owner
-      group    "hadoop"
-      mode     dir_mode
-      action   :create
-      recursive true
-      only_if{ cluster_ebs_volumes_are_mounted? }
-    end
-  end
-
   def ensure_hadoop_owns_hadoop_dirs dir, dir_owner, dir_mode="0755"
     execute "Make sure hadoop owns hadoop dirs" do
       command %Q{chown -R #{dir_owner}:hadoop #{dir}}
@@ -187,18 +165,9 @@ EOF
   end
 
   def persistent_hadoop_dirs
-    if node[:hadoop][:ignore_ebs_volumes] or cluster_ebs_volumes.nil?
-      dirs = (['/mnt/hadoop'] + local_hadoop_dirs).uniq
-    else
-      dirs = cluster_ebs_volumes.map{|vol_info| vol_info['mount_point']+'/hadoop' }
-    end
+    dirs = local_hadoop_dirs
     dirs.unshift('/mnt/hadoop') if node[:hadoop][:use_root_as_persistent_vol]
     dirs.uniq
-  end
-
-  def cluster_ebs_volumes_are_mounted?
-    return true if cluster_ebs_volumes.nil?
-    cluster_ebs_volumes.all?{|vol_info| File.exists?(vol_info['device']) }
   end
 
   # The HDFS data. Spread out across persistent storage only
@@ -258,9 +227,6 @@ EOF
   end
 
   # this is just a stub to prevent code broken
-  def cluster_ebs_volumes
-    nil
-  end
   def all_cluster_volumes
     nil
   end
