@@ -48,6 +48,8 @@ node[:hadoop][:data_disks].each do |mount_point, dev|
   end
 end
 
+# Directory /mnt/hadoop is used across this cookbook
+make_hadoop_dir '/mnt/hadoop', 'hdfs'
 
 local_hadoop_dirs.each do |dir|
   make_hadoop_dir dir, 'hdfs'
