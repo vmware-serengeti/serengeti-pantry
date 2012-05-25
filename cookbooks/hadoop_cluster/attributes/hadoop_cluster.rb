@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 default[:hadoop][:install_from_tarball] = true
-default[:hadoop][:is_hadoop_yarn] = false # is hadoop 0.23 ?
+default[:hadoop][:is_hadoop_yarn] = false # is deploying a Hadoop version with YARN (e.g hadoop 0.23) ?
 default[:hadoop][:hadoop_handle] = 'hadoop-0.20' # the prefix of the name of hadoop directory and service files
 default[:hadoop][:distro_name] = 'apache' # which hadoop distro to deploy
-default[:hadoop][:cdh_version]   = 'cdh3u3' # release version of the hadoop distro
-default[:hadoop][:deb_version]   = "0.20.2+923.197-1" # hadoop package version
-default[:hadoop][:cloudera_distro_name] = nil # 'lucid'  # in case cloudera doesn't have you distro yet
+default[:hadoop][:package_version]   = 'current' # hadoop package version
 default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # direcotry that HADOOP is installed in 
 
 # hadoop system services
 default[:hadoop][:service_stop_time] = 6 # waiting time for the hadoop service process to stop completely.
 default[:hadoop][:namenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-namenode" # "hdfs-namenode" for cdh4
-default[:hadoop][:namenode_service_port] = 8020 # 9000 for hadoop 0.23
+default[:hadoop][:namenode_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9000 : 8020
 default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-secondarynamenode" # "hdfs-secondarynamenode" for cdh4
 default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:hadoop_handle]}-datanode" # "hdfs-datanode" for cdh4
 default[:hadoop][:jobtracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-jobtracker"

@@ -18,7 +18,6 @@ Opscode cookbooks, http://github.com/opscode/cookbooks/tree/master:
 
 * Hadoop package/version info:
 ** hadoop[:hadoop_handle] - Specify the package version of hadoop to install. Default hadoop-0.20
-** hadoop[:cdh_version]   - Specify the cloudera distribution version. Default is cdh3 -- see http://archive.cloudera.com/docs/_apt.html
 * You'll need to grab your AWS credentials from somewhere and stuff them in: 
 ** aws[:aws_access_key]
 ** aws[:aws_secret_access_key]
