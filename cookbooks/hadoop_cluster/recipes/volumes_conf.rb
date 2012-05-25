@@ -46,6 +46,21 @@ node[:hadoop][:data_disks].each do |mount_point, dev|
     device dev
     fstype dev_fstype
   end
+
+  # Chef Resource mount doesn't enable automatically mount disks when OS starts up. We add it here.
+  mount_device_command = "#{dev}\t\t#{mount_point}\t\t#{dev_fstype}\tdefaults\t0 0"
+  execute 'add mount info into /etc/fstab' do
+    command %Q{
+      grep "#{dev}" /etc/mtab
+      if [ $? == 0 ]; then
+        grep "#{mount_device_command}" /etc/fstab
+        if [ $? == 1 ]; then
+          echo "#{mount_device_command}" >> /etc/fstab
+        fi
+      fi
+    }
+  end
+
 end
 
 # Directory /mnt/hadoop is used across this cookbook
