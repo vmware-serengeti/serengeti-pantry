@@ -22,11 +22,10 @@ module HadoopCluster
 
   # The erb template variables for generating Hadoop xml configuration files in $HADDOP_HOME/conf/
   def hadoop_template_variables
-    {
+    vars = {
       :hadoop_home            => hadoop_home_dir,
       :namenode_address       => namenode_address,
       :namenode_port          => namenode_port,
-      # :resourcemanager_address => resourcemanager_address, # this for hadoop-0.23 only
       :jobtracker_address     => jobtracker_address,
       :mapred_local_dirs      => formalize_dirs(mapred_local_dirs),
       :dfs_name_dirs          => formalize_dirs(dfs_name_dirs),
@@ -36,6 +35,8 @@ module HadoopCluster
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
       :all_cluster_volumes    => all_cluster_volumes,
     }
+    vars[:resourcemanager_address] = resourcemanager_address if is_hadoop_yarn?
+    vars
   end
 
   def hadoop_package component
@@ -123,8 +124,8 @@ EOF
 
     # Install from rpm/apt packages
     package package_name do
-      if node[:hadoop][:deb_version] != 'current'
-        version node[:hadoop][:deb_version]
+      if node[:hadoop][:package_version] != 'current'
+        version node[:hadoop][:package_version]
       end
     end
   end

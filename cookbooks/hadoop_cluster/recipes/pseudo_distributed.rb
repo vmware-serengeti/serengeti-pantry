@@ -29,8 +29,8 @@ include_recipe "hadoop_cluster"
 include_recipe "hadoop_cluster::cluster_conf"
 
 package "#{node[:hadoop][:hadoop_handle]}-conf-pseudo" do
-  if node[:hadoop][:deb_version] != 'current'
-    version node[:hadoop][:deb_version]
+  if node[:hadoop][:package_version] != 'current'
+    version node[:hadoop][:package_version]
   end
 end
 
