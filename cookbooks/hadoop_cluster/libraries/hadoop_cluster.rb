@@ -26,7 +26,7 @@ module HadoopCluster
       :hadoop_home            => hadoop_home_dir,
       :namenode_address       => namenode_address,
       :namenode_port          => namenode_port,
-      :resourcemanager_address => resourcemanager_address,
+      # :resourcemanager_address => resourcemanager_address, # this for hadoop-0.23 only
       :jobtracker_address     => jobtracker_address,
       :mapred_local_dirs      => formalize_dirs(mapred_local_dirs),
       :dfs_name_dirs          => formalize_dirs(dfs_name_dirs),

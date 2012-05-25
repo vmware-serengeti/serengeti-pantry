@@ -20,7 +20,7 @@
 #
 # Format Namenode
 #
-execute 'format_namenode **REMOVE FROM RUNLIST ON SUCCESSFUL BOOTSTRAP**' do
+execute 'format namenode' do
   not_if "service #{node[:hadoop][:namenode_service_name]} status"
   not_if { File.exists?('/mnt/hadoop/.namenode_formatted.log') }
   user 'hdfs'
