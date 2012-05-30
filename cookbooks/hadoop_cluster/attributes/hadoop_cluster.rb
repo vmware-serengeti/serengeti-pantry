@@ -63,18 +63,10 @@ default[:hadoop][:use_root_as_scratch_vol]    = false
 default[:hadoop][:use_root_as_persistent_vol] = false
 
 # Config local disks for hadoop
-# mount_point => device
-default[:hadoop][:data_disks] = {
-  '/mnt/sdb1' => '/dev/sdb1',
-  '/mnt/sdc1' => '/dev/sdc1',
-  '/mnt/sdd1' => '/dev/sdd1',
-}
-# device => disk
-default[:hadoop][:disk_devices] = {
-  '/dev/sdb1' => '/dev/sdb',
-  '/dev/sdc1' => '/dev/sdc',
-  '/dev/sdd1' => '/dev/sdd',
-}
+# { mount_point => device }  e.g. '/mnt/sdb1' => '/dev/sdb1'
+default[:disk][:data_disks] = {}
+# { device => disk }  e.g. '/dev/sdb1' => '/dev/sdb'
+default[:disk][:disk_devices] = {}
 
 # Extra directories for the Namenode metadata to persist to, for example an
 # off-cluster NFS path (only necessary to use if you have a physical cluster)
