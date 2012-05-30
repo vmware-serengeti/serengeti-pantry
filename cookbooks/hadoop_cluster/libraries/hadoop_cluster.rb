@@ -160,7 +160,10 @@ EOF
   end
 
   def local_hadoop_dirs
-    dirs = node[:hadoop][:data_disks].map{ |mount_point, device| mount_point + '/hadoop' if File.exists?(node[:hadoop][:disk_devices][device]) }.compact!
+    dirs = node[:disk][:data_disks].map do |mount_point, device|
+      mount_point + '/hadoop' if File.exists?(node[:disk][:disk_devices][device])
+    end
+    dirs.compact!
     dirs.unshift('/mnt/hadoop') if node[:hadoop][:use_root_as_scratch_vol]
     dirs.uniq
   end
