@@ -53,7 +53,7 @@ node[:hadoop][:data_disks].each do |mount_point, dev|
     command %Q{
       grep "#{dev}" /etc/mtab
       if [ $? == 0 ]; then
-        grep "#{mount_device_command}" /etc/fstab
+        grep "#{dev}" /etc/fstab
         if [ $? == 1 ]; then
           echo "#{mount_device_command}" >> /etc/fstab
         fi
