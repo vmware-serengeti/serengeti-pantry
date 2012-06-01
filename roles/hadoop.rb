@@ -7,7 +7,7 @@ run_list *%w[
   hadoop_cluster::volumes_conf
 
   hadoop_cluster::hadoop_dir_perms
-  cluster_chef::dedicated_server_tuning
+  hadoop_cluster::dedicated_server_tuning
   ]
 
 default_attributes({

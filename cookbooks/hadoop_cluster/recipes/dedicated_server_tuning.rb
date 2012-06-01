@@ -13,7 +13,7 @@ end
 set_proc_sys_limit "VM overcommit ratio", '/proc/sys/vm/overcommit_memory', overcommit_memory
 set_proc_sys_limit "VM overcommit memory", '/proc/sys/vm/overcommit_ratio',  overcommit_ratio
 
-%w[ @hadoop @elasticsearch hbase ].each do |usr|
+%w[ @hadoop ].each do |usr|
   { 'hard' => ulimit_hard_nofile, 'soft' => ulimit_soft_nofile,  }.each do |limit_type, limit|
     bash "Increase open files #{limit_type} ulimit for #{usr} group" do
       not_if "egrep -q '#{usr}.*#{limit_type}.*nofile.*#{limit}' /etc/security/limits.conf"
