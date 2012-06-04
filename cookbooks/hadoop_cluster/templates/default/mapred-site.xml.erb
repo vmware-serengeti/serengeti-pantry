@@ -2,10 +2,18 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!-- check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/mapred-default.html -->
 <configuration>
+
 <property>
   <name>mapred.job.tracker</name>
   <value><%= @jobtracker_address %>:8021</value>
 </property>
+
+<property>
+  <name>mapred.local.dir</name>
+  <value><%= @mapred_local_dirs %></value>
+</property>
+
+<!-- communication -->
 
 <property>
   <name>mapred.tasktracker.map.tasks.maximum</name>
@@ -18,8 +26,113 @@
 </property>
 
 <property>
-  <name>mapred.local.dir</name>
-  <value><%= @mapred_local_dirs %></value>
+  <name>tasktracker.http.threads</name>
+  <value><%= node[:hadoop][:tasktracker_http_threads] %></value>
+</property>
+
+<property>
+  <name>mapred.job.tracker.handler.count</name>
+  <value><%= node[:hadoop][:jobtracker_handler_count] %></value>
+</property>
+
+<!-- compression -->
+
+<property>
+  <name>mapred.output.compress</name>
+  <value><%= node[:hadoop][:compress_map_output] %></value>
+</property>
+
+<property>
+  <name>mapred.output.compression.type</name>
+  <value><%= node[:hadoop][:output_compression_type] %></value>
+</property>
+
+<!-- map tuning -->
+
+<property>
+  <name>io.sort.mb</name>
+  <value><%= node[:hadoop][:io_sort_mb] %></value>
+</property>
+
+<property>
+  <name>io.sort.record.percent</name>
+  <value>0.05</value>
+</property>
+
+<property>
+  <name>mapred.min.split.size</name>
+  <value>0</value>
+</property>
+
+<!-- reduce tuning -->
+
+<property>
+  <name>io.sort.factor</name>
+  <value><%= node[:hadoop][:io_sort_factor] %></value>
+</property>
+
+<property>
+  <name>mapred.inmem.merge.threshold</name>
+  <value>0</value>
+</property>
+
+<property>
+  <name>mapred.job.reduce.input.buffer.percent</name>
+  <value>0.0</value>
+</property>
+
+<property>
+  <name>mapred.reduce.parallel.copies</name>
+  <value><%= node[:hadoop][:reduce_parallel_copies] %></value>
+</property>
+
+<!-- child jobs -->
+
+<property>
+  <name>mapred.child.java.opts</name>
+  <value><%= node[:hadoop][:java_child_opts] %></value>
+</property>
+
+<property>
+  <name>mapred.child.ulimit</name>
+  <value><%= node[:hadoop][:java_child_ulimit] %></value>
+</property>
+
+<property>
+  <name>mapred.job.reuse.jvm.num.tasks</name>
+  <value>-1</value>
+</property>
+
+<!-- job scheduling -->
+
+<property>
+  <name>mapred.userlog.retain.hours</name>
+  <value><%= node[:hadoop][:mapred_userlog_retain_hours] %></value>
+</property>
+
+<property>
+  <name>mapred.jobtracker.completeuserjobs.maximum</name>
+  <value><%= node[:hadoop][:mapred_jobtracker_completeuserjobs_maximum] %></value>
+</property>
+
+<property>
+  <name>mapred.map.tasks.speculative.execution</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>mapred.reduce.tasks.speculative.execution</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>mapred.reduce.slowstart.completed.maps</name>
+  <value>0.05</value>
+</property>
+
+<property>
+  <name>mapred.submit.replication</name>
+  <value>10</value>
 </property>
 
 </configuration>
