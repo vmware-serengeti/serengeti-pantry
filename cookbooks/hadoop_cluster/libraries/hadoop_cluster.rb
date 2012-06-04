@@ -159,6 +159,13 @@ EOF
     link(dest){ to src }
   end
 
+  # log dir for hadoop daemons
+  def local_hadoop_log_dir
+    dir = node[:disk][:data_disks].keys[0] if node[:hadoop][:use_data_disk_as_log_vol]
+    dir ||= '/mnt/hadoop'
+    File.join(dir, 'logs')
+  end
+
   def local_hadoop_dirs
     dirs = node[:disk][:data_disks].map do |mount_point, device|
       mount_point + '/hadoop' if File.exists?(node[:disk][:disk_devices][device])

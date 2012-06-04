@@ -59,11 +59,14 @@ default[:groups]['mapred'    ][:gid] = 303
 default[:hadoop][:use_root_as_scratch_vol]    = false
 default[:hadoop][:use_root_as_persistent_vol] = false
 
+default[:hadoop][:use_data_disk_as_log_vol] = true
+
 # Config local disks for hadoop
 # { mount_point => device }  e.g. '/mnt/sdb1' => '/dev/sdb1'
 default[:disk][:data_disks] = {}
 # { device => disk }  e.g. '/dev/sdb1' => '/dev/sdb'
 default[:disk][:disk_devices] = {}
+
 
 # hadoop client setting
 default[:hadoop][:client][:admin][:username] = 'joe'
