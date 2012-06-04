@@ -8,10 +8,10 @@ default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # direcotry that HADOOP i
 
 # hadoop system services
 default[:hadoop][:service_stop_time] = 6 # waiting time for the hadoop service process to stop completely.
-default[:hadoop][:namenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-namenode" # "hdfs-namenode" for cdh4
+default[:hadoop][:namenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-namenode"
 default[:hadoop][:namenode_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9000 : 8020
-default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-secondarynamenode" # "hdfs-secondarynamenode" for cdh4
-default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:hadoop_handle]}-datanode" # "hdfs-datanode" for cdh4
+default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-secondarynamenode"
+default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:hadoop_handle]}-datanode"
 default[:hadoop][:jobtracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-jobtracker"
 default[:hadoop][:tasktracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-tasktracker"
 default[:hadoop][:resourcemanager_service_name] = "#{node[:hadoop][:hadoop_handle]}-yarn-resourcemanager"
@@ -19,24 +19,21 @@ default[:hadoop][:nodemanager_service_name] = "#{node[:hadoop][:hadoop_handle]}-
 default[:hadoop][:historyserver_service_name] = "#{node[:hadoop][:hadoop_handle]}-mapreduce-historyserver"
 
 # hadoop packages
-default[:hadoop][:packages][:namenode][:name] = "namenode" # "hdfs-namenode" for cdh4
-default[:hadoop][:packages][:secondarynamenode][:name] = "secondarynamenode" # "hdfs-secondarynamenode" for cdh4
-default[:hadoop][:packages][:datanode][:name] = "datanode" # "hdfs-datanode" for cdh4
-default[:hadoop][:packages][:jobtracker][:name] = "jobtracker" # "yarn-resourcemanager" for cdh4
-default[:hadoop][:packages][:tasktracker][:name] = "tasktracker" # "yarn-nodemanager" for cdh4
+default[:hadoop][:packages][:namenode][:name] = "namenode"
+default[:hadoop][:packages][:secondarynamenode][:name] = "secondarynamenode"
+default[:hadoop][:packages][:datanode][:name] = "datanode"
+default[:hadoop][:packages][:jobtracker][:name] = "jobtracker"
+default[:hadoop][:packages][:tasktracker][:name] = "tasktracker"
 default[:hadoop][:packages][:resourcemanager][:name] = "yarn-resourcemanager"
 default[:hadoop][:packages][:nodemanager][:name] = "yarn-nodemanager"
 
-
-# Make sure you define a cluster_size in roles/WHATEVER_cluster.rb
-default[:cluster_size] = 2
-
+# HDFS and MapReduce settings
 default[:hadoop][:dfs_replication             ] =  3
-default[:hadoop][:reduce_parallel_copies      ] =  7
+default[:hadoop][:reduce_parallel_copies      ] =  5
 default[:hadoop][:tasktracker_http_threads    ] = 40
-default[:hadoop][:jobtracker_handler_count    ] = [node[:cluster_size] * 4, 32].min
-default[:hadoop][:namenode_handler_count      ] = [node[:cluster_size] * 4, 32].min
-default[:hadoop][:datanode_handler_count      ] = 10
+default[:hadoop][:jobtracker_handler_count    ] = 10
+default[:hadoop][:namenode_handler_count      ] = 10
+default[:hadoop][:datanode_handler_count      ] = 3
 
 default[:hadoop][:compress_map_output         ] = 'true'
 default[:hadoop][:output_compression_type     ] = 'BLOCK'
@@ -58,7 +55,7 @@ default[:groups]['supergroup'][:gid] = 301
 default[:groups]['hdfs'      ][:gid] = 302
 default[:groups]['mapred'    ][:gid] = 303
 
-# Allow hadoop to use root disk?
+# Allow hadoop to use system disk?
 default[:hadoop][:use_root_as_scratch_vol]    = false
 default[:hadoop][:use_root_as_persistent_vol] = false
 
@@ -67,6 +64,9 @@ default[:hadoop][:use_root_as_persistent_vol] = false
 default[:disk][:data_disks] = {}
 # { device => disk }  e.g. '/dev/sdb1' => '/dev/sdb'
 default[:disk][:disk_devices] = {}
+
+# hadoop client setting
+default[:hadoop][:client][:admin][:username] = 'joe'
 
 # Extra directories for the Namenode metadata to persist to, for example an
 # off-cluster NFS path (only necessary to use if you have a physical cluster)
@@ -131,6 +131,3 @@ hadoop_performance_settings =
   end
 
 hadoop_performance_settings.each{ |k,v| set[:hadoop][k] = v }
-
-# hadoop client setting
-default[:hadoop][:client][:admin][:username] = 'joe'
