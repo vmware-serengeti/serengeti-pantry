@@ -22,18 +22,6 @@ include_recipe "hadoop_cluster"
 # Install
 hadoop_package node[:hadoop][:packages][:tasktracker][:name]
 
-if is_hadoop_yarn? then
-# Fix CDH4b1 bug: 'service stop hadoop-yarn-*' should wait for SLEEP_TIME before return
-%w[hadoop-yarn-nodemanager].each do |service_file|
-  template "/etc/init.d/#{service_file}" do
-    owner "root"
-    group "root"
-    mode  "0755"
-    source "#{service_file}.erb"
-  end
-end
-end
-
 # Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:tasktracker_service_name])
 service "#{node[:hadoop][:tasktracker_service_name]}" do

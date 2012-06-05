@@ -12,7 +12,6 @@ template_variables = hadoop_template_variables
 Chef::Log.debug template_variables.inspect
 
 files = %w[core-site.xml hdfs-site.xml mapred-site.xml hadoop-env.sh fairscheduler.xml raw_settings.yaml hadoop-metrics.properties]
-files << ['yarn-env.sh', 'yarn-site.xml'] if is_hadoop_yarn?
 files.each do |conf_file|
   template "/etc/hadoop/conf/#{conf_file}" do
     owner "root"
