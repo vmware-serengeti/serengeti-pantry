@@ -14,9 +14,6 @@ default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:hadoop_han
 default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:hadoop_handle]}-datanode"
 default[:hadoop][:jobtracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-jobtracker"
 default[:hadoop][:tasktracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-tasktracker"
-default[:hadoop][:resourcemanager_service_name] = "#{node[:hadoop][:hadoop_handle]}-yarn-resourcemanager"
-default[:hadoop][:nodemanager_service_name] = "#{node[:hadoop][:hadoop_handle]}-yarn-nodemanager"
-default[:hadoop][:historyserver_service_name] = "#{node[:hadoop][:hadoop_handle]}-mapreduce-historyserver"
 
 # hadoop packages
 default[:hadoop][:packages][:namenode][:name] = "namenode"
@@ -24,8 +21,6 @@ default[:hadoop][:packages][:secondarynamenode][:name] = "secondarynamenode"
 default[:hadoop][:packages][:datanode][:name] = "datanode"
 default[:hadoop][:packages][:jobtracker][:name] = "jobtracker"
 default[:hadoop][:packages][:tasktracker][:name] = "tasktracker"
-default[:hadoop][:packages][:resourcemanager][:name] = "yarn-resourcemanager"
-default[:hadoop][:packages][:nodemanager][:name] = "yarn-nodemanager"
 
 # HDFS and MapReduce settings
 default[:hadoop][:dfs_replication             ] =  3
