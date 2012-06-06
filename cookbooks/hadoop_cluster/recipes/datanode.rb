@@ -1,8 +1,9 @@
 #
-# Cookbook Name:: hadoop
+# Cookbook Name:: hadoop_cluster
 # Recipe::        datanode
 #
 # Copyright 2009, Opscode, Inc.
+# Portions copyright © 2012 VMware, Inc. All rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,16 +22,6 @@ include_recipe "hadoop_cluster"
 
 # Install
 hadoop_package node[:hadoop][:packages][:datanode][:name]
-
-=begin 
-# should run this only after namenode is formatted
-# Remove current cluster id
-directory "/mnt/hadoop/hdfs/data/current" do
-  ignore_failure true
-  recursive true
-  action :delete
-end
-=end
 
 # Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:datanode_service_name])

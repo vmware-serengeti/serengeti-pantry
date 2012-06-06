@@ -1,8 +1,9 @@
 #
-# Cookbook Name:: hadoop
+# Cookbook Name:: hadoop_cluster
 # Recipe::        worker
 #
 # Copyright 2010, Infochimps, Inc
+# Portions copyright © 2012 VMware, Inc. All rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
