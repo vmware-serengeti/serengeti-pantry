@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: hadoop
-# Recipe:: pseudo_distributed
+# Cookbook Name:: hadoop_cluster
+# Recipe::        pseudo_distributed
 #
 # Copyright 2009, Opscode, Inc.
 #
