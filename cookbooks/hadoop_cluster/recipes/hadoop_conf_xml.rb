@@ -2,7 +2,9 @@
 # Cookbook Name:: hadoop_cluster
 # Recipe::        hadoop_conf_xml
 #
-#   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+
+#
+#   Portions Copyright (c) 2012 VMware, Inc. All Rights Reserved.
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at

@@ -5,7 +5,7 @@
 # Author:: Philip (flip) Kromer <flip@infochimps.com>
 #
 # Copyright 2011, Philip (flip) Kromer
-# Portions copyright © 2012 VMware, Inc. All rights Reserved.
+# Portions Copyright (c) 2012 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
