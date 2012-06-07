@@ -1,4 +1,18 @@
-# -*- coding: utf-8 -*-
+#
+#   Portions Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
 default[:hadoop][:install_from_tarball] = true
 default[:hadoop][:is_hadoop_yarn] = false # is deploying a Hadoop version with YARN (e.g hadoop 0.23) ?
 default[:hadoop][:hadoop_handle] = 'hadoop-0.20' # the prefix of the name of hadoop directory and service files
