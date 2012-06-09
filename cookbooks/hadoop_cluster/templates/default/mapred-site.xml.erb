@@ -47,6 +47,11 @@
   <value><%= node[:hadoop][:output_compression_type] %></value>
 </property>
 
+<property>
+  <name>mapred.compress.map.output</name>
+  <value><%= node[:hadoop][:compress_map_output] %></value>
+</property>
+
 <!-- map tuning -->
 
 <property>
