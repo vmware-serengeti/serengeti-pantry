@@ -44,7 +44,7 @@ default[:hadoop][:jobtracker_handler_count    ] = 10
 default[:hadoop][:namenode_handler_count      ] = 10
 default[:hadoop][:datanode_handler_count      ] = 3
 
-default[:hadoop][:compress_map_output         ] = 'true'
+default[:hadoop][:compress_map_output         ] = 'false'
 default[:hadoop][:output_compression_type     ] = 'BLOCK'
 
 default[:hadoop][:mapred_userlog_retain_hours ] = 24
