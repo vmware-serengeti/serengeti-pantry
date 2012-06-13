@@ -35,11 +35,11 @@ We mainly create the following cookbooks and recipes for deploying a Hadoop clus
 
 * cluster_service_discovery : runtime Hadoop services discovery (e.g. tell all nodes in a cluster what's the ip of the Hadoop NameNode)
 * hadoop_cluster : contain following recipes for installing Hadoop package and running Hadoop services
-** namenode
-** jobtracker
-** datanode
-** tasktracker
-** etc.
+   * namenode
+   * jobtracker
+   * datanode
+   * tasktracker
+   * etc.
 * pig  : install Pig package
 * hive : install Hive package
 * install_from : install a package from a tarball
@@ -57,22 +57,22 @@ we can easily support various Hadoop distributions with minimum changes.
 
 The meta data of a Hadoop distribution is saved into Chef databag 'hadoop_distros' before running the cookbooks.
 Here is an example of databag containing the meta data of Apache Hadoop distribution:
-
+<pre>
   $ knife data bag show hadoop_distros apache
   id:      apache  (the name of this Hadoop distribution)
   hadoop:  http://localhost/distros/apache/1.0.1/hadoop-1.0.1.tar.gz  (the url of hadoop tarball of this Hadoop distribution)
   hive:    http://localhost/distros/apache/1.0.1/hive-0.8.1.tar.gz    (the url of hive tarball of this Hadoop distribution)
   pig:     http://localhost/distros/apache/1.0.1/pig-0.9.2.tar.gz     (the url of pig tarball of this Hadoop distribution)
-
+</pre>
 You can manually save meta data for a new Hadoop Distribution with id 'new_distro' into the databag 'hadoop_distros',
 add the following code in cluster role file, and upload the cluster role to Chef Server, then run the cookbooks.
-
+<pre>
   override_attributes({
     :hadoop => {
       :distro_name => "new_distro"
     }
   })
-
+</pre>
 When VMware Serengeti Cookbooks is used by VMware Serengeti Ironfan to deploy a Hadoop cluster, the meta data of a Hadoop distribution is
 specified in cluster definition file. Ironfan will read the meta data and save to databags automatically. Please read VMware Serengeti Ironfan
 user guide to find out how to use it.
@@ -91,4 +91,4 @@ Please let us know if other Hadoop/Pig/Hive combination works in your environmen
 
 # Contact
 
-Please email us if you have any questions.
+Please send email to our mailing lists for [developers](https://groups.google.com/group/serengeti-dev) or for [users](https://groups.google.com/group/serengeti-user) if you have any questions.
