@@ -22,5 +22,5 @@ case platform
 when "centos","redhat","fedora"
   set["java"]["java_home"] = "/usr/lib/jvm/java"
 else
-        set["java"]["java_home"] = "/usr/lib/jvm/default-java"
+  set["java"]["java_home"] = "/usr/lib/jvm/default-java"
 end
