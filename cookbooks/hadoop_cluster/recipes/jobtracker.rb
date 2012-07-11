@@ -34,7 +34,13 @@ include_recipe "hadoop_cluster::hadoop_conf_xml"
 # Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:jobtracker_service_name])
 service "#{node[:hadoop][:jobtracker_service_name]}" do
-  action [ :enable, :restart ]
-  running true
+  action [ :enable, :start ]
   supports :status => true, :restart => true
+
+  subscribes :restart, resources("template[/etc/hadoop/conf/core-site.xml]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/mapred-site.xml]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
+  notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately
 end

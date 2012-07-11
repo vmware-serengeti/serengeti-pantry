@@ -64,27 +64,32 @@ module HadoopCluster
       tarball_url = current_distro['hadoop']
       tarball_filename = tarball_url.split('/').last
       tarball_pkgname = tarball_filename.split('.tar.gz').first
-      Chef::Log.info "start installing package #{tarball_pkgname} from tarball"
 
       if component == nil then
         # install hadoop base package
         install_dir = [File.dirname(hadoop_home), tarball_pkgname].join('/')
-        already_installed = File.exists?(install_dir)
+        already_installed = File.exists?("#{install_dir}/lib")
         if already_installed then
           Chef::Log.info("#{tarball_filename} has already been installed. Will not re-install.")
           return
         end
 
-        set_bootstrap_action(ACTION_INSTALL_PACKAGE, package_name)
+        set_bootstrap_action(ACTION_INSTALL_PACKAGE, package_name, true)
 
         execute "install #{tarball_pkgname} from tarball if not installed" do
           not_if do already_installed end
 
+          Chef::Log.info "start installing package #{tarball_pkgname} from tarball"
           command %Q{
             if [ ! -f /usr/local/src/#{tarball_filename} ]; then
               echo 'downloading tarball #{tarball_filename}'
               cd /usr/local/src/
-              wget #{tarball_url}
+              wget --tries=3 #{tarball_url}
+
+              if [ $? -ne 0 ]; then
+                echo '[ERROR] downloading tarball failed'
+                exit 1
+              fi
             fi
 
             echo 'extract the tarball'
@@ -133,7 +138,6 @@ EOF
         end
       end
 
-      Chef::Log.info "Successfully installed package #{package_name}"
       return
     end
 
