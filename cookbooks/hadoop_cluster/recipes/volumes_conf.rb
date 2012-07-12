@@ -46,7 +46,7 @@ end
 node[:disk][:data_disks].each do |mount_point, dev|
   next unless File.exists?(node[:disk][:disk_devices][dev])
 
-  Chef::Log.info ['mounting data disk', mount_point, dev]
+  Chef::Log.info "mounting data disk #{dev} at #{mount_point} if not mounted"
   directory mount_point do
     only_if{ File.exists?(dev) }
     owner     'root'
@@ -65,11 +65,11 @@ node[:disk][:data_disks].each do |mount_point, dev|
 
   # Chef Resource mount doesn't enable automatically mount disks when OS starts up. We add it here.
   mount_device_command = "#{dev}\t\t#{mount_point}\t\t#{dev_fstype}\tdefaults\t0 0"
-  execute 'add mount info into /etc/fstab' do
+  execute 'add mount info into /etc/fstab if not added' do
     command %Q{
-      grep "#{dev}" /etc/mtab
+      grep "#{dev}" /etc/mtab > /dev/null
       if [ $? == 0 ]; then
-        grep "#{dev}" /etc/fstab
+        grep "#{dev}" /etc/fstab > /dev/null
         if [ $? == 1 ]; then
           echo "#{mount_device_command}" >> /etc/fstab
         fi

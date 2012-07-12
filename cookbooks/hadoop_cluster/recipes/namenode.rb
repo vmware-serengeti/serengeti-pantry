@@ -37,14 +37,21 @@ include_recipe "hadoop_cluster::bootstrap_format_namenode"
 # Launch NameNode service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:namenode_service_name])
 service "#{node[:hadoop][:namenode_service_name]}" do
-  action [ :enable, :restart ]
-  running true
+  action [ :enable, :start ]
   supports :status => true, :restart => true
+
+  subscribes :restart, resources("template[/etc/hadoop/conf/core-site.xml]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
+  notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
 end
 
 # 'service hadoop-0.20-namenode start' launchs the hadoop process then return without ensuring all listening ports are up.
-Chef::Log.info('Wait until namenode service starts listening at network ports')
-sleep 5
+ruby_block "Wait until namenode service starts listening at network ports" do
+  block { sleep 5 }
+end
+
 
 # Set hdfs permission on only after formatting namenode
 include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"

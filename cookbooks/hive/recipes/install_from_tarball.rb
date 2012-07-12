@@ -18,7 +18,6 @@ include_recipe "install_from"
 # Load distro repository info
 tarball_url = current_distro['hive']
 unless ::File.exists?("#{node[:hive][:home_dir]}")
-  Chef::Log.info "Installing tarball from #{tarball_url}"
   set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'hive')
 end
 

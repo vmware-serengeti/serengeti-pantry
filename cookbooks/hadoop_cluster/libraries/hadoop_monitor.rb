@@ -18,16 +18,17 @@ module HadoopCluster
   ACTION_START_SERVICE = 'Starting service <obj>'
 
   # Save Bootstrap Status to Chef::Node.
-  def set_bootstrap_action(act = '', obj = '')
+  def set_bootstrap_action(act = '', obj = '', run = false)
     act = act.gsub(/<obj>/, obj)
-    ruby_block "Set Bootstrap action to '#{act}'" do
+    ruby_block "#{obj}" do
       block do
+        Chef::Log.info "Set Bootstrap action to '#{act}'"
         attrs = node[:provision] ? node[:provision].to_hash : Hash.new
         attrs['action'] = act
         node[:provision] = attrs
         node.save
       end
-      action :create
+      action run ? :create : :nothing
     end
   end
 
