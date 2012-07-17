@@ -66,6 +66,12 @@
   <value><%= node[:hadoop][:max_balancer_bandwidth] %></value>
 </property>
 
+<property>
+  <name>dfs.webhdfs.enabled</name>
+  <value>true</value>
+  <description>WebHDFS REST API http://hadoop.apache.org/common/docs/stable/webhdfs.html</description>
+</property>
+
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['hdfs-site.xml'] rescue conf = {} %>
 <%- conf.map do |key, value| %>
