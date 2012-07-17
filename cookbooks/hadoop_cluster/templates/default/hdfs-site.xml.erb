@@ -21,10 +21,12 @@
 <property>
   <name>dfs.name.dir</name>
   <value><%= @dfs_name_dirs %></value>
+  <final>true</final>
 </property>
 <property>
   <name>dfs.data.dir</name>
   <value><%= @dfs_data_dirs %></value>
+  <final>true</final>
 </property>
 <property>
   <!-- If its value is great than available diskspace on datanode, datanode will reports its available diskspace as 0, 
@@ -32,49 +34,44 @@
   -->
   <name>dfs.datanode.du.reserved</name>
   <value>0</value>
-  <final>true</final>
 </property>
 <property>
   <name>dfs.datanode.handler.count</name>
   <value><%= node[:hadoop][:datanode_handler_count] %></value>
-  <final>true</final>
 </property>
 
 <property>
   <name>dfs.datanode.max.xcievers</name>
   <value>4096</value>
-  <final>true</final>
 </property>
 <property>
   <name>dfs.datanode.max.xceivers</name>
   <value>4096</value>
-  <final>true</final>
 </property>
 <property>
   <name>dfs.datanode.socket.write.timeout</name>
   <value>0</value>
 </property>
 
-<!--property>
-  <name>dfs.hosts</name>
-  <value>/etc/<%= node[:hadoop][:hadoop_handle] %>/conf/dfs.hosts</value>
-  <final>true</final>
-</property-->
 <property>
   <name>dfs.hosts.exclude</name>
   <value>/etc/<%= node[:hadoop][:hadoop_handle] %>/conf/dfs.hosts.exclude</value>
-  <final>true</final>
 </property>
 <property>
   <name>dfs.namenode.handler.count</name>
   <value><%= node[:hadoop][:namenode_handler_count] %></value>
-  <final>true</final>
 </property>
 <property>
   <name>dfs.balance.bandwidthPerSec</name>
   <value><%= node[:hadoop][:max_balancer_bandwidth] %></value>
 </property>
 
+<!-- properties specified by users -->
+<%- conf = node['cluster_configuration']['hadoop']['hdfs-site.xml'] rescue conf = {} %>
+<%- conf.map do |key, value| %>
+<property>
+  <name><%= key %></name>
+  <value><%= value %></value>
+</property>
+<%- end %>
 </configuration>
-
-

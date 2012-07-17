@@ -11,6 +11,7 @@
 <property>
   <name>mapred.local.dir</name>
   <value><%= @mapred_local_dirs %></value>
+  <final>true</final>
 </property>
 
 <!-- communication -->
@@ -139,5 +140,14 @@
   <name>mapred.submit.replication</name>
   <value>10</value>
 </property>
+
+<!-- properties specified by users -->
+<%- conf = node['cluster_configuration']['hadoop']['mapred-site.xml'] rescue conf = {} %>
+<%- conf.map do |key, value| %>
+<property>
+  <name><%= key %></name>
+  <value><%= value %></value>
+</property>
+<%- end %>
 
 </configuration>

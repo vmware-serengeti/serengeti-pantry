@@ -15,4 +15,10 @@ export YARN_COMMON_HOME=${YARN_HOME}
 export YARN_CONF_DIR=${YARN_HOME}/conf
 export YARN_PID_DIR=/var/run/yarn
 
-export PATH=$HADOOP_HOME/bin:$PATH
+# env variables specified by users
+<%- conf = node['cluster_configuration']['hadoop']['hadoop-env.sh'] rescue conf = {} %>
+<%- conf.map do |key, value| %>
+export <%= key %>=<%= value %>
+<%- end %>
+
+export PATH=$HADOOP_HOME/bin:$JAVA_HOME/bin:$PATH
