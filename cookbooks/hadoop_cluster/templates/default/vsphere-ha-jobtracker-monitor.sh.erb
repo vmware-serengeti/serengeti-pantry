@@ -1,0 +1,13 @@
+#!/bin/sh
+#this exists to run monitors via the bin/hadoop command; it is used to debug this locally
+
+# determine location of script
+this="${BASH_SOURCE-$0}"
+here="`dirname ${this}`"
+here="`cd ${here}; pwd`"
+
+export HADOOP_CLASSPATH="${here}/hmonitor.jar:${here}/extras/*"
+
+hadoop com.hortonworks.servicemonitor.MonitorJobTracker -conf ${here}/vm-jobtracker.xml "$@"
+
+

@@ -24,6 +24,7 @@ include_recipe "hadoop_cluster"
 
 # Install
 hadoop_package node[:hadoop][:packages][:namenode][:name]
+hadoop_ha_package node[:hadoop][:packages][:namenode][:name]
 
 # Register with cluster_service_discovery
 provide_service ("#{node[:cluster_name]}-#{node[:hadoop][:namenode_service_name]}")
@@ -55,3 +56,12 @@ end
 
 # Set hdfs permission on only after formatting namenode
 include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"
+
+# Launch service level ha monitor
+set_bootstrap_action(ACTION_START_SERVICE, "hmonitor-namenode-monitor")
+if node[:hadoop][:ha_enabled] then
+  service "hmonitor-namenode-monitor" do
+    action [ :enable, :start ]
+    supports :status => true, :restart => true
+  end
+end

@@ -137,7 +137,6 @@ EOF
           end
         end
       end
-
       return
     end
 
@@ -261,6 +260,30 @@ EOF
     nil
   end
 
+  def hadoop_ha_package component
+    if ['namenode', 'jobtracker'].include?(component) then
+      if node[:hadoop][:ha_enabled] then
+        ha_installed = File.exists?("/usr/lib/hadoop/monitor/vsphere-ha-#{component}-monitor.sh")
+        if ha_installed then
+          Chef::Log.info("HA monitor for #{component} has already been installed. Will not re-install.")
+          return
+        end
+        if File.exists?("/usr/local/rpms/hmonitor-rpms-0.1-12.el5.gz")
+          execute "install ha monitor from rpm if not installed" do
+            command %Q{
+              echo "start installing #{component} ha monitor from rpm"
+              cd /usr/local/rpms
+              tar -xvf hmonitor-rpms-0.1-12.el5.gz
+              rpm -ih hmonitor-0.1-12.el5.x86_64.rpm
+              rpm -ih hmonitor-vsphere-monitoring-0.1-12.el5.x86_64.rpm
+              rpm -ih hmonitor-vsphere-#{component}-daemon-0.1-12.el5.x86_64.rpm
+            }
+          end
+          return
+        end
+      end
+    end
+  end
 end
 
 class Chef::Recipe

@@ -24,6 +24,7 @@ include_recipe "hadoop_cluster"
 
 # Install
 hadoop_package node[:hadoop][:packages][:jobtracker][:name]
+hadoop_ha_package node[:hadoop][:packages][:jobtracker][:name]
 
 # Register with cluster_service_discovery
 provide_service ("#{node[:cluster_name]}-#{node[:hadoop][:jobtracker_service_name]}")
@@ -43,4 +44,13 @@ service "#{node[:hadoop][:jobtracker_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately
+end
+
+# Launch service level ha monitor
+set_bootstrap_action(ACTION_START_SERVICE, "hmonitor-jobtracker-monitor")
+if node[:hadoop][:ha_enabled] then
+  service "hmonitor-jobtracker-monitor" do
+    action [ :enable, :start ]
+    supports :status => true, :restart => true
+  end
 end

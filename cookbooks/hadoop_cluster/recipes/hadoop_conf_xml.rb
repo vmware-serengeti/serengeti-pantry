@@ -43,3 +43,14 @@ template "/etc/default/#{node[:hadoop][:hadoop_handle]}" do
   variables(template_variables)
   source "etc_default_hadoop.erb"
 end
+
+files = %w[vm-jobtracker.xml vm-namenode.xml vsphere-ha-jobtracker-monitor.sh]
+files.each do |monitor_conf_file|
+  template "/usr/lib/hadoop/monitor/#{monitor_conf_file}" do
+    owner "root"
+    mode "0644"
+    variables(template_variables)
+    source "#{monitor_conf_file}.erb"
+    only_if "test -d /usr/lib/hadoop/monitor/"
+  end
+end
