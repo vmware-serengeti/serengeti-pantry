@@ -20,8 +20,6 @@
 # limitations under the License.
 #
 
-include_recipe "postgresql::client"
-
 # Create a group and user like the package will.
 # Otherwise the templates fail.
 
@@ -68,6 +66,13 @@ when "redhat", "centos", "scientific"
   end
 when "fedora","suse"
   package "postgresql-server"
+end
+
+template "#{node[:postgresql][:dir]}/postgresql.conf" do
+  source "postgresql.conf.erb"
+  owner "postgres"
+  group "postgres"
+  mode 0600
 end
 
 service "postgresql" do

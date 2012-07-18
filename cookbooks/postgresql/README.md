@@ -57,15 +57,7 @@ Recipes
 default
 -------
 
-Includes the client recipe.
-
-client
-------
-
-Installs postgresql client packages and development headers during the
-compile phase. Also installs the `pg` Ruby gem during the compile
-phase so it can be made available for the `database` cookbook's
-resources, providers and libraries.
+Includes the server recipe.
 
 server
 ------

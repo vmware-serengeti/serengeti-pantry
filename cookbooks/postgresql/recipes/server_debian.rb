@@ -19,8 +19,6 @@
 # limitations under the License.
 #
 
-include_recipe "postgresql::client"
-
 case node[:postgresql][:version]
 when "8.3"
   node.default[:postgresql][:ssl] = "off"

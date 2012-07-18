@@ -11,6 +11,8 @@ depends          "hadoop_cluster"
 depends          "install_from"
 
 recipe           "hive::default",                      "Base configuration for hive"
+recipe           "hive::postgresql_metastore",         "Configuration for postgresql metastore"
+recipe           "hive::server",                       "Configuration for hive server"
 
 %w[ debian ubuntu ].each do |os|
   supports os
