@@ -1,4 +1,4 @@
-<%- conf = node['cluster_configuration']['hadoop']['log4j.properties'] rescue conf = {} %>
+<%- conf = node['cluster_configuration']['hadoop']['log4j.properties'] || {} rescue conf = {} %>
 
 # Define some default values that can be overridden by system properties
 hadoop.root.logger=<%= conf['hadoop.root.logger'] ||= 'INFO,console' %>

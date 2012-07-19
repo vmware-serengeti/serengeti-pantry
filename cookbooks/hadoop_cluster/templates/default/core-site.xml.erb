@@ -8,7 +8,7 @@
 </property>
 
 <!-- properties specified by users -->
-<%- conf = node['cluster_configuration']['hadoop']['core-site.xml'] rescue conf = {} %>
+<%- conf = node['cluster_configuration']['hadoop']['core-site.xml'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>
 <property>
   <name><%= key %></name>

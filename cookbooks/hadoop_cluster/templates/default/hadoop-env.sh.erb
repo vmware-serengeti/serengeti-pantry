@@ -16,7 +16,7 @@ export YARN_CONF_DIR=${YARN_HOME}/conf
 export YARN_PID_DIR=/var/run/yarn
 
 # env variables specified by users
-<%- conf = node['cluster_configuration']['hadoop']['hadoop-env.sh'] rescue conf = {} %>
+<%- conf = node['cluster_configuration']['hadoop']['hadoop-env.sh'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>
 export <%= key %>=<%= value %>
 <%- end %>
