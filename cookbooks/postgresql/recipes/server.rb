@@ -20,6 +20,8 @@
 # limitations under the License.
 #
 
+::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+
 # randomly generate postgres password
 node.set_unless[:postgresql][:password][:postgres] = secure_password
 node.save unless Chef::Config[:solo]
