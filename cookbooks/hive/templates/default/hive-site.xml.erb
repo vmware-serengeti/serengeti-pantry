@@ -142,7 +142,7 @@
 
 <property>
   <name>javax.jdo.option.ConnectionPassword</name>
-  <value><%= node[:hive][:metastore_password] %></value>
+  <value><%= node[:postgresql][:password][:postgres]  %></value>
   <description>password to use against metastore database</description>
 </property>
 

@@ -20,6 +20,10 @@
 # limitations under the License.
 #
 
+# randomly generate postgres password
+node.set_unless[:postgresql][:password][:postgres] = secure_password
+node.save unless Chef::Config[:solo]
+
 case node[:postgresql][:version]
 when "8.3"
   node.default[:postgresql][:ssl] = "off"
@@ -42,4 +46,13 @@ template "#{node[:postgresql][:dir]}/pg_hba.conf" do
   group "postgres"
   mode 0600
   notifies :reload, resources(:service => "postgresql"), :immediately
+end
+
+execute "assign-postgres-password" do
+  user "postgres"
+  cwd "/var/lib/pgsql"
+  command %Q{
+    echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:password][:postgres]}';" | psql
+  }
+  action :run
 end

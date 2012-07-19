@@ -87,13 +87,13 @@
 # (autovacuum, daily cronjob, replication, and similar tasks).
 #
 # Database administrative login by UNIX sockets
-local   all         postgres                          trust
+local   all         postgres                          ident sameuser
 
 # TYPE  DATABASE    USER        CIDR-ADDRESS          METHOD
 
 # "local" is for Unix domain socket connections only
-local   all         all                               trust
+local   all         all                               ident sameuser
 # IPv4 local connections:
-host    all         all         <%= node[:ipaddress] %>/32       trust
+host    all         all         <%= node[:ipaddress] %>/32      md5
 # IPv6 local connections:
-host    all         all         ::1/128               md5
+host    all         all         <%= node[:ipaddress] %>/128     md5

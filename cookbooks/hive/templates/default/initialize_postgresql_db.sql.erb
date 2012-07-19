@@ -2,5 +2,5 @@
 DROP DATABASE <%= node[:hive][:metastore_db] %>;
 DROP USER <%= node[:hive][:metastore_user] %>;
 
-CREATE USER <%= node[:hive][:metastore_user] %> WITH PASSWORD '<%= node[:hive][:metastore_password] %>';
+CREATE USER <%= node[:hive][:metastore_user] %> WITH PASSWORD '<%= node[:postgresql][:password][:postgres] %>';
 CREATE DATABASE <%= node[:hive][:metastore_db] %> OWNER = <%= node[:hive][:metastore_user] %> ENCODING = 'UTF8';

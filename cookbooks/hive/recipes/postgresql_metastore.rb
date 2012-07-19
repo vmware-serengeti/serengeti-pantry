@@ -23,8 +23,10 @@ template initialize_postgresql_db_path do
 end
 
 execute "Initialize postgresql db" do
+  user "postgres"
+  cwd "/var/lib/pgsql"
   command %Q{
-    psql -U postgres -h #{node[:ipaddress]} postgres -f #{initialize_postgresql_db_path}
+    psql -U postgres postgres -f #{initialize_postgresql_db_path}
   }
 end
 
