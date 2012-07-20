@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
@@ -18,26 +19,32 @@
   ~ limitations under the License.
   -->
 
-<!--
-This is the configuration file for monitoring a namenode in a vSphere
-system.
--->
+
 <configuration>
 
-
-  
   <property>
     <name>fs.default.name</name>
-    <description>The filesystem to work with.
-    For monitoring</description>
-
+    <description>The filesystem to work with for monitoring,
+      which must be an HDFS filesystem.
+      This hostname in the URL must match the external hostname
+      of the VM hosting the namenode.
+    </description>
     <value>hdfs://<%= @namenode_address %>:<%= @namenode_port %></value>
   </property>
 
   <property>
-    <name>service.monitor.portprobe.host</name>
-    <description>Port to probe via a telnet operation</description>
-    <value><%= @namenode_address %></value>
+    <name>mapred.job.tracker</name>
+    <description>The Job Tracker in the cluster. This
+      is used when monitoring/interacting with the Job Tracker,
+      and must match the external hostname of the Job Tracker.
+    </description>
+    <value><%= @jobtracker_address %>:8021</value>
+  </property>
+
+  <property>
+    <name>service.monitor.webprobe.url</name>
+    <description>Web URL to monitor</description>
+    <value>http://<%= @namenode_address %>:50070/</value>
   </property>
 
   <property>
@@ -46,42 +53,37 @@ system.
     <value><%= @namenode_port %></value>
   </property>
 
-
   <property>
-    <name>service.monitor.webprobe.url</name>
-    <description>URL to get</description>
-    <value>http://<%= @namenode_address %>:50070/</value>
+    <name>service.monitor.portprobe.host</name>
+    <description>Port to probe via a telnet operation</description>
+    <value><%= @namenode_address %></value>
   </property>
 
 
   <property>
     <name>service.monitor.report.classname</name>
-    <description>The class to use for reporting heartbeats. 
-    This is a low-level property that is not intended for
-    customization.</description>
+    <description>The class to use for reporting heartbeats</description>
     <value>com.hortonworks.servicemonitor.reporting.vsphere.VSphereReporter</value>
   </property>
 
-  <property>
-    <name>service.monitor.report.interval</name>
-    <description>Interval in milliseconds for sending heartbeats status to vSphere</description>
-    <value>7000</value>
-  </property>
 
   <property>
+    <name>service.monitor.report.interval</name>
+    <description>Interval in milliseconds between reporting health status to the reporter</description>
+    <value>7000</value>
+  </property>
+ 
+  <property>
     <name>service.monitor.probe.interval</name>
-    <description>Time in milliseconds between the last probe cycle ending and the new one beginning.
-      The shorter this cycle, the faster failures are detected, but slightly more CPU, network and
-      server load can be generated.
-    </description>
+    <description>Time in millis between the last probe cycle ending and the new one beginning.</description>
     <value>11000</value>
   </property>
+
 
   <property>
     <name>service.monitor.probe.timeout</name>
     <description>How long in milliseconds does the probe loop have to be blocked
-      before that is considered a liveness failure
-    </description>
+    before that is considered a liveness failure</description>
     <value>60000</value>
   </property>
 
@@ -100,6 +102,7 @@ system.
     <value>true</value>
   </property>
 
+
   <property>
     <name>service.monitor.portprobe.connect.timeout</name>
     <description>Port probing key : timeout of the connection attempt</description>
@@ -108,8 +111,8 @@ system.
 
   <property>
     <name>service.monitor.lsprobe.enabled</name>
-    <description>enable the LS probe</description>
-    <value>true</value>
+    <description>is the LS probe enabled</description>
+    <value><%= @monitor_namenode %></value>
   </property>
 
   <property>
@@ -145,7 +148,16 @@ system.
   <property>
     <name>service.monitor.jtprobe.enabled</name>
     <description>Enable monitoring of the JT defined in the "mapred.job.tracker" property</description>
-    <value>false</value>
+    <value><%= @monitor_jobtracker %></value>
   </property>
-  
+
+  <property>
+    <name>service.monitor.dependency.dfslive</name>
+    <description>Flag to indicate the monitored application depends on DFS going live
+      before it starts -so the monitor should not worry about the application appearing not to
+      bootstrap until then.
+    </description>
+    <value><%= @monitor_jobtracker %></value>
+  </property>
+
 </configuration>

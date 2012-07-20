@@ -284,6 +284,17 @@ EOF
       end
     end
   end
+
+  def enable_ha_service component, service_name
+    if node[:hadoop][:ha_enabled] then
+      set_bootstrap_action(ACTION_START_SERVICE, "hmonitor-#{component}-monitor")
+      service "hmonitor-#{component}-monitor" do
+        action [ :enable, :start ]
+        supports :status => true, :restart => true
+        notifies :create, resources("ruby_block[hmonitor-#{component}-monitor]"), :immediately
+      end
+    end
+  end
 end
 
 class Chef::Recipe

@@ -24,8 +24,8 @@
 
   <property>
     <name>fs.default.name</name>
-    <description>The filesystem to work with -for monitoring,
-      this must be an HDFS filesystem.
+    <description>The filesystem to work with for monitoring,
+      which must be an HDFS filesystem.
       This hostname in the URL must match the external hostname
       of the VM hosting the namenode.
     </description>
@@ -43,7 +43,7 @@
 
   <property>
     <name>service.monitor.webprobe.url</name>
-    <description>URL to get</description>
+    <description>Web URL to monitor</description>
     <value>http://<%= @jobtracker_address %>:50030/</value>
   </property>
 
@@ -112,9 +112,14 @@
   <property>
     <name>service.monitor.lsprobe.enabled</name>
     <description>is the LS probe enabled</description>
-    <value>false</value>
+    <value><%= @monitor_namenode %></value>
   </property>
 
+  <property>
+    <name>service.monitor.lsprobe.path</name>
+    <description>The path for the LS probe</description>
+    <value>/</value>
+  </property>
 
   <property>
     <name>service.monitor.webprobe.enabled</name>
@@ -143,7 +148,7 @@
   <property>
     <name>service.monitor.jtprobe.enabled</name>
     <description>Enable monitoring of the JT defined in the "mapred.job.tracker" property</description>
-    <value>true</value>
+    <value><%= @monitor_jobtracker %></value>
   </property>
 
   <property>
@@ -152,7 +157,7 @@
       before it starts -so the monitor should not worry about the application appearing not to
       bootstrap until then.
     </description>
-    <value>true</value>
+    <value><%= @monitor_jobtracker %></value>
   </property>
 
 </configuration>

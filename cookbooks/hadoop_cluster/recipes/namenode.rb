@@ -58,10 +58,4 @@ end
 include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"
 
 # Launch service level ha monitor
-set_bootstrap_action(ACTION_START_SERVICE, "hmonitor-namenode-monitor")
-if node[:hadoop][:ha_enabled] then
-  service "hmonitor-namenode-monitor" do
-    action [ :enable, :start ]
-    supports :status => true, :restart => true
-  end
-end
+enable_ha_service node[:hadoop][:packages][:namenode][:name], "hmonitor-namenode-monitor"

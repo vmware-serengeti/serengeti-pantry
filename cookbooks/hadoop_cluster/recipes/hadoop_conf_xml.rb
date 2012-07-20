@@ -44,7 +44,9 @@ template "/etc/default/#{node[:hadoop][:hadoop_handle]}" do
   source "etc_default_hadoop.erb"
 end
 
-files = %w[vm-jobtracker.xml vm-namenode.xml vsphere-ha-jobtracker-monitor.sh]
+template_variables[:monitor_jobtracker] = node.role? "hadoop_jobtracker"
+template_variables[:monitor_namenode] = node.role? "hadoop_namenode"
+files = %w[vm-namenode.xml vm-jobtracker.xml vsphere-ha-jobtracker-monitor.sh]
 files.each do |monitor_conf_file|
   template "/usr/lib/hadoop/monitor/#{monitor_conf_file}" do
     owner "root"
