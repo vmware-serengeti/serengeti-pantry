@@ -14,14 +14,15 @@
 #
 
 module HadoopCluster
-
   # The namenode's hostname, or the local node's numeric ip if 'localhost' is given.
   def namenode_address
-    provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:namenode_service_name]}")
+    # if the user has specified the namenode ip, use it.
+    namenode_ip_conf || provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:namenode_service_name]}")
   end
 
   def namenode_port
-    node[:hadoop][:namenode_service_port]
+    # if the user has specified the namenode port, use it.
+    namenode_port_conf || node[:hadoop][:namenode_service_port]
   end
 
   # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
