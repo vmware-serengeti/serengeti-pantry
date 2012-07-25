@@ -68,13 +68,6 @@ when "fedora","suse"
   package "postgresql-server"
 end
 
-template "#{node[:postgresql][:dir]}/postgresql.conf" do
-  source "postgresql.conf.erb"
-  owner "postgres"
-  group "postgres"
-  mode 0600
-end
-
 service "postgresql" do
   supports :restart => true, :status => true, :reload => true
   action [:enable, :start]
