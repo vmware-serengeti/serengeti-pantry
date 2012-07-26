@@ -15,7 +15,7 @@
 
 user node[:hive][:user] do
   comment "A sample user for hive server"
-  home "/home/#{node[:hive][:user]}"
+  home "#{node[:hive][:home_dir]}"
   shell "/bin/bash"
   password   '$1$tecIsaQr$3.2FCeDL9mBR2zsq579uJ1'
   supports   :manage_home => true
@@ -32,7 +32,7 @@ end
 
 group node[:hive][:group] do
   group_name node[:hive][:group]
-  gid        node[:groups]['hive'][:gid]
+  gid        node[:groups][:hive][:gid]
   action     [:create]
 end
 
@@ -63,7 +63,7 @@ template "/etc/init.d/hive-server" do
   source "hive-server.erb"
   owner "root"
   group "root"
-  mode 0777
+  mode 0755
 end
 
 service "hive-server" do

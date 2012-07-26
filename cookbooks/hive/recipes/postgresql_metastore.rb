@@ -23,15 +23,38 @@ template initialize_postgresql_db_path do
 end
 
 execute "Initialize postgresql db" do
+  only_if "sudo service postgresql status"
+  not_if { File.exists?("#{node[:postgresql][:dir]}/.initialized_postgresql_db.log") }
   user "postgres"
   cwd "/var/lib/pgsql"
   command %Q{
     psql -U postgres postgres -f #{initialize_postgresql_db_path}
-  }
+
+    exit_status=$?
+    if [ $exit_status -eq 0 ]; then touch #{node[:postgresql][:dir]}/.initialized_postgresql_db.log ; fi
+    exit $exit_status
+ }
+end
+
+# TODO: hive-schema-[version].postgres.sql should be adapt to the hive version installed on the node
+# but the sql file for hive 0.8.0 in hive svn trunk doesn't work for hive-0.8.1: http://svn.apache.org/viewvc/hive/trunk/metastore/scripts/upgrade/postgres/hive-schema-0.8.0.postgres.sql?revision=1334537&view=markup
+execute "Import metastore schema" do
+  only_if "sudo service postgresql status"
+  not_if { File.exists?("#{node[:hive][:log_dir]}/.imported_metastore_schema.log") }
+  user "hive"
+  cwd "#{node[:hive][:home_dir]}"
+  command %Q{
+    psql -U hive -d metastore_db -f #{node[:hive][:home_dir]}/src/metastore/scripts/upgrade/postgres/hive-schema-0.7.0.postgres.sql
+
+    exit_status=$?
+    if [ $exit_status -eq 0 ]; then touch #{node[:hive][:log_dir]}/.imported_metastore_schema.log ; fi
+    exit $exit_status
+ }
 end
 
 package "postgresql-jdbc" do
   not_if "rpm -q postgresql-jdbc"
+  version "8.1.407"
   action :install
 end
 

@@ -21,42 +21,31 @@ fi
 
 # pid file for /sbin/runuser
 pidfile=${PIDFILE-<%= node[:hive][:pid_dir] %>/hive-thrift.pid}
-# pid file for the java child process.
-pidfile_java=${PIDFILE_JAVA-<%= node[:hive][:pid_dir] %>/hive-thrift-java.pid}
 RETVAL=0
 
 start() {
   # check to see if hive is already running by looking at the pid file and grepping
   # the process table.
-  if [ -f $pidfile_java ] && checkpid `cat $pidfile_java`; then
+  if [ -f $pidfile ] && checkpid `cat $pidfile`; then
     echo "hive-thrift is already running"
     exit 0
   fi
   echo -n $"Starting $prog: "
-  /sbin/runuser -s /bin/sh -c "$HIVE_BIN $HIVE_ARGS" $HIVE_USER >> $HIVE_LOG 2>&1 &
-  runuser_pid=$!
-  echo $runuser_pid > $pidfile
-  # sleep so the process can make its way to the process table.
-  usleep 500000
-  # get the child Java process that /usr/bin/hive started.
-  java_pid=$(ps -eo pid,ppid,fname | awk "{ if (\$2 == $runuser_pid && \$3 ~ /java/) { print \$1 } }")
-  echo $java_pid > $pidfile_java
-  disown -ar
-  # print status information.
-  ps aux | grep $java_pid &> /dev/null && echo_success || echo_failure
-  RETVAL=$?
-  echo
-  return $RETVAL
+  nohup sudo -u $HIVE_USER $HIVE_BIN $HIVE_ARGS >> $HIVE_LOG 2>&1 &
+  java_pid=$!
+  echo $java_pid > $pidfile
+  ps $java_pid > /dev/null
+  return $?
 }
 
 stop() {
   # check if the process is already stopped by seeing if the pid file exists.
-  if [ ! -f $pidfile_java ]; then
+  if [ ! -f $pidfile ]; then
     echo "hive-thrift is already stopped"
     exit 0
   fi
   echo -n $"Stopping $prog: "
-  if kill `cat $pidfile` && kill `cat $pidfile_java`; then
+  if kill `cat $pidfile`; then
     RETVAL=0
     echo_success
   else
@@ -64,11 +53,11 @@ stop() {
     echo_failure
   fi
   echo
-  [ $RETVAL = 0 ] && rm -f ${pidfile} ${pidfile_java}
+  [ $RETVAL = 0 ] && rm -f ${pidfile}
 }
 
 status_fn() {
-  if [ -f $pidfile_java ] && checkpid `cat $pidfile_java`; then
+  if [ -f $pidfile ] && checkpid `cat $pidfile`; then
     echo "hive-thrift is running"
     exit 0
   else
