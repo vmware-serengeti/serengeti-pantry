@@ -127,7 +127,12 @@ log4j.appender.NullAppender=org.apache.log4j.varia.NullAppender
 # Event Counter Appender
 # Sends counts of logging messages at different severity levels to Hadoop Metrics.
 #
+<%- major_version = `hadoop version | head -1 | awk '{print $2}'`.split('.')[0].to_i rescue major_version = 0 %>
+<%- if major_version >= 1 %>
 log4j.appender.EventCounter=org.apache.hadoop.log.metrics.EventCounter
+<%- else %>
+log4j.appender.EventCounter=org.apache.hadoop.metrics.jvm.EventCounter
+<%- end %>
 
 #
 # Job Summary Appender
