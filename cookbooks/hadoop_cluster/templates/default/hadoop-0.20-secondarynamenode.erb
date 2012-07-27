@@ -153,9 +153,9 @@ hadoop_service() {
             start
 
             if hadoop_check_pidfile $PID_FILE ; then
-                echo "$NAME."
+                echo "$NAME started"
             else
-                echo "ERROR. Could not start $DESC"
+                echo "ERROR: Could not start $DESC"
                 exit 1
             fi
             ;;
@@ -165,10 +165,10 @@ hadoop_service() {
             stop
 
             if ! hadoop_check_pidfile $PID_FILE ; then
-                echo "ERROR. Could not stop $DESC"
+                echo "ERROR: Could not stop $DESC"
                 exit 1
             else
-                echo "$NAME."
+                echo "$NAME stopped"
             fi
             ;;
         force-stop)
@@ -177,9 +177,9 @@ hadoop_service() {
             hadoop_stop_pidfile $PID_FILE
 
             if ! hadoop_check_pidfile $PID_FILE ; then
-                echo "$NAME."
+                echo "$NAME stopped"
             else
-                echo "ERROR. Could not force stop $DESC"
+                echo "ERROR: Could not force stop $DESC"
                 exit 1
             fi
             ;;
@@ -200,7 +200,7 @@ hadoop_service() {
             if hadoop_check_pidfile $PID_FILE ;  then
                 echo "running"
             else
-                echo "not running."
+                echo "not running"
                 exit 1
             fi
             ;;
@@ -223,5 +223,3 @@ hadoop_service() {
 }
 
 hadoop_service "$1"
-
-exit 0
