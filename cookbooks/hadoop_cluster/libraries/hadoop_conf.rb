@@ -31,11 +31,11 @@ module HadoopCluster
 
   # Return user defined hadoop configuration by file and attr
   def hadoop_conf(file, attr)
-    hadoop_conf[file][attr] rescue nil
+    all_hadoop_conf[file][attr] rescue nil
   end
 
   # Return user defined hadoop configuration
-  def hadoop_conf
+  def all_hadoop_conf
     all_conf['hadoop'] || {}
   end
 
