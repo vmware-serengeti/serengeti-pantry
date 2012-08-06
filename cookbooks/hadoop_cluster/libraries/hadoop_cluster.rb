@@ -269,18 +269,12 @@ EOF
           Chef::Log.info("HA monitor for #{component} has already been installed. Will not re-install.")
           return
         end
-        if File.exists?("/usr/local/rpms/hmonitor-rpms-0.1-12.el5.gz")
-          execute "install ha monitor from rpm if not installed" do
-            command %Q{
-              echo "start installing #{component} ha monitor from rpm"
-              cd /usr/local/rpms
-              tar -xvf hmonitor-rpms-0.1-12.el5.gz
-              rpm -ih hmonitor-0.1-12.el5.x86_64.rpm
-              rpm -ih hmonitor-vsphere-monitoring-0.1-12.el5.x86_64.rpm
-              rpm -ih hmonitor-vsphere-#{component}-daemon-0.1-12.el5.x86_64.rpm
-            }
-          end
-          return
+
+        pkg = "hmonitor-vsphere-#{component}-daemon"
+        set_bootstrap_action(ACTION_INSTALL_PACKAGE, pkg)
+        package pkg do
+          action :install
+          notifies :create, resources("ruby_block[#{pkg}]"), :immediately
         end
       end
     end
@@ -288,11 +282,12 @@ EOF
 
   def enable_ha_service component, service_name
     if node[:hadoop][:ha_enabled] then
-      set_bootstrap_action(ACTION_START_SERVICE, "hmonitor-#{component}-monitor")
-      service "hmonitor-#{component}-monitor" do
+      svc = "hmonitor-#{component}-monitor"
+      set_bootstrap_action(ACTION_START_SERVICE, svc)
+      service svc do
         action [ :enable, :start ]
         supports :status => true, :restart => true
-        notifies :create, resources("ruby_block[hmonitor-#{component}-monitor]"), :immediately
+        notifies :create, resources("ruby_block[#{svc}]"), :immediately
       end
     end
   end

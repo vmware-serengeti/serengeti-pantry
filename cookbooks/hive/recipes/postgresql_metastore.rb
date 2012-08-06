@@ -53,9 +53,7 @@ execute "Import metastore schema" do
 end
 
 package "postgresql-jdbc" do
-  not_if "rpm -q postgresql-jdbc"
-  version "8.1.407"
-  action :install
+  # version "8.1.407"
 end
 
 execute "Copy postgresql-jdbc to hive lib" do

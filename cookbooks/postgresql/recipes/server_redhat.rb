@@ -37,30 +37,11 @@ user "postgres" do
   supports :manage_home => false
 end
 
-package "postgresql" do
-  not_if "rpm -q postgresql"
-  case node.platform
-  when "redhat", "centos", "scientific"
-    case
-    when node.platform_version.to_f >= 5.0
-      package_name "postgresql"
-    else
-      package_name "postgresql#{node['postgresql']['version'].split('.').join}"
-    end
-  else
-    package_name "postgresql"
-  end
-  action :install
-end
-
 case node.platform
 when "redhat", "centos", "scientific"
   case
   when node.platform_version.to_f >= 5.0
-    package "postgresql-server" do
-      not_if "rpm -q postgresql-server"
-      action :install
-    end
+    package "postgresql-server"
   else
     package "postgresql#{node['postgresql']['version'].split('.').join}-server"
   end

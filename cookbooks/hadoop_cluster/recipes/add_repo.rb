@@ -26,11 +26,13 @@ when 'centos'
     end
     execute 'disable all external yum repos' do
       command 'mv -f /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup/'
+      ignore_failure true # in case no file found
     end
   else
     execute 'enable all external yum repos' do
       only_if {File.exists?('/etc/yum.repos.d/backup')}
       command 'mv -f /etc/yum.repos.d/backup/*.repo /etc/yum.repos.d/'
+      ignore_failure true
     end
   end
 
