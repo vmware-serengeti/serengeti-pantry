@@ -36,6 +36,13 @@ execute "Initialize postgresql db" do
  }
 end
 
+schema_file_path = "#{node[:hive][:home_dir]}/src/metastore/scripts/upgrade/postgres/hive-schema-0.7.0.postgres.sql"
+
+execute "fix hive server sql bug for postgresql metastore on GreenPlum HD" do
+  only_if "grep 'bit(1)' #{schema_file_path} > /dev/null"
+  command %Q{sudo sed -i 's|bit(1)|boolean|' #{schema_file_path}}
+end
+
 # TODO: hive-schema-[version].postgres.sql should be adapt to the hive version installed on the node
 # but the sql file for hive 0.8.0 in hive svn trunk doesn't work for hive-0.8.1: http://svn.apache.org/viewvc/hive/trunk/metastore/scripts/upgrade/postgres/hive-schema-0.8.0.postgres.sql?revision=1334537&view=markup
 execute "Import metastore schema" do
@@ -44,7 +51,7 @@ execute "Import metastore schema" do
   user "hive"
   cwd "#{node[:hive][:home_dir]}"
   command %Q{
-    psql -U hive -d metastore_db -f #{node[:hive][:home_dir]}/src/metastore/scripts/upgrade/postgres/hive-schema-0.7.0.postgres.sql
+    psql -U hive -d metastore_db -f #{schema_file_path}
 
     exit_status=$?
     if [ $exit_status -eq 0 ]; then touch #{node[:hive][:log_dir]}/.imported_metastore_schema.log ; fi
