@@ -122,13 +122,9 @@ start() {
     fi
 
 }
+
 stop() {
     $DAEMON_SCRIPT stop datanode
-
-    if [ "datanode" = "datanode" ]; then
-      # Some processes are slow to stop
-      sleep $SLEEP_TIME
-    fi
 }
 
 is_hadoop_23_or_above() {
