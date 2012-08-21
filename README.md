@@ -8,6 +8,7 @@ To understand the basic concept of Cookbooks and Roles (defined by Chef), please
 
 ## Main Changes in VMware Serengeti Cookbooks
 
+* Generate user defined hadooop configuration (in cluster/facet roles) in hadoop conf files 
 * Add support for deploying a Hadoop cluster using various Hadoop Distributions (e.g. Apache Hadoop, GreenPlum HD, Cloudera CDH, Hortonworks, etc.).
 * The cookbooks are targeted for deploying a Hadoop 0.20 or 1.0 cluster with support for HDFS, MapReduce, Pig and Hive.
 * The cookbooks now only run well on a VM or server with RHEL 5.x and CentOS 5.x installed.
@@ -24,8 +25,10 @@ We mainly define the following roles for deploying a Hadoop cluster via Chef.
 * hadoop_datanode    : run Hadoop DataNode service in one or more cluster nodes
 * hadoop_tasktracker : run Hadoop TaskTracker service in one or more cluster nodes
 * hive : install Hive package in a cluster node
+* hive_server : install Hive Server in a cluster node and use postgresql as the meta db
 * pig  : install Pig package in a cluster node
 * hadoop_client : create a node running as a client to submit MapReduce/Pig/Hive jobs to the cluster
+* postgresql_server: install a Postgresql Server
 
 Each role points to recipes contained in several cookbooks.
 
@@ -42,9 +45,12 @@ We mainly create the following cookbooks and recipes for deploying a Hadoop clus
    * etc.
 * pig  : install Pig package
 * hive : install Hive package
+* postgresql : install a Postgresql Server
 * install_from : install a package from a tarball
 
-## Support for Multi Hadoop Distributions
+## New Features
+
+### Support for Multi Hadoop Distributions
 
 The support for Multi Hadoop Distribution is a big exciting feature we add into VMware Serengeti Cookbooks.
 
@@ -53,7 +59,7 @@ provided by Hadoop distributors. Because the folder structure of Hadoop binary t
 the Hadoop NameNode/JobTracker/DataNode/TaskTracker service in various Hadoop distributions are almost the same,
 we can easily support various Hadoop distributions with minimum changes.
 
-### Specify a Hadoop Distribution to Deploy
+#### Specify a Hadoop Distribution to Deploy
 
 The meta data of a Hadoop distribution is saved into Chef databag 'hadoop_distros' before running the cookbooks.
 Here is an example of databag containing the meta data of Apache Hadoop distribution:
@@ -65,7 +71,7 @@ Here is an example of databag containing the meta data of Apache Hadoop distribu
   pig:     http://localhost/distros/apache/1.0.1/pig-0.9.2.tar.gz     (the url of pig tarball of this Hadoop distribution)
 </pre>
 You can manually save meta data for a new Hadoop Distribution with id 'new_distro' into the databag 'hadoop_distros',
-add the following code in cluster role file, and upload the cluster role to Chef Server, then run the cookbooks.
+add the following code in cluster role file, and upload the cluster role to Chef Server, then bootstrap the node. 
 <pre>
   override_attributes({
     :hadoop => {
@@ -77,7 +83,7 @@ When VMware Serengeti Cookbooks is used by VMware Serengeti Ironfan to deploy a 
 specified in cluster definition file. Ironfan will read the meta data and save to databags automatically. Please read VMware Serengeti Ironfan
 user guide to find out how to use it.
 
-### Tested Hadoop Distributions
+#### Tested Hadoop Distributions
 
 We have tested that VMware Serengeti Cookbooks can be used to successfully deploy a Hadoop cluster with the following Hadoop distributions:
 
@@ -89,6 +95,44 @@ We have tested that VMware Serengeti Cookbooks can be used to successfully deplo
 Other Hadoop 0.20 or 1.0 series distributions should also work well but not tested.
 Please let us know if other Hadoop/Pig/Hive combination works in your environment.
 
+### Support for User Specified Hadoop Configuration
+A Hadoop admin may want to tune the hadoop cluster configuration by modifying configuration attributes in core-site.xml, hdfs-site.xml, mapred-site.xml, hadoop-env.sh, etc.
+In Ironfan, the Hadoop admin can add the following code in cluster role file, and upload the cluster role to Chef Server, then bootstrap the node, and all specified configuration will apply to the whole cluster. If add the following code in facet role file, the specified configuration will only apply to that facet.
+<pre>
+  default_attributes({
+    "cluster_configuration": {
+      "hadoop": {
+        "core-site.xml": {
+          // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html
+          // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
+          // "io.file.buffer.size": "4096",
+        },
+        "hdfs-site.xml": {
+          // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html
+          // "dfs.replication": "3"
+        },
+        "mapred-site.xml": {
+          // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/mapred-default.html
+          // "mapred.map.tasks": "3"
+        },
+        "hadoop-env.sh": {
+          // "JAVA_HOME": "",
+          // "HADOOP_HEAPSIZE": "",
+          // "HADOOP_NAMENODE_OPTS": "",
+          // "HADOOP_DATANODE_OPTS": "",
+          // "HADOOP_SECONDARYNAMENODE_OPTS": "",
+          // "HADOOP_JOBTRACKER_OPTS": "",
+          // "HADOOP_TASKTRACKER_OPTS": "",
+          // "PATH": "",
+        },
+        "log4j.properties": {
+          // "hadoop.root.logger": "DEBUG,console",
+          // "hadoop.security.logger": "DEBUG,console",
+        }
+      }
+    }
+  })
+</pre>
 # Contact
 
 Please send email to our mailing lists for [developers](https://groups.google.com/group/serengeti-dev) or for [users](https://groups.google.com/group/serengeti-user) if you have any questions.
