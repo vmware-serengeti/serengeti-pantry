@@ -60,16 +60,6 @@
   <value><%= node[:hadoop][:io_sort_mb] %></value>
 </property>
 
-<property>
-  <name>io.sort.record.percent</name>
-  <value>0.05</value>
-</property>
-
-<property>
-  <name>mapred.min.split.size</name>
-  <value>0</value>
-</property>
-
 <!-- reduce tuning -->
 
 <property>
@@ -80,11 +70,6 @@
 <property>
   <name>mapred.inmem.merge.threshold</name>
   <value>0</value>
-</property>
-
-<property>
-  <name>mapred.job.reduce.input.buffer.percent</name>
-  <value>0.0</value>
 </property>
 
 <property>
@@ -121,26 +106,6 @@
   <value><%= node[:hadoop][:mapred_jobtracker_completeuserjobs_maximum] %></value>
 </property>
 
-<property>
-  <name>mapred.map.tasks.speculative.execution</name>
-  <value>true</value>
-</property>
-
-<property>
-  <name>mapred.reduce.tasks.speculative.execution</name>
-  <value>true</value>
-</property>
-
-<property>
-  <name>mapred.reduce.slowstart.completed.maps</name>
-  <value>0.05</value>
-</property>
-
-<property>
-  <name>mapred.submit.replication</name>
-  <value>10</value>
-</property>
-
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['mapred-site.xml'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>
@@ -149,5 +114,6 @@
   <value><%= value %></value>
 </property>
 <%- end %>
+<!-- end -->
 
 </configuration>

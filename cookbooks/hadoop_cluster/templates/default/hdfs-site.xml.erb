@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!-- check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html -->
 <configuration>
+
 <property>
   <name>dfs.http.address</name>
   <value><%= @namenode_address %>:50070</value>
@@ -15,10 +16,6 @@
   <value><%= node[:hadoop][:dfs_replication] %></value>
 </property>
 <property>
-  <name>dfs.block.size</name>
-  <value>67108864</value>
-</property>
-<property>
   <name>dfs.name.dir</name>
   <value><%= @dfs_name_dirs %></value>
   <final>true</final>
@@ -30,8 +27,7 @@
 </property>
 <property>
   <!-- If its value is great than available diskspace on datanode, datanode will reports its available diskspace as 0, 
-       thus namenode will throw a java.io.IOException: File /hadoop/system/mapred/jobtracker.info could only be replicated to 0 nodes, instead of 1.
-  -->
+       thus namenode will throw a java.io.IOException: File /hadoop/system/mapred/jobtracker.info could only be replicated to 0 nodes, instead of 1. -->
   <name>dfs.datanode.du.reserved</name>
   <value>0</value>
 </property>
@@ -41,14 +37,12 @@
 </property>
 
 <property>
-  <name>dfs.datanode.max.xcievers</name>
-  <value>4096</value>
-</property>
-<property>
+  <!-- see https://issues.apache.org/jira/browse/HDFS-1861 -->
   <name>dfs.datanode.max.xceivers</name>
   <value>4096</value>
 </property>
 <property>
+  <!-- see https://issues.apache.org/jira/browse/HADOOP-5464 -->
   <name>dfs.datanode.socket.write.timeout</name>
   <value>0</value>
 </property>
@@ -80,4 +74,6 @@
   <value><%= value %></value>
 </property>
 <%- end %>
+<!-- end -->
+
 </configuration>

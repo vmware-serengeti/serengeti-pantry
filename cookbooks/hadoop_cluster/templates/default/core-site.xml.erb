@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!-- check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html -->
 <configuration>
+
 <property>
   <name>fs.default.name</name>
   <value>hdfs://<%= @namenode_address %>:<%= @namenode_port %></value>
@@ -15,4 +16,6 @@
   <value><%= value %></value>
 </property>
 <%- end %>
+<!-- end -->
+
 </configuration>
