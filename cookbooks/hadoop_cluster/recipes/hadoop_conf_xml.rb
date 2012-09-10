@@ -27,11 +27,13 @@ class Chef::Recipe; include HadoopCluster ; end
 template_variables = hadoop_template_variables
 Chef::Log.debug template_variables.inspect
 
-files = %w[core-site.xml hdfs-site.xml mapred-site.xml hadoop-env.sh log4j.properties fairscheduler.xml raw_settings.yaml hadoop-metrics.properties]
+files = %w[core-site.xml hdfs-site.xml mapred-site.xml hadoop-env.sh
+           log4j.properties fairscheduler.xml raw_settings.yaml hadoop-metrics.properties
+           topology.data topology.sh]
 files.each do |conf_file|
   template "/etc/hadoop/conf/#{conf_file}" do
     owner "root"
-    mode "0644"
+    mode conf_file.end_with?('.sh') ? "0755" : "0644"
     variables(template_variables)
     source "#{conf_file}.erb"
   end
@@ -50,7 +52,7 @@ files = %w[vm-namenode.xml vm-jobtracker.xml vsphere-ha-jobtracker-monitor.sh]
 files.each do |monitor_conf_file|
   template "/usr/lib/hadoop/monitor/#{monitor_conf_file}" do
     owner "root"
-    mode "0644"
+    mode monitor_conf_file.end_with?('.sh') ? "0755" : "0644"
     variables(template_variables)
     source "#{monitor_conf_file}.erb"
     only_if "test -d /usr/lib/hadoop/monitor/"

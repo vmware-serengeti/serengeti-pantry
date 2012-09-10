@@ -8,6 +8,25 @@
   <value>hdfs://<%= @namenode_address %>:<%= @namenode_port %></value>
 </property>
 
+<% if node[:hadoop][:rack_topology][:hve_enabled] %>
+<!-- settings for Hadoop Virtualization Extensions -->
+<property>
+  <name>net.topology.nodegroup.aware</name>
+  <value>yes</value>
+  <description>By default, network topology is not aware of nodegroup layer.</description>
+</property>
+<property>
+  <name>net.topology.impl</name>
+  <value>org.apache.hadoop.net.NetworkTopologyWithNodeGroup</value>
+  <description>The default implementation of NetworkTopology which is classic three layer one.</description>
+</property>
+<property>
+  <name>dfs.block.replicator.classname</name>
+  <value>org.apache.hadoop.hdfs.server.namenode.ReplicationTargetChooserWithNodeGroup</value>
+  <description>The default implementation of ReplicationTargetChooser.</description>
+</property>
+<% end %>
+
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['core-site.xml'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>

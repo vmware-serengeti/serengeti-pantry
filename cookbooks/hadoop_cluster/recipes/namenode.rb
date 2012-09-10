@@ -45,6 +45,7 @@ service "#{node[:hadoop][:namenode_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/topology.data]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
 end
 

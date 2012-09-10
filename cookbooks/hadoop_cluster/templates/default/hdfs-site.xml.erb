@@ -66,6 +66,15 @@
   <description>WebHDFS REST API http://hadoop.apache.org/common/docs/stable/webhdfs.html</description>
 </property>
 
+<% if node[:hadoop][:rack_topology][:enabled] %>
+<!-- turn on Rack Awareness of Hadoop -->
+<property>
+  <name>topology.script.file.name</name>
+  <value>/etc/hadoop/conf/topology.sh</value>
+  <description>Topology scripts are used by hadoop to determine the rack location of nodes. This information is used by hadoop to replicate block data to redundant racks.</description>
+</property>
+<% end %>
+
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['hdfs-site.xml'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>
