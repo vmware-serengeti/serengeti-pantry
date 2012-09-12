@@ -28,7 +28,7 @@ template_variables = hadoop_template_variables
 Chef::Log.debug template_variables.inspect
 
 files = %w[core-site.xml hdfs-site.xml mapred-site.xml hadoop-env.sh
-           log4j.properties fairscheduler.xml raw_settings.yaml hadoop-metrics.properties
+           log4j.properties fair-scheduler.xml capacity-scheduler.xml mapred-queue-acls.xml hadoop-metrics.properties raw_settings.yaml
            topology.data topology.sh]
 files.each do |conf_file|
   template "/etc/hadoop/conf/#{conf_file}" do
