@@ -94,6 +94,11 @@
   <value>-1</value>
 </property>
 
+<property>
+  <name>mapred.hosts.exclude</name>
+  <value>/etc/<%= node[:hadoop][:hadoop_handle] %>/conf/mapred.hosts.exclude</value>
+</property>
+
 <!-- job scheduling -->
 
 <property>

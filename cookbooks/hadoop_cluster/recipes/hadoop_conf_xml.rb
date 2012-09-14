@@ -46,6 +46,15 @@ template "/etc/default/#{node[:hadoop][:hadoop_handle]}" do
   source "etc_default_hadoop.erb"
 end
 
+exclude_files = %w[mapred.hosts.exclude dfs.hosts.exclude]
+exclude_files.each do |exclude_file|
+  file "/etc/hadoop/conf/#{exclude_file}" do
+    owner "root"
+    mode "0644"
+    action :create
+  end
+end
+
 template_variables[:monitor_jobtracker] = node.role? "hadoop_jobtracker"
 template_variables[:monitor_namenode] = node.role? "hadoop_namenode"
 files = %w[vm-namenode.xml vm-jobtracker.xml vsphere-ha-jobtracker-monitor.sh]
