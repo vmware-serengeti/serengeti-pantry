@@ -58,3 +58,9 @@ files.each do |monitor_conf_file|
     only_if "test -d /usr/lib/hadoop/monitor/"
   end
 end
+
+file "/etc/hadoop/conf/excludes" do
+  owner "root"
+  mode "0644"
+  action :create
+end

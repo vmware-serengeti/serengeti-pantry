@@ -87,6 +87,9 @@ set[:hadoop][:extra_nn_metadata_path] = nil
 # Other hadoop settings
 default[:hadoop][:max_balancer_bandwidth]     = 1048576  # bytes per second -- 1MB/s by default
 
+# Hadoop cluster nodes exclude
+default['cluster_configuration']['hadoop']['mapred-site.xml']['dfs.hosts.exclude'] = "#{default[:hadoop][:hadoop_home_dir]}/conf/excludes"
+
 #
 # Tune cluster settings for size of instance
 #
