@@ -12,7 +12,7 @@
 <!-- settings for Hadoop Virtualization Extensions -->
 <property>
   <name>net.topology.nodegroup.aware</name>
-  <value>yes</value>
+  <value>true</value>
   <description>By default, network topology is not aware of nodegroup layer.</description>
 </property>
 <property>
@@ -22,8 +22,8 @@
 </property>
 <property>
   <name>dfs.block.replicator.classname</name>
-  <value>org.apache.hadoop.hdfs.server.namenode.ReplicationTargetChooserWithNodeGroup</value>
-  <description>The default implementation of ReplicationTargetChooser.</description>
+  <value>org.apache.hadoop.hdfs.server.namenode.BlockPlacementPolicyWithNodeGroup</value>
+  <description>The default implementation of BlockPlacementPolicy.</description>
 </property>
 <% end %>
 
