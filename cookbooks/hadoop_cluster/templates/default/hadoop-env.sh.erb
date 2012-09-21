@@ -1,8 +1,10 @@
 # JAVA_HOME is required by HADOOP_HOME/bin/*.sh scripts
-export JAVA_HOME=/usr/local/jdk
+# guess JAVA_HOME and PATH
+. /etc/profile
+. /etc/environment
 
 # Hadoop env
-export HADOOP_HOME_WARN_SUPPRESS="TRUE"
+export HADOOP_HOME_WARN_SUPPRESS=TRUE
 export HADOOP_HOME=<%= @hadoop_home %>
 export HADOOP_COMMON_HOME=${HADOOP_HOME}
 export HADOOP_MAPRED_HOME=${HADOOP_HOME}
@@ -21,4 +23,5 @@ export YARN_PID_DIR=/var/run/yarn
 export <%= key %>=<%= value %>
 <%- end %>
 
+export JAVA_HOME
 export PATH=$HADOOP_HOME/bin:$JAVA_HOME/bin:$PATH

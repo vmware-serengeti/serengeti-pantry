@@ -1,0 +1,18 @@
+#! /bin/sh
+#
+# chkconfig: 2345 86 14
+# description: Starts HBase Region Server
+#
+### BEGIN INIT INFO
+# Provides:          hbase-regionserver
+# Required-Start:    $network $local_fs
+# Required-Stop:
+# Should-Start:      $named
+# Should-Stop:
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 4 6
+# Short-Description: HBase Region Server daemon
+### END INIT INFO
+
+HBASE_DAEMON_SH=<%= @node[:hbase][:home_dir] %>/bin/hbase-daemon.sh
+su hbase -c "$HBASE_DAEMON_SH $1 regionserver"

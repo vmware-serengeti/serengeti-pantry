@@ -14,10 +14,15 @@
 #
 
 module HadoopCluster
+  # whether the node itself has namenode role
+  def is_namenode
+    node.role?("hadoop_namenode")
+  end
+
   # The namenode's hostname, or the local node's numeric ip if 'localhost' is given.
   def namenode_address
     # if the user has specified the namenode ip, use it.
-    namenode_ip_conf || provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:namenode_service_name]}")
+    namenode_ip_conf || provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:namenode_service_name]}", !is_namenode)
   end
 
   def namenode_port
@@ -30,10 +35,35 @@ module HadoopCluster
   def resourcemanager_address
     provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:resourcemanager_service_name]}")
   end
-  
+
+  # whether the node itself has jobtracker role
+  def is_jobtracker
+    node.role?("hadoop_jobtracker")
+  end
+
+  # whether any node in the cluster has jobtracker role
+  def has_jobtracker
+    nodes = search(:node, "cluster_name:#{node[:cluster_name]} AND role:hadoop_jobtracker")
+    (nodes and nodes.size > 0) ? true : false
+  end
+
   # The jobtracker's hostname, or the local node's numeric ip if 'localhost' is given.
   def jobtracker_address
-    provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:jobtracker_service_name]}")
+    ip = jobtracker_ip_conf
+    if !ip
+      if has_jobtracker
+        ip = provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:jobtracker_service_name]}", !is_jobtracker)
+      else
+        # return empty string if the cluster doesn't have a jobtracker (e.g. an HBase cluster)
+        ip = ""
+      end
+    end
+    ip
+  end
+
+  def jobtracker_port
+    # if the user has specified the jobtracker port, use it.
+    jobtrackerport_conf || node[:hadoop][:jobtracker_service_port]
   end
 
   # The erb template variables for generating Hadoop xml configuration files in $HADDOP_HOME/conf/
@@ -244,18 +274,6 @@ EOF
     node[:hadoop][:hadoop_home_dir]
   end
 
-  # Use `file -s` to identify volume type: ohai doesn't seem to want to do so.
-  def fstype_from_file_magic(dev)
-    return 'ext4' unless File.exists?(dev)
-    dev_type_str = `file -s '#{dev}'`
-    case
-    when dev_type_str =~ /SGI XFS/           then 'xfs'
-    when dev_type_str =~ /Linux.*ext2/       then 'ext2'
-    when dev_type_str =~ /Linux.*ext3/       then 'ext3'
-    else                                          'ext4'
-    end
-  end
-
   # this is just a stub to prevent code broken
   def all_cluster_volumes
     nil
@@ -288,6 +306,20 @@ EOF
         action [ :enable, :start ]
         supports :status => true, :restart => true
         notifies :create, resources("ruby_block[#{svc}]"), :immediately
+      end
+    end
+  end
+
+  def wait_for_datanodes
+    service_registry_name = "#{node[:cluster_name]}-#{node[:hadoop][:datanode_service_name]}"
+    ruby_block "wait-for-#{service_registry_name}" do
+      block do
+        Chef::Log.info('wait until the datanodes daemon are started.')
+        all_providers_for_service(service_registry_name)
+        Chef::Log.info('the datanodes daemon are started and contacted with namenode daemon.')
+        Chef::Log.info('wait until namenode adds the datanodes and are able to place replica.')
+        sleep(60)
+        Chef::Log.info('HDFS are ready to place replica now.')
       end
     end
   end

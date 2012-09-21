@@ -1,0 +1,18 @@
+#! /bin/sh
+#
+# chkconfig: 2345 84 16
+# description: Starts a Zookeeper Server
+#
+### BEGIN INIT INFO
+# Provides:          zookeeper-server
+# Required-Start:    $network $local_fs
+# Required-Stop:
+# Should-Start:      $named
+# Should-Stop:
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 4 6
+# Short-Description: Zookeeper Server daemon
+### END INIT INFO
+
+ZK_SERVER_SH=<%= @node[:zookeeper][:home_dir] %>/bin/zkServer.sh
+su zookeeper -c "$ZK_SERVER_SH $1"

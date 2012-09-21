@@ -47,28 +47,41 @@
 # in.
 #
 module ClusterServiceDiscovery
+  WAIT_TIMEOUT = 600 # seconds
+  SLEEP_TIME = 5
 
   # Find all nodes that have indicated they provide the given service,
   # in descending order of when they registered.
   #
-  def all_providers_for_service service_name
-    servers = search(:node, "provides_service:#{service_name}").
-      find_all{|server| server[:provides_service][service_name] && server[:provides_service][service_name]['timestamp'] }.
-      sort_by{|server| server[:provides_service][service_name]['timestamp'] } rescue []
-    Chef::Log.info("search(:node, 'provides_service:#{service_name}') returns #{servers.count} nodes.")
-
-    servers || []
+  def all_providers_for_service service_name, wait = true
+    start_time = Time.now
+    while true
+      servers = search(:node, "provides_service:#{service_name}").
+        find_all{|server| server[:provides_service][service_name] && server[:provides_service][service_name]['timestamp'] }.
+        sort_by{|server| server[:provides_service][service_name]['timestamp'] } rescue []
+      if !wait or (servers and servers.size > 0)
+        Chef::Log.info("search(:node, 'provides_service:#{service_name}') returns #{servers.count} nodes.")
+        return servers
+      else
+        wait_time = Time.now - start_time
+        if wait_time > WAIT_TIMEOUT
+          Chef::Log.error("search(:node, 'provides_service:#{service_name}') failed, return empty.")
+          raise "Can't find any nodes which provide service #{service_name}. Did any node register this service? Or is the Chef Search Server is down?"
+        end
+        Chef::Log.info("search(:node, 'provides_service:#{service_name}') returns nothing, already wait #{wait_time} seconds.")
+        sleep SLEEP_TIME
+      end
+    end
   end
 
   # Find the most recent node that registered to provide the given service
-  def provider_for_service service_name
-    all_providers_for_service(service_name).last
+  def provider_for_service service_name, wait = true
+    all_providers_for_service(service_name, wait).last
   end
 
   # Register to provide the given service.
-  # If you pass in a hash of information, it will be added to
-  # the registry, and available to clients
-  def provide_service service_name, service_info={}
+  # If you pass in a hash of information, it will be added to the registry, and available to clients
+  def provide_service service_name, service_info = {}
     Chef::Log.info("Registering to provide service '#{service_name}' with extra info: #{service_info.inspect}")
     timestamp = ClusterServiceDiscovery.timestamp
     node.set[:provides_service][service_name] = {
@@ -82,8 +95,8 @@ module ClusterServiceDiscovery
     # So let's wait for Chef Search Server to generate the search index.
     found = false
     while !found do
-      Chef::Log.info("Wait for Chef Solr Server to generate search index for property 'provides_service'") 
-      sleep 5
+      Chef::Log.info("Wait for Chef Solr Server to generate search index for property 'provides_service'")
+      sleep SLEEP_TIME
       # a service can be provided by multi nodes, e.g. zookeeper server service
       servers = all_providers_for_service(service_name)
       servers.each do |server|
@@ -99,8 +112,8 @@ module ClusterServiceDiscovery
   # given service, get most recent address
 
   # The local-only ip address for the most recent provider for service_name
-  def provider_private_ip service_name
-    server = provider_for_service(service_name) or return
+  def provider_private_ip service_name, wait = true
+    server = provider_for_service(service_name, wait) or return
     private_ip_of(server)
   end
 

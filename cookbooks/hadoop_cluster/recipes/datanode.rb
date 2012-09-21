@@ -25,6 +25,15 @@ include_recipe "hadoop_cluster"
 # Install
 hadoop_package node[:hadoop][:packages][:datanode][:name]
 
+# Register with cluster_service_discovery
+service_registry_name = "#{node[:cluster_name]}-#{node[:hadoop][:datanode_service_name]}"
+ruby_block service_registry_name do
+  action :nothing
+  block do
+    provide_service(service_registry_name)
+  end
+end
+
 # Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:datanode_service_name])
 service "#{node[:hadoop][:datanode_service_name]}" do
@@ -36,4 +45,6 @@ service "#{node[:hadoop][:datanode_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hadoop][:datanode_service_name]}]"), :immediately
+  notifies :create, resources("ruby_block[#{service_registry_name}]"), :immediately
 end
+

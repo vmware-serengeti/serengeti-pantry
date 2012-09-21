@@ -1,0 +1,25 @@
+# The number of milliseconds of each tick
+tickTime=<%= @node[:zookeeper][:tick_time] %>
+
+# The number of ticks that the initial 
+# synchronization phase can take
+initLimit=<%= @node[:zookeeper][:init_limit] %>
+
+# The number of ticks that can pass between 
+# sending a request and getting an acknowledgement
+syncLimit=<%= @node[:zookeeper][:sync_limit] %>
+
+# the directory where the snapshot is stored.
+dataDir=/var/lib/zookeeper
+
+# the port at which the clients will connect
+clientPort=<%= @node[:zookeeper][:client_port] %>
+
+<% if @servers.size > 1 -%>
+  <% @servers.each_with_index do |server, i| %>
+server.<%= i %>=<%= server[:provision][:ip_address] %>:<%= @node[:zookeeper][:peer_port] %>:<%= @node[:zookeeper][:leader_port] %>
+  <% end -%>
+<% else -%>
+  <% server = @servers.first -%>
+server=<%= server[:provision][:ip_address] %>:<%= @node[:zookeeper][:peer_port] %>:<%= @node[:zookeeper][:leader_port] %>
+<% end -%>

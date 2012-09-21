@@ -23,11 +23,12 @@ default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # direcotry that HADOOP i
 # hadoop system services
 default[:hadoop][:service_stop_time] = 6 # waiting time for the hadoop service process to stop completely.
 default[:hadoop][:namenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-namenode"
-default[:hadoop][:namenode_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9000 : 8020
 default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-secondarynamenode"
 default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:hadoop_handle]}-datanode"
 default[:hadoop][:jobtracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-jobtracker"
 default[:hadoop][:tasktracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-tasktracker"
+default[:hadoop][:namenode_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9000 : 8020
+default[:hadoop][:jobtracker_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9001 : 8021
 
 # hadoop packages
 default[:hadoop][:packages][:namenode][:name] = "namenode"
@@ -69,13 +70,6 @@ default[:hadoop][:use_root_as_scratch_vol]    = false
 default[:hadoop][:use_root_as_persistent_vol] = false
 
 default[:hadoop][:use_data_disk_as_log_vol] = true
-
-# Config local disks for hadoop
-# { mount_point => device }  e.g. '/mnt/sdb1' => '/dev/sdb1'
-default[:disk][:data_disks] = {}
-# { device => disk }  e.g. '/dev/sdb1' => '/dev/sdb'
-default[:disk][:disk_devices] = {}
-
 
 # hadoop client setting
 default[:hadoop][:client][:admin][:username] = 'joe'

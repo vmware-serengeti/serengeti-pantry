@@ -14,6 +14,21 @@
 #
 
 module HadoopCluster
+  def jobtracker_ip_conf
+    jobtracker_uri_conf[0] rescue nil
+  end
+
+  def jobtracker_port_conf
+    jobtracker_uri_conf[1] rescue nil
+  end
+
+  # Return user defined jobtracker uri
+  def jobtracker_uri_conf
+    uri = hadoop_conf('mapred-site.xml', 'mapred.job.tracker')
+    # mapred.job.tracker is something like : '192.168.1.100:8021'
+    uri ? uri.split(':') : nil rescue nil
+  end
+
   def namenode_ip_conf
     namenode_uri_conf[0] rescue nil
   end
