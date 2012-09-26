@@ -29,7 +29,6 @@ hadoop_ha_package node[:hadoop][:packages][:namenode][:name]
 # Register with cluster_service_discovery
 provide_service ("#{node[:cluster_name]}-#{node[:hadoop][:namenode_service_name]}")
 # Regenerate Hadoop xml conf files with new Hadoop server address
-node.run_state[:seen_recipes].delete("hadoop_cluster::hadoop_conf_xml") # this is a work around; check http://tickets.opscode.com/browse/CHEF-1406
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 # Format namenode
