@@ -74,10 +74,11 @@ link "/etc/zookeeper" do
   to node[:zookeeper][:home_dir] + "/conf"
 end
 
-zk_servers = search(:node, "cluster_name:#{node[:cluster_name]} AND facet_name:#{node[:facet_name]}")
+zk_servers = search(:node, "cluster_name:#{node[:cluster_name]} AND role:zookeeper")
 zk_servers.sort! { |a, b| a.name <=> b.name }
-
-Chef::Log.info("Zookeeper servers in cluster [#{node[:cluster_name]}]  facet[#{node[:facet_name]}] #{zk_servers.inspect}")
+Chef::Log.info("Zookeeper servers in cluster are: #{zk_servers.inspect}")
+quorum = zk_servers.collect { |n| "#{n[:provision][:ip_address]}:#{node[:zookeeper][:client_port]}" }
+myid = zk_servers.collect { |n| n[:provision][:ip_address] }.index(node[:provision][:ip_address])
 
 %w[ zoo.cfg log4j.properties ].each do |file|
   template "/etc/zookeeper/#{file}" do
@@ -98,8 +99,6 @@ template "/etc/zookeeper/java.env" do
   group "zookeeper"
   variables(:jvm_option => jvm_option)
 end
-
-myid = zk_servers.collect { |n| n[:provision][:ip_address] }.index(node[:provision][:ip_address])
 
 template "/var/lib/zookeeper/myid" do
   source "myid.erb"
@@ -135,8 +134,4 @@ service node[:zookeeper][:zookeeper_service_name] do
 end
 
 # Register with cluster_service_discovery
-if myid == 0
-  quorum = zk_servers.collect { |n| "#{n[:provision][:ip_address]}:#{node[:zookeeper][:client_port]}" }
-  provide_service("#{node[:cluster_name]}-#{node[:zookeeper][:zookeeper_service_name]}", {:quorum => quorum})
-end
-
+provide_service("#{node[:cluster_name]}-#{node[:zookeeper][:zookeeper_service_name]}", { :quorum => quorum, :id => myid })
