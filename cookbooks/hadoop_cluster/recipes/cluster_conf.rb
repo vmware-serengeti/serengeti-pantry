@@ -50,6 +50,15 @@ end
   end
 end
 
+logger = node['cluster_configuration']['hadoop']['log4j.properties']['hadoop.root.logger'] rescue logger = nil
+if logger
+  %w[/usr/lib/hadoop/bin/hadoop-daemon.sh].each do |file|
+    execute "set HADOOP_ROOT_LOGGER to hadoop.root.logger value in log4j.properties" do
+      command %Q{sed -i -e 's|^export HADOOP_ROOT_LOGGER=.*|export HADOOP_ROOT_LOGGER=#{logger}|' #{file}}
+    end
+  end
+end
+
 # Set SLEEP_TIME
 execute "Set SLEEP_TIME longer enough for the hadoop service process to stop completely" do
   command %Q{
