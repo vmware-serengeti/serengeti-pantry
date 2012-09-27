@@ -40,3 +40,6 @@ service "#{node[:hadoop][:tasktracker_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-queue-acls.xml]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hadoop][:tasktracker_service_name]}]"), :immediately
 end
+
+# Register with cluster_service_discovery
+provide_service(node[:hadoop][:tasktracker_service_name])

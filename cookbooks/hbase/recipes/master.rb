@@ -41,9 +41,6 @@ end
 # when starting HBase Master daemon, it requires at least 1 datanode to replicate hbase.version
 wait_for_datanodes
 
-# Register with cluster_service_discovery
-provide_service node[:hbase][:master_service_registry_name]
-
 # Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:master_service_name])
 service node[:hbase][:master_service_name] do
@@ -56,3 +53,6 @@ service node[:hbase][:master_service_name] do
   subscribes :restart, resources("template[/etc/hbase/conf/log4j.properties]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hbase][:master_service_name]}]"), :immediately
 end
+
+# Register with cluster_service_discovery
+provide_service(node[:hbase][:master_service_name])

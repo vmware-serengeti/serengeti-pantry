@@ -25,15 +25,14 @@ include_recipe "hadoop_cluster"
 # Install
 hadoop_package node[:hadoop][:packages][:secondarynamenode][:name]
 
-# Register with cluster_service_discovery
-provide_service ("#{node[:cluster_name]}-#{node[:hadoop][:secondarynamenode_service_name]}")
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 # Launch service
 service "#{node[:hadoop][:secondarynamenode_service_name]}" do
-  action [ :enable, :restart ]
-  running true
+  action [ :enable, :start ]
   supports :status => true, :restart => true
 end
 
+# Register with cluster_service_discovery
+provide_service(node[:hadoop][:secondarynamenode_service_name])

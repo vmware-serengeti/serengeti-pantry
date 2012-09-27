@@ -56,7 +56,7 @@ module ClusterServiceDiscovery
   def all_providers_for_service service_name, wait = true
     start_time = Time.now
     while true
-      servers = search(:node, "provides_service:#{service_name}").
+      servers = search(:node, "cluster_name:#{node[:cluster_name]} AND provides_service:#{service_name}").
         find_all{|server| server[:provides_service][service_name] && server[:provides_service][service_name]['timestamp'] }.
         sort_by{|server| server[:provides_service][service_name]['timestamp'] } rescue []
       if !wait or (servers and servers.size > 0)
@@ -82,31 +82,35 @@ module ClusterServiceDiscovery
   # Register to provide the given service.
   # If you pass in a hash of information, it will be added to the registry, and available to clients
   def provide_service service_name, service_info = {}
-    Chef::Log.info("Registering to provide service '#{service_name}' with extra info: #{service_info.inspect}")
-    timestamp = ClusterServiceDiscovery.timestamp
-    node.set[:provides_service][service_name] = {
-      :timestamp  => timestamp,
-    }.merge(service_info)
-    node.save
+    ruby_block "provide-#{service_name}" do
+      block do
+        Chef::Log.info("Registering to provide service '#{service_name}' with extra info: #{service_info.inspect}")
+        timestamp = ClusterServiceDiscovery.timestamp
+        node.set[:provides_service][service_name] = {
+          :timestamp  => timestamp,
+        }.merge(service_info)
+        node.save
 
-    # Typically when bootstrap the chef node for the first time, the chef node registers itself to provide some service,
-    # but the Chef Search Server is not faster enough to build index for newly added node property(e.g. 'provides_service'),
-    # and will return stale results for search(:node, "provides_service:#{service_name}").
-    # So let's wait for Chef Search Server to generate the search index.
-    found = false
-    while !found do
-      Chef::Log.info("Wait for Chef Solr Server to generate search index for property 'provides_service'")
-      sleep SLEEP_TIME
-      # a service can be provided by multi nodes, e.g. zookeeper server service
-      servers = all_providers_for_service(service_name)
-      servers.each do |server|
-        if server[:ipaddress] == node[:ipaddress] and server[:provides_service][service_name][:timestamp] == timestamp
-          found = true
-          break
+        # Typically when bootstrap the chef node for the first time, the chef node registers itself to provide some service,
+        # but the Chef Search Server is not faster enough to build index for newly added node property(e.g. 'provides_service'),
+        # and will return stale results for search(:node, "provides_service:#{service_name}").
+        # So let's wait for Chef Search Server to generate the search index.
+        found = false
+        while !found do
+          Chef::Log.info("Wait for Chef Solr Server to generate search index for property 'provides_service'")
+          sleep SLEEP_TIME
+          # a service can be provided by multi nodes, e.g. zookeeper server service
+          servers = all_providers_for_service(service_name)
+          servers.each do |server|
+            if server[:ipaddress] == node[:ipaddress] and server[:provides_service][service_name][:timestamp] == timestamp
+              found = true
+              break
+            end
+          end
         end
+        Chef::Log.info("service '#{service_name}' is registered successfully.")
       end
     end
-    Chef::Log.info("service '#{service_name}' is registered successfully.")
   end
 
   # given service, get most recent address

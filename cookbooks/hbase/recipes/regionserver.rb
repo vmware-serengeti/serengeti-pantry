@@ -50,3 +50,6 @@ service node[:hbase][:region_service_name] do
   subscribes :restart, resources("template[/etc/hbase/conf/log4j.properties]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hbase][:region_service_name]}]"), :immediately
 end
+
+# Register with cluster_service_discovery
+provide_service(node[:hbase][:region_service_name])

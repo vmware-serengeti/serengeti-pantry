@@ -134,4 +134,4 @@ service node[:zookeeper][:zookeeper_service_name] do
 end
 
 # Register with cluster_service_discovery
-provide_service("#{node[:cluster_name]}-#{node[:zookeeper][:zookeeper_service_name]}", { :quorum => quorum, :id => myid })
+provide_service(node[:zookeeper][:zookeeper_service_name], { :quorum => quorum, :id => myid })

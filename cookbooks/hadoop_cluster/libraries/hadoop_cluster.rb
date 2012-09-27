@@ -23,7 +23,7 @@ module HadoopCluster
   def namenode_address
     return node[:ipaddress] if is_namenode
     # if the user has specified the namenode ip, use it.
-    namenode_ip_conf || provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:namenode_service_name]}", !is_namenode)
+    namenode_ip_conf || provider_private_ip(node[:hadoop][:namenode_service_name], !is_namenode)
   end
 
   def namenode_port
@@ -39,7 +39,7 @@ module HadoopCluster
   # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
   # The resourcemanager in hadoop-0.23 is vary similar to the jobtracker in hadoop-0.20.
   def resourcemanager_address
-    provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:resourcemanager_service_name]}")
+    provider_private_ip(node[:hadoop][:resourcemanager_service_name])
   end
 
   # whether the node itself has jobtracker role
@@ -64,7 +64,7 @@ module HadoopCluster
           # namenode and secondarynamenode don't require the jobtracker service is running
           ip = jobtracker[:ipaddress]
         else
-          ip = provider_private_ip("#{node[:cluster_name]}-#{node[:hadoop][:jobtracker_service_name]}", !is_jobtracker)
+          ip = provider_private_ip(node[:hadoop][:jobtracker_service_name], !is_jobtracker)
         end
       else
         # return empty string if the cluster doesn't have a jobtracker (e.g. an HBase cluster)
@@ -324,7 +324,7 @@ EOF
   end
 
   def wait_for_datanodes
-    service_registry_name = "#{node[:cluster_name]}-#{node[:hadoop][:datanode_service_name]}"
+    service_registry_name = node[:hadoop][:datanode_service_name]
     ruby_block "wait-for-#{service_registry_name}" do
       block do
         Chef::Log.info('wait until the datanodes daemon are started.')
@@ -332,7 +332,7 @@ EOF
         Chef::Log.info('the datanodes daemon are started and contacted with namenode daemon.')
         Chef::Log.info('wait until namenode adds the datanodes and are able to place replica.')
         sleep(60)
-        Chef::Log.info('HDFS are ready to place replica now.')
+        Chef::Log.info('HDFS is ready to place replica now.')
       end
     end
   end

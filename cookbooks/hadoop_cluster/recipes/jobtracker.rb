@@ -26,8 +26,6 @@ include_recipe "hadoop_cluster"
 hadoop_package node[:hadoop][:packages][:jobtracker][:name]
 hadoop_ha_package node[:hadoop][:packages][:jobtracker][:name] unless node.role? "hadoop_namenode"
 
-# Register with cluster_service_discovery
-provide_service ("#{node[:cluster_name]}-#{node[:hadoop][:jobtracker_service_name]}")
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
@@ -49,6 +47,9 @@ service "#{node[:hadoop][:jobtracker_service_name]}" do
     notifies :restart, resources("service[hmonitor-namenode-monitor]"), :delayed
   end
 end
+
+# Register with cluster_service_discovery
+provide_service(node[:hadoop][:jobtracker_service_name])
 
 # Launch service level ha monitor
 enable_ha_service node[:hadoop][:packages][:jobtracker][:name], "hmonitor-jobtracker-monitor" unless node.role? "hadoop_namenode"
