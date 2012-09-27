@@ -15,6 +15,12 @@ end
 set_proc_sys_limit "VM overcommit ratio", '/proc/sys/vm/overcommit_memory', overcommit_memory
 set_proc_sys_limit "VM overcommit memory", '/proc/sys/vm/overcommit_ratio',  overcommit_ratio
 
+bash "Increase nofile and noproc for hadoop-daemon.sh" do
+  code <<EOF
+    sed -i '/^pid=/ a\\n# Set nofile and noproc\nulimit -n #{ulimit_soft_nofile}\nulimit -u #{ulimit_soft_nproc}' /usr/lib/hadoop/bin/hadoop-daemon.sh
+EOF
+end
+
 %w[ @hadoop ].each do |usr|
   { 'hard' => ulimit_hard_nofile, 'soft' => ulimit_soft_nofile,  }.each do |limit_type, limit|
     bash "Increase open files #{limit_type} ulimit for #{usr} group" do
