@@ -225,7 +225,7 @@ EOF
   def local_hadoop_log_dir
     dir = node[:disk][:data_disks].keys[0] if node[:hadoop][:use_data_disk_as_log_vol]
     dir ||= '/mnt/hadoop'
-    File.join(dir, 'logs')
+    File.join(dir, 'hadoop/log')
   end
 
   def local_hadoop_dirs

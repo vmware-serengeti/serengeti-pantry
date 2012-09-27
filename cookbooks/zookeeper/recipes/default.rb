@@ -47,26 +47,32 @@ install_from_release('zookeeper') do
   not_if { ::File.exists?("#{node[:zookeeper][:home_dir]}") }
 end
 
-["/var/log/zookeeper", "/var/run/zookeeper"].each do |dir|
+# link Zookeeper data dir and log dir to the mounted data disk to get larger disk space
+disk_dir = disks_mount_points[0]
+if disk_dir
+  dirs = { '/var/lib/zookeeper' => 'zookeeper/data', '/var/log/zookeeper' => 'zookeeper/log' }
+  dirs.map do |src, des|
+    target = "#{disk_dir}/#{des}"
+    directory target do
+      owner "zookeeper"
+      group "zookeeper"
+      mode "0755"
+      recursive true
+    end
+
+    link src do
+      to target
+    end
+  end
+end
+
+dirs = ["/var/run/zookeeper"]
+dirs += ["/var/lib/zookeeper", "/var/log/zookeeper"] unless disk_dir
+dirs.each do |dir|
   directory dir do
     owner "zookeeper"
     group "zookeeper"
     mode "0755"
-  end
-end
-
-# link Zookeeper data dir (set to /var/lib/zookeeper) to a mounted data disk to get larger disk space
-disk_dir = disks_mount_points[0]
-if disk_dir
-  target = "#{disk_dir}/zookeeper"
-  directory target do
-    owner "zookeeper"
-    group "zookeeper"
-    mode "0755"
-  end
-
-  link "/var/lib/zookeeper" do
-    to target
   end
 end
 

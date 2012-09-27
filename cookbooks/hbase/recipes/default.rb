@@ -61,11 +61,32 @@ install_from_release('hbase') do
   not_if { ::File.exists?("#{node[:hbase][:home_dir]}") }
 end
 
-["/var/log/hbase", "/var/run/hbase", "/etc/hbase"].each do |dir|
+# link HBase log dir to the mounted data disk to get larger disk space
+disk_dir = disks_mount_points[0]
+if disk_dir
+  dirs = { '/var/log/hbase' => 'hbase/log' }
+  dirs.map do |src, des|
+    target = "#{disk_dir}/#{des}"
+    directory target do
+      owner "hbase"
+      group "hbase"
+      mode  "0755"
+      recursive true
+    end
+
+    link src do
+      to target
+    end
+  end
+end
+
+dirs = ["/var/run/hbase", "/etc/hbase"]
+dirs += ["/var/log/hbase"] unless disk_dir
+dirs.each do |dir|
   directory dir do
     owner "hbase"
     group "hbase"
-    mode 0755
+    mode  "0755"
   end
 end
 
