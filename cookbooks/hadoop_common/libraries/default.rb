@@ -29,9 +29,19 @@ module HadoopCluster
     end
   end
 
-  # an Array of mount points of the mounted data disks
+  # return an Array of mount points of the mounted data disks
   def disks_mount_points
     node[:disk][:data_disks].keys
   end
 
+  # run the given code block in a Chef Ruby Block
+  # see http://wiki.opscode.com/display/chef/Resources#Resources-RubyBlock
+  def run_in_ruby_block(name, &code)
+    return unless name and code
+    ruby_block name do
+      block do
+        code.call
+      end
+    end
+  end
 end

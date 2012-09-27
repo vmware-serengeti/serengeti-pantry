@@ -71,7 +71,7 @@ service "start-#{node[:hadoop][:namenode_service_name]}" do
 end
 
 ## run this regardless namenode is already started before bootstrapping or started by this recipe
-resource_wait_namenode.run_action(:run)
+run_in_ruby_block(resource_wait_namenode.name) { resource_wait_namenode.run_action(:run) }
 # Register with cluster_service_discovery
 provide_service(node[:hadoop][:namenode_service_name])
 
