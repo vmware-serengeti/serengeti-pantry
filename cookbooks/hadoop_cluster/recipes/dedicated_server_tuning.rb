@@ -2,6 +2,8 @@ overcommit_memory  =     1
 overcommit_ratio   =   100
 ulimit_hard_nofile = 32768
 ulimit_soft_nofile = 32768
+ulimit_hard_nproc = 32000
+ulimit_soft_nproc = 32000
 
 def set_proc_sys_limit desc, proc_path, limit
   bash desc do
@@ -20,6 +22,18 @@ set_proc_sys_limit "VM overcommit memory", '/proc/sys/vm/overcommit_ratio',  ove
       code <<EOF
         egrep -q '#{usr}.*#{limit_type}.*nofile' || ( echo '#{usr} #{limit_type} nofile' >> /etc/security/limits.conf )
         sed -i "s/#{usr}.*#{limit_type}.*nofile.*/#{usr}    #{limit_type}    nofile  #{limit}/" /etc/security/limits.conf
+EOF
+    end
+  end
+end
+
+%w[ @hadoop ].each do |usr|
+  { 'hard' => ulimit_hard_nproc, 'soft' => ulimit_soft_nproc,  }.each do |limit_type, limit|
+    bash "Increase maximum number of processes #{limit_type} ulimit for #{usr} group" do
+      not_if "egrep -q '#{usr}.*#{limit_type}.*nproc.*#{limit}' /etc/security/limits.conf"
+      code <<EOF
+        egrep -q '#{usr}.*#{limit_type}.*nproc' || ( echo '#{usr} #{limit_type} nproc' >> /etc/security/limits.conf )
+        sed -i "s/#{usr}.*#{limit_type}.*nproc.*/#{usr}    #{limit_type}  nproc  #{limit}/" /etc/security/limits.conf
 EOF
     end
   end

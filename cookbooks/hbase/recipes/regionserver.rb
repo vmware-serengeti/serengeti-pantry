@@ -20,6 +20,16 @@
 
 include_recipe "hbase"
 
+hbase_conf_dir = "/etc/hbase/conf"
+
+%w[ hbase-env-regionserver.sh ].each do |file|
+  template "#{hbase_conf_dir}/#{file}" do
+    owner "hbase"
+    mode "0755"
+    source "#{file}.erb"
+  end
+end
+
 %w[ hbase-regionserver ].each do |conf_file|
   template "/etc/init.d/#{conf_file}" do
     owner "root"
@@ -36,6 +46,7 @@ service node[:hbase][:region_service_name] do
 
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-env.sh]"), :delayed
+  subscribes :restart, resources("template[/etc/hbase/conf/hbase-env-regionserver.sh]"), :delayed
+  subscribes :restart, resources("template[/etc/hbase/conf/log4j.properties]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hbase][:region_service_name]}]"), :immediately
 end
-

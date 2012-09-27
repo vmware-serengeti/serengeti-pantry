@@ -27,6 +27,9 @@ ZOO_DATADIR=/var/lib/zookeeper
 ZOO_LOG_DIR=/var/log/zookeeper
 ZOOPIDFILE=/var/run/zookeeper/zookeeper.pid
 
+<%- conf = node['cluster_configuration']['zookeeper']['log4j.properties'] || {} rescue conf = {} %>
+ZOO_LOG4J_PROP=<%= conf['zookeeper.root.logger'] || '' %>
+
 # We use ZOOCFGDIR if defined,
 # otherwise we use /etc/zookeeper
 # or the conf directory that is

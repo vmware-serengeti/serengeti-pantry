@@ -27,6 +27,22 @@ user "hbase" do
   gid "hbase"
 end
 
+ulimit_nofile = 32768
+ulimit_nproc = 32000
+
+def set_sys_limit desc, user, ulimit_type, ulimit_value
+  bash desc do
+    not_if "egrep -q '#{user}.*#{ulimit_type}.*#{ulimit_value}' /etc/security/limits.conf"
+    code <<EOF
+      egrep -q '#{user}.*#{ulimit_type}' || ( echo '#{user} - #{ulimit_type}' >> /etc/security/limits.conf )
+      sed -i "s/#{user}.*-.*#{ulimit_type}.*/#{user} - #{ulimit_type} #{ulimit_value}/" /etc/security/limits.conf
+EOF
+  end
+end
+
+set_sys_limit "Increase maximum num of open files ulimit", "@hbase", "nofile", ulimit_nofile
+set_sys_limit "Increase maximum num of processes ulimit", "@hbase", "nproc", ulimit_nproc
+
 include_recipe "install_from"
 
 # Load distro repository info
@@ -68,7 +84,7 @@ template_variables = {
   :zookeeper_quorum => zk_quorum.join(",")
 }
 
-%w[ hbase-site.xml hbase-env.sh ].each do |file|
+%w[ hbase-site.xml hbase-env.sh log4j.properties ].each do |file|
   template "#{hbase_conf_dir}/#{file}" do
     owner "hbase"
     mode file.end_with?('.sh') ? "0755" : "0644"

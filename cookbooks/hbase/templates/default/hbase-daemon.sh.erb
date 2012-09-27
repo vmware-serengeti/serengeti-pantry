@@ -117,7 +117,10 @@ fi
 JAVA=$JAVA_HOME/bin/java
 export HBASE_LOG_PREFIX=hbase-$HBASE_IDENT_STRING-$command-$HOSTNAME
 export HBASE_LOGFILE=$HBASE_LOG_PREFIX.log
-export HBASE_ROOT_LOGGER="INFO,DRFA"
+
+<%- conf = node['cluster_configuration']['hbase']['log4j.properties'] || {} rescue conf = {} %>
+export HBASE_ROOT_LOGGER=<%= conf['hbase.root.logger'] || 'INFO,DRFA' %>
+
 logout=$HBASE_LOG_DIR/$HBASE_LOG_PREFIX.out
 loggc=$HBASE_LOG_DIR/$HBASE_LOG_PREFIX.gc
 loglog="${HBASE_LOG_DIR}/${HBASE_LOGFILE}"
