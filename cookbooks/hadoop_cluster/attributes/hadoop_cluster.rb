@@ -37,7 +37,7 @@ default[:hadoop][:packages][:datanode][:name] = "datanode"
 default[:hadoop][:packages][:jobtracker][:name] = "jobtracker"
 default[:hadoop][:packages][:tasktracker][:name] = "tasktracker"
 
-default[:hadoop][:namenode_wait_for_safemode_timeout] = 36 # 36*5 seconds
+default[:hadoop][:namenode_wait_for_safemode_timeout] = 120 # 2 minutes
 
 # HDFS and MapReduce settings
 default[:hadoop][:dfs_replication             ] =  3

@@ -322,20 +322,6 @@ EOF
       end
     end
   end
-
-  def wait_for_datanodes
-    service_registry_name = node[:hadoop][:datanode_service_name]
-    ruby_block "wait-for-#{service_registry_name}" do
-      block do
-        Chef::Log.info('wait until the datanodes daemon are started.')
-        all_providers_for_service(service_registry_name)
-        Chef::Log.info('the datanodes daemon are started and contacted with namenode daemon.')
-        Chef::Log.info('wait until namenode adds the datanodes and are able to place replica.')
-        sleep(60)
-        Chef::Log.info('HDFS is ready to place replica now.')
-      end
-    end
-  end
 end
 
 class Chef::Recipe

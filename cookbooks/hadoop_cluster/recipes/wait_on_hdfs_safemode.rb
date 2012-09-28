@@ -31,3 +31,4 @@ execute 'wait until the HDFS is out of safemode' do
   user 'hdfs'
   command %Q{hadoop dfsadmin -safemode wait}
 end
+

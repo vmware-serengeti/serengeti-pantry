@@ -38,6 +38,12 @@ end
   end
 end
 
+log = 'wait for HBase Master daemon to be ready'
+run_in_ruby_block(log) do
+  Chef::Log.info(log)
+  provider_for_service(node[:hbase][:master_service_name])
+end
+
 # Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:region_service_name])
 service node[:hbase][:region_service_name] do

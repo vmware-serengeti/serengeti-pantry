@@ -21,6 +21,7 @@
 #
 
 include_recipe "hadoop_cluster"
+include_recipe "hadoop_cluster::wait_for_hdfs"
 
 # Install
 hadoop_package node[:hadoop][:packages][:namenode][:name]
@@ -32,26 +33,8 @@ include_recipe "hadoop_cluster::hadoop_conf_xml"
 # Format namenode
 include_recipe "hadoop_cluster::bootstrap_format_namenode"
 
-resource_wait_namenode = execute "wait until namenode is ready" do
-  action :nothing
-  command %Q{
-    i=0
-    while [ $i -le #{node[:hadoop][:namenode_wait_for_safemode_timeout]} ]
-    do
-      sleep 5
-      if `hadoop dfsadmin -safemode get | grep OFF > /dev/null` ; then
-        echo "namenode safemode is off"
-        exit
-      fi
-      echo "Wait until namenode leaves safemode. Retrying $i times."
-      (( i++ ))
-    done
-    echo "Namenode stucks in safemode. Will explictlly let it leave safemode."
-    hadoop dfsadmin -safemode leave
-  }
-end
-
 # Launch NameNode service
+resource_wait_for_namenode = resources(:execute => "wait_for_namenode")
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:namenode_service_name])
 service "restart-#{node[:hadoop][:namenode_service_name]}" do
   service_name node[:hadoop][:namenode_service_name]
@@ -62,7 +45,7 @@ service "restart-#{node[:hadoop][:namenode_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/topology.data]"), :delayed
-  notifies :run, resource_wait_namenode, :immediately
+  notifies :run, resource_wait_for_namenode, :immediately
 end
 service "start-#{node[:hadoop][:namenode_service_name]}" do
   service_name node[:hadoop][:namenode_service_name]
@@ -71,7 +54,7 @@ service "start-#{node[:hadoop][:namenode_service_name]}" do
 end
 
 ## run this regardless namenode is already started before bootstrapping or started by this recipe
-run_in_ruby_block(resource_wait_namenode.name) { resource_wait_namenode.run_action(:run) }
+run_in_ruby_block(resource_wait_for_namenode.name) { resource_wait_for_namenode.run_action(:run) }
 # Register with cluster_service_discovery
 provide_service(node[:hadoop][:namenode_service_name])
 
