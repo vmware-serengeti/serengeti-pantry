@@ -100,17 +100,23 @@ zk_service_name = node[:hbase][:zookeeper_service_name]
 zk_service_provider = provider_for_service(zk_service_name)
 zk_quorum = zk_service_provider[:provides_service][zk_service_name][:quorum]
 
+# get zookeeper_session_timeout to be used in hbase-daemon.sh
+zookeeper_session_timeout = node['cluster_configuration']['hbase']['hbase-site.xml']['zookeeper.session.timeout'] rescue nil
+zookeeper_session_timeout ||= node[:hbase][:zookeeper_session_timeout]
+zookeeper_session_timeout = zookeeper_session_timeout.to_i / 1000 + 120 # convert to seconds, and plus extra 2 minutes
+
 template_variables = {
   :hbase_hdfs_home => hbase_hdfs_home,
-  :zookeeper_quorum => zk_quorum.join(",")
+  :zookeeper_quorum => zk_quorum.join(","),
+  :zookeeper_session_timeout => zookeeper_session_timeout
 }
 
 %w[ hbase-site.xml hbase-env.sh log4j.properties ].each do |file|
   template "#{hbase_conf_dir}/#{file}" do
     owner "hbase"
     mode file.end_with?('.sh') ? "0755" : "0644"
-    variables(template_variables)
     source "#{file}.erb"
+    variables(template_variables)
   end
 end
 
@@ -119,5 +125,6 @@ end
     owner "hbase"
     mode file.end_with?('.sh') ? "0755" : "0644"
     source "#{file}.erb"
+    variables(template_variables)
   end
 end

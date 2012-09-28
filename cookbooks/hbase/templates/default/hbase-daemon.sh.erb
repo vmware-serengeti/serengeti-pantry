@@ -202,6 +202,10 @@ case $startStop in
     if [ $sp -gt 0 ]; then
       sleep $sp
     fi
+    # sometimes 'bin/hbase master stop' doesn't unregister hbase master from zookeeper server,
+    # if run 'bin/hbase master start' within the zookeeper.session.timeout, zookeeper complains fatal error 'duplicate hbase master entry found'.
+    echo 'waiting <%= @zookeeper_session_timeout %> seconds for the zookeeper session times out'
+    sleep <%= @zookeeper_session_timeout %>
     # start the command
     $thiscmd --config "${HBASE_CONF_DIR}" start $command $args &
     wait_until_done $!
