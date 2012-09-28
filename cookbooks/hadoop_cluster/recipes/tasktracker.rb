@@ -25,11 +25,12 @@ include_recipe "hadoop_cluster"
 # Install
 hadoop_package node[:hadoop][:packages][:tasktracker][:name]
 
-# Launch Service
+## Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:tasktracker_service_name])
-service "#{node[:hadoop][:tasktracker_service_name]}" do
-  action [ :enable, :start ]
-  supports :status => true, :restart => true
+
+is_tasktracker_running = system("service #{node[:hadoop][:tasktracker_service_name]} status")
+service "restart-#{node[:hadoop][:tasktracker_service_name]}" do
+  service_name node[:hadoop][:tasktracker_service_name]
 
   subscribes :restart, resources("template[/etc/hadoop/conf/core-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
@@ -38,6 +39,14 @@ service "#{node[:hadoop][:tasktracker_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/capacity-scheduler.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-queue-acls.xml]"), :delayed
+  notifies :create, resources("ruby_block[#{node[:hadoop][:tasktracker_service_name]}]"), :immediately
+end if is_tasktracker_running
+
+service "start-#{node[:hadoop][:tasktracker_service_name]}" do
+  service_name node[:hadoop][:tasktracker_service_name]
+  action [ :enable, :start ]
+  supports :status => true, :restart => true
+
   notifies :create, resources("ruby_block[#{node[:hadoop][:tasktracker_service_name]}]"), :immediately
 end
 

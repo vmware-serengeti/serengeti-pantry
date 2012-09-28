@@ -18,6 +18,7 @@
 #   limitations under the License.
 #
 
+include_recipe "hadoop_cluster" # install the hadoop binary which will be used to wait for hdfs in case HBase is installed without Hadoop
 include_recipe "hbase"
 
 hbase_conf_dir = "/etc/hbase/conf"
@@ -44,16 +45,25 @@ include_recipe "hadoop_cluster::wait_for_hdfs"
 wait_for_hdfs = resources(:ruby_block => "wait_for_hdfs")
 run_in_ruby_block(wait_for_hdfs.name) { wait_for_hdfs.run_action(:create) }
 
-# Launch service
+## Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:master_service_name])
-service node[:hbase][:master_service_name] do
-  action [ :enable, :start ]
-  supports :status => true, :restart => true
+
+is_master_running = system("service #{node[:hbase][:master_service_name]} status")
+service "restart-#{node[:hbase][:master_service_name]}" do
+  service_name node[:hbase][:master_service_name]
 
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-env-master.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/log4j.properties]"), :delayed
+  notifies :create, resources("ruby_block[#{node[:hbase][:master_service_name]}]"), :immediately
+end if is_master_running
+
+service "start-#{node[:hbase][:master_service_name]}" do
+  service_name node[:hbase][:master_service_name]
+  action [ :enable, :start ]
+  supports :status => true, :restart => true
+
   notifies :create, resources("ruby_block[#{node[:hbase][:master_service_name]}]"), :immediately
 end
 

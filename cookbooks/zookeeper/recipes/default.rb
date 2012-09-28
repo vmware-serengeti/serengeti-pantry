@@ -127,15 +127,25 @@ template "/etc/init.d/zookeeper-server" do
   mode  "0755"
 end
 
+## Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, node[:zookeeper][:zookeeper_service_name])
-service node[:zookeeper][:zookeeper_service_name] do
-  action [ :enable, :start ]
-  supports :status => true, :restart => true
+
+is_zookeeper_running = system("service #{node[:zookeeper][:zookeeper_service_name]} status")
+service "restart-#{node[:zookeeper][:zookeeper_service_name]}" do
+  service_name node[:zookeeper][:zookeeper_service_name]
 
   subscribes :restart, resources("template[/etc/zookeeper/zoo.cfg]"), :delayed
   subscribes :restart, resources("template[/etc/zookeeper/log4j.properties]"), :delayed
   subscribes :restart, resources("template[/etc/zookeeper/java.env]"), :delayed
   subscribes :restart, resources("template[#{node[:zookeeper][:home_dir]}/bin/zkEnv.sh]"), :delayed
+  notifies :create, resources("ruby_block[#{node[:zookeeper][:zookeeper_service_name]}]"), :immediately
+end if is_zookeeper_running
+
+service "start-#{node[:zookeeper][:zookeeper_service_name]}" do
+  service_name node[:zookeeper][:zookeeper_service_name]
+  action [ :enable, :start ]
+  supports :status => true, :restart => true
+
   notifies :create, resources("ruby_block[#{node[:zookeeper][:zookeeper_service_name]}]"), :immediately
 end
 

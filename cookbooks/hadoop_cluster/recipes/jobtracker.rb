@@ -29,11 +29,12 @@ hadoop_ha_package node[:hadoop][:packages][:jobtracker][:name] unless node.role?
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
-# Launch service
+## Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:jobtracker_service_name])
-service "#{node[:hadoop][:jobtracker_service_name]}" do
-  action [ :enable, :start ]
-  supports :status => true, :restart => true
+
+is_jobtracker_running = system("service #{node[:hadoop][:jobtracker_service_name]} status")
+service "restart-#{node[:hadoop][:jobtracker_service_name]}" do
+  service_name node[:hadoop][:jobtracker_service_name]
 
   subscribes :restart, resources("template[/etc/hadoop/conf/core-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
@@ -46,6 +47,14 @@ service "#{node[:hadoop][:jobtracker_service_name]}" do
   if ((node[:hadoop][:ha_enabled]) && (node.role? "hadoop_namenode")) then
     notifies :restart, resources("service[hmonitor-namenode-monitor]"), :delayed
   end
+end if is_jobtracker_running
+
+service "start-#{node[:hadoop][:jobtracker_service_name]}" do
+  service_name node[:hadoop][:jobtracker_service_name]
+  action [ :enable, :start ]
+  supports :status => true, :restart => true
+
+  notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately
 end
 
 # Register with cluster_service_discovery

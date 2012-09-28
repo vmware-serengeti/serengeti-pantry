@@ -44,16 +44,25 @@ run_in_ruby_block(log) do
   provider_for_service(node[:hbase][:master_service_name])
 end
 
-# Launch service
+## Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:region_service_name])
-service node[:hbase][:region_service_name] do
-  action [ :enable, :start ]
-  supports :status => true, :restart => true
+
+is_regionserver_running = system("service #{node[:hbase][:region_service_name]} status")
+service "restart-#{node[:hbase][:region_service_name]}" do
+  service_name node[:hbase][:region_service_name]
 
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-env-regionserver.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/log4j.properties]"), :delayed
+  notifies :create, resources("ruby_block[#{node[:hbase][:region_service_name]}]"), :immediately
+end if is_regionserver_running
+
+service "start-#{node[:hbase][:region_service_name]}" do
+  service_name node[:hbase][:region_service_name]
+  action [ :enable, :start ]
+  supports :status => true, :restart => true
+
   notifies :create, resources("ruby_block[#{node[:hbase][:region_service_name]}]"), :immediately
 end
 
