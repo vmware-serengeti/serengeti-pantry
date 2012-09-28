@@ -27,6 +27,13 @@ class Chef::Recipe; include HadoopCluster ; end
 template_variables = hadoop_template_variables
 Chef::Log.debug template_variables.inspect
 
+# create it in case it's not created, e.g. when this recipe is included by hbase recipes
+# which only need the hadoop conf files rather than hadoop packages and conf files)
+directory "/etc/hadoop/conf" do
+  mode  "0755"
+  recursive true
+end
+
 files = %w[core-site.xml hdfs-site.xml mapred-site.xml hadoop-env.sh
            log4j.properties fair-scheduler.xml capacity-scheduler.xml mapred-queue-acls.xml hadoop-metrics.properties raw_settings.yaml
            topology.data topology.sh]

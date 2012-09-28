@@ -19,6 +19,8 @@
 #
 
 include_recipe "java::sun"
+include_recipe "install_from"
+include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 group "hbase" do
 end
@@ -42,8 +44,6 @@ end
 
 set_sys_limit "Increase maximum num of open files ulimit", "@hbase", "nofile", ulimit_nofile
 set_sys_limit "Increase maximum num of processes ulimit", "@hbase", "nproc", ulimit_nproc
-
-include_recipe "install_from"
 
 # Load distro repository info
 current_distro = data_bag_item("hadoop_distros", node[:hadoop][:distro_name])
