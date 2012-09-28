@@ -47,7 +47,7 @@
 # in.
 #
 module ClusterServiceDiscovery
-  WAIT_TIMEOUT = 600 # seconds
+  WAIT_TIMEOUT = 1800 # seconds
   SLEEP_TIME = 5
 
   # Find all nodes that have indicated they provide the given service,
