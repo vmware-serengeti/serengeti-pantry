@@ -1,3 +1,18 @@
+# 0.7.0 (2012-10-8)
+
+New Features:
+* Add Zookeeper and HBase cookbooks/roles for deploying a Zookeeper or HBase cluster
+* Enhance service register framework to ensure service is registered after the service daemon is started and ready to handle requests. This can eliminate intermittent synchronization issue between dependent service daemons
+* Add support for tuning fair-scheduler.xml, capacity-scheduler.xml and mapred-queue-acls.xml
+* Add ulimit settings in hadoop-daemon.sh
+* Auto detect JAVA_HOME from /etc/profile instead of hardcode.
+* Enable configuration for Hadoop Topology Rack Awareness and Hadoop Virtualization Extensions
+
+Bug Fix:
+* When bootstrapping, either service start or service restart should be triggerred, but not both, because restart after start is unnecessary.
+* For hadoop daemons: set HADOOP_ROOT_LOGGER to hadoop.root.logger value in log4j.properties.
+* Fix issue: hadoop services restart returns zero instead of non-zero when restart failed.
+
 # 0.6.0 (2012-8-21)
 
 New Features:

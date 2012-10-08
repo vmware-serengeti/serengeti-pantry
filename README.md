@@ -29,6 +29,10 @@ We mainly define the following roles for deploying a Hadoop cluster via Chef.
 * pig  : install Pig package in a cluster node
 * hadoop_client : create a node running as a client to submit MapReduce/Pig/Hive jobs to the cluster
 * postgresql_server: install a Postgresql Server
+* zookeeper: install and run Apache Zookeeper service
+* hbase_master: install and run Apache HBase Master service
+* hbase_regionserver: install and run Apache HBase RegionServer service
+* hbase_client: install Apache HBase package and setup HBase configuration
 
 Each role points to recipes contained in several cookbooks.
 
@@ -45,6 +49,8 @@ We mainly create the following cookbooks and recipes for deploying a Hadoop clus
    * etc.
 * pig  : install Pig package
 * hive : install Hive package
+* hbase : install HBase package
+* zookeeper : install Zookeeper package
 * postgresql : install a Postgresql Server
 * install_from : install a package from a tarball
 
@@ -69,6 +75,8 @@ Here is an example of databag containing the meta data of Apache Hadoop distribu
   hadoop:  http://localhost/distros/apache/1.0.1/hadoop-1.0.1.tar.gz  (the url of hadoop tarball of this Hadoop distribution)
   hive:    http://localhost/distros/apache/1.0.1/hive-0.8.1.tar.gz    (the url of hive tarball of this Hadoop distribution)
   pig:     http://localhost/distros/apache/1.0.1/pig-0.9.2.tar.gz     (the url of pig tarball of this Hadoop distribution)
+  hbase:   http://localhost/distros/apache/1.0.1/hbase-0.94.1.tar.gz  (the url of hbase tarball of this Hadoop distribution) 
+  zookeeper: http://localhost/distros/apache/1.0.1/zookeeper-3.4.3.tar.gz  (the url of zookeeper tarball of this Hadoop distribution)
 </pre>
 You can manually save meta data for a new Hadoop Distribution with id 'new_distro' into the databag 'hadoop_distros',
 add the following code in cluster role file, and upload the cluster role to Chef Server, then bootstrap the node. 
