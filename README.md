@@ -75,11 +75,11 @@ Here is an example of databag containing the meta data of Apache Hadoop distribu
   hadoop:  http://localhost/distros/apache/1.0.1/hadoop-1.0.1.tar.gz  (the url of hadoop tarball of this Hadoop distribution)
   hive:    http://localhost/distros/apache/1.0.1/hive-0.8.1.tar.gz    (the url of hive tarball of this Hadoop distribution)
   pig:     http://localhost/distros/apache/1.0.1/pig-0.9.2.tar.gz     (the url of pig tarball of this Hadoop distribution)
-  hbase:   http://localhost/distros/apache/1.0.1/hbase-0.94.1.tar.gz  (the url of hbase tarball of this Hadoop distribution) 
+  hbase:   http://localhost/distros/apache/1.0.1/hbase-0.94.1.tar.gz  (the url of hbase tarball of this Hadoop distribution)
   zookeeper: http://localhost/distros/apache/1.0.1/zookeeper-3.4.3.tar.gz  (the url of zookeeper tarball of this Hadoop distribution)
 </pre>
 You can manually save meta data for a new Hadoop Distribution with id 'new_distro' into the databag 'hadoop_distros',
-add the following code in cluster role file, and upload the cluster role to Chef Server, then bootstrap the node. 
+add the following code in cluster role file, and upload the cluster role to Chef Server, then bootstrap the node.
 <pre>
   override_attributes({
     :hadoop => {
@@ -113,7 +113,7 @@ In Ironfan, the Hadoop admin can add the following code in cluster role file, an
         "core-site.xml": {
           // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html
           // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
-          // "io.file.buffer.size": "4096",
+          // "io.file.buffer.size": "4096"
         },
         "hdfs-site.xml": {
           // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html
@@ -131,11 +131,11 @@ In Ironfan, the Hadoop admin can add the following code in cluster role file, an
           // "HADOOP_SECONDARYNAMENODE_OPTS": "",
           // "HADOOP_JOBTRACKER_OPTS": "",
           // "HADOOP_TASKTRACKER_OPTS": "",
-          // "PATH": "",
+          // "PATH": ""
         },
         "log4j.properties": {
-          // "hadoop.root.logger": "DEBUG,console",
-          // "hadoop.security.logger": "DEBUG,console",
+          // "hadoop.root.logger": "DEBUG,DRFA",
+          // "hadoop.security.logger": "DEBUG,DRFA"
         }
       }
     }
