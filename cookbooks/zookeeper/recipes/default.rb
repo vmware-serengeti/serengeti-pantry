@@ -133,6 +133,7 @@ set_bootstrap_action(ACTION_START_SERVICE, node[:zookeeper][:zookeeper_service_n
 is_zookeeper_running = system("service #{node[:zookeeper][:zookeeper_service_name]} status")
 service "restart-#{node[:zookeeper][:zookeeper_service_name]}" do
   service_name node[:zookeeper][:zookeeper_service_name]
+  supports :status => true, :restart => true
 
   subscribes :restart, resources("template[/etc/zookeeper/zoo.cfg]"), :delayed
   subscribes :restart, resources("template[/etc/zookeeper/log4j.properties]"), :delayed
