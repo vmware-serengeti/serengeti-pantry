@@ -164,7 +164,7 @@ hadoop_service() {
             echo -n "Stopping $DESC: "
             stop
 
-            if ! hadoop_check_pidfile $PID_FILE ; then
+            if hadoop_check_pidfile $PID_FILE ; then
                 echo "ERROR: Could not stop $DESC"
                 exit 1
             else
