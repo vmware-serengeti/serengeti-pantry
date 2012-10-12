@@ -49,6 +49,28 @@ when "fedora","suse"
   package "postgresql-server"
 end
 
+template "/etc/init.d/postgresql" do
+  source "postgresql.erb"
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
+execute "postgresql initdb" do
+  not_if { File.exists?(File.join(node[:postgresql][:dir], "PG_VERSION")) }
+  command %Q{
+    service postgresql initdb
+  }
+  action :run
+end
+
+template "#{node[:postgresql][:dir]}/postgresql.conf" do
+  source "postgresql.conf.erb"
+  owner "postgres"
+  group "postgres"
+  mode "0600"
+end
+
 service "postgresql" do
   supports :restart => true, :status => true, :reload => true
   action [:enable, :start]
