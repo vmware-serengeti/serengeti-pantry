@@ -35,6 +35,7 @@ set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:jobtracker_service_nam
 is_jobtracker_running = system("service #{node[:hadoop][:jobtracker_service_name]} status")
 service "restart-#{node[:hadoop][:jobtracker_service_name]}" do
   service_name node[:hadoop][:jobtracker_service_name]
+  supports :status => true, :restart => true
 
   subscribes :restart, resources("template[/etc/hadoop/conf/core-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed

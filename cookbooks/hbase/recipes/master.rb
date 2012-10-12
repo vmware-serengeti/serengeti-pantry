@@ -51,6 +51,7 @@ set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:master_service_name])
 is_master_running = system("service #{node[:hbase][:master_service_name]} status")
 service "restart-#{node[:hbase][:master_service_name]}" do
   service_name node[:hbase][:master_service_name]
+  supports :status => true, :restart => true
 
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-env.sh]"), :delayed
