@@ -122,29 +122,28 @@ module ClusterServiceDiscovery
   end
 
   # The local-only ip address for the most recent provider for service_name
-  def provider_fqdn service_name
-    server = provider_for_service(service_name) or return
-    # Chef::Log.info("for #{service_name} got #{server.inspect} with #{fqdn_of(server)}")
+  def provider_fqdn service_name, wait = true
+    server = provider_for_service(service_name, wait) or return
     fqdn_of(server)
   end
 
   # The globally-accessable ip address for the most recent provider for service_name
-  def provider_public_ip service_name
-    server = provider_for_service(service_name) or return
+  def provider_public_ip service_name, wait = true
+    server = provider_for_service(service_name, wait) or return
     public_ip_of(server)
   end
 
   # given service, get many addresses
 
   # The local-only ip address for all providers for service_name
-  def all_provider_private_ips service_name
-    servers = all_providers_for_service(service_name)
+  def all_provider_private_ips service_name, wait = true
+    servers = all_providers_for_service(service_name, wait)
     servers.map{ |server| private_ip_of(server) }
   end
 
   # The globally-accessable ip address for all providers for service_name
-  def all_provider_public_ips service_name
-    servers = all_providers_for_service(service_name)
+  def all_provider_public_ips service_name, wait = true
+    servers = all_providers_for_service(service_name, wait)
     servers.map{ |server| public_ip_of(server) }
   end
 

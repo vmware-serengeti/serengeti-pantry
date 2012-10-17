@@ -21,9 +21,9 @@ module HadoopCluster
 
   # The namenode's hostname, or the local node's numeric ip if 'localhost' is given.
   def namenode_address
-    return node[:ipaddress] if is_namenode
+    return node[:fqdn] if is_namenode
     # if the user has specified the namenode ip, use it.
-    namenode_ip_conf || provider_private_ip(node[:hadoop][:namenode_service_name], !is_namenode)
+    namenode_ip_conf || provider_fqdn(node[:hadoop][:namenode_service_name], !is_namenode)
   end
 
   def namenode_port
@@ -39,7 +39,7 @@ module HadoopCluster
   # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
   # The resourcemanager in hadoop-0.23 is vary similar to the jobtracker in hadoop-0.20.
   def resourcemanager_address
-    provider_private_ip(node[:hadoop][:resourcemanager_service_name])
+    provider_fqdn(node[:hadoop][:resourcemanager_service_name])
   end
 
   # whether the node itself has jobtracker role
@@ -55,16 +55,16 @@ module HadoopCluster
 
   # The jobtracker's hostname, or the local node's numeric ip if 'localhost' is given.
   def jobtracker_address
-    return node[:ipaddress] if is_jobtracker
+    return node[:fqdn] if is_jobtracker
     ip = jobtracker_ip_conf
     if !ip
       jobtracker = jobtracker_node
       if jobtracker
         if is_namenode or is_secondarynamenode
           # namenode and secondarynamenode don't require the jobtracker service is running
-          ip = jobtracker[:ipaddress]
+          ip = jobtracker[:fqdn]
         else
-          ip = provider_private_ip(node[:hadoop][:jobtracker_service_name], !is_jobtracker)
+          ip = provider_fqdn(node[:hadoop][:jobtracker_service_name], !is_jobtracker)
         end
       else
         # return empty string if the cluster doesn't have a jobtracker (e.g. an HBase cluster)
