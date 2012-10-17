@@ -46,7 +46,13 @@ service "restart-#{node[:hadoop][:namenode_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
-  subscribes :restart, resources("template[/etc/hadoop/conf/topology.data]"), :delayed
+  unless ['create', 'launch'].include?(node[:cluster_action])
+    # When running 'cluster create' or 'cluster launch', new nodes are added into this cluster.
+    # chef-client will only append new lines to /etc/hadoop/conf/topology.data (containing ip to rack mapping), and no existing lines are updated.
+    # And when Namenode adds a new Datanode (having a new IP), it will lookup topology.data to find its rack info.
+    # So there is no need to restart Namenode daemon in this case.
+    subscribes :restart, resources("template[/etc/hadoop/conf/topology.data]"), :delayed
+  end
   notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
   notifies :run, resource_wait_for_namenode, :immediately
 end if is_namenode_running
