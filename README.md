@@ -138,24 +138,14 @@ In Ironfan, the Hadoop admin can add the following code in cluster role file, an
           // "hadoop.security.logger": "DEBUG,DRFA"
         }
       }
-    }Serengeti 0.7
-Copyright (c) 2012 VMware, Inc. All Rights Reserved.
-
-This product is licensed to you under the Apache License, Version 2.0 (the "License").  
-You may not use this product except in compliance with the License.  
-
-This product may include a number of subcomponents with
-separate copyright notices and license terms. Your use of the source
-code for the these subcomponents is subject to the terms and
-conditions of the subcomponent's license, as noted in the LICENSE file. 
+    }
   })
 </pre>
-# Contact
 
+# Contact
 Please send email to our mailing lists for [developers](https://groups.google.com/group/serengeti-dev) or for [users](https://groups.google.com/group/serengeti-user) if you have any questions.
 
-
-# Notice of Serengeti 0.7
+# Notice
 Copyright (c) 2012 VMware, Inc. All Rights Reserved.
 
 This product is licensed to you under the Apache License, Version 2.0 (the "License").  
