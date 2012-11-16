@@ -18,3 +18,27 @@
 #   limitations under the License.
 #
 include_recipe "hbase"
+
+%w[ hbase-rest hbase-thrift ].each do |file|
+  template "/etc/init.d/#{file}" do
+    owner "root"
+    mode "0755"
+    source "#{file}.erb"
+  end
+end
+
+set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:rest_service_name])
+service "start-#{node[:hbase][:rest_service_name]}" do
+  service_name node[:hbase][:rest_service_name]
+  supports :status => true, :restart => true
+  action [:enable, :start]
+end
+provide_service(node[:hbase][:rest_service_name])
+
+set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:thrift_service_name])
+service "start-#{node[:hbase][:thrift_service_name]}" do
+  service_name node[:hbase][:thrift_service_name]
+  supports :status => true, :restart => true
+  action [:enable, :start]
+end
+provide_service(node[:hbase][:thrift_service_name])

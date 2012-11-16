@@ -1,0 +1,30 @@
+#! /bin/sh
+#
+# chkconfig: 2345 86 14
+# description: Starts HBase Thrift Service
+# (1) by default, Thrift service listens on port 9090
+# (2) for hbase 0.94 and 0.96, we must specify the implementation
+# mode for thrift gateway, this is a minor bug of hbase and fixed
+# by https://issues.apache.org/jira/browse/HBASE-6263, but not yet
+# released, so here we specify "-threadpool" mode for 0.94 and 0.96
+# temporarily
+#
+### BEGIN INIT INFO
+# Provides:          hbase-thrift
+# Required-Start:    $network $local_fs
+# Required-Stop:
+# Should-Start:      $named
+# Should-Stop:
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 4 6
+# Short-Description: HBase Thrift Service daemon
+### END INIT INFO
+
+HBASE_DAEMON_SH=<%= @node[:hbase][:home_dir] %>/bin/hbase-daemon.sh
+HBASE_SH=<%= @node[:hbase][:home_dir] %>/bin/hbase
+
+if $HBASE_SH version 2>&1 | grep "0.94\|0.96 > /dev/null 2>&1"; then
+  $HBASE_DAEMON_SH $1 thrift -threadpool
+else
+  $HBASE_DAEMON_SH $1 thrift
+fi
