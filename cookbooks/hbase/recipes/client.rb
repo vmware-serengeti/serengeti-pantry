@@ -27,6 +27,12 @@ include_recipe "hbase"
   end
 end
 
+log = 'wait for HBase Master daemon to be ready'
+run_in_ruby_block(log) do
+  Chef::Log.info(log)
+  provider_for_service(node[:hbase][:master_service_name])
+end
+
 set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:rest_service_name])
 service "start-#{node[:hbase][:rest_service_name]}" do
   service_name node[:hbase][:rest_service_name]
