@@ -127,6 +127,11 @@ template "/etc/init.d/zookeeper-server" do
   mode  "0755"
 end
 
+# This piece of code is for Hontonworks distro only(zookeeper 3.3.4)
+bash "Remove invalid nc parameter in zkServer.sh" do
+  code "sed -i 's/nc -q 1/nc/' #{node[:zookeeper][:home_dir]}/bin/zkServer.sh"
+end
+
 ## Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, node[:zookeeper][:zookeeper_service_name])
 
