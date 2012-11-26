@@ -21,8 +21,6 @@
 include_recipe "java::sun"
 include_recipe "hadoop_common::mount_disks"
 
-jvm_default_option = "-Xmx512m"
-
 group "zookeeper" do
 end
 
@@ -95,15 +93,11 @@ myid = zk_servers.collect { |n| n[:provision][:ip_address] }.index(node[:provisi
   end
 end
 
-java_conf = node['cluster_configuration']['zookeeper']['java.env'] || {} rescue {}
-jvm_option =  java_conf['jvm_option'] || jvm_default_option
-
 template "/etc/zookeeper/java.env" do
   source "java.env.erb"
   mode "0755"
   owner "zookeeper"
   group "zookeeper"
-  variables(:jvm_option => jvm_option)
 end
 
 template "/var/lib/zookeeper/myid" do

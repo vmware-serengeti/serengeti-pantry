@@ -102,6 +102,6 @@ export HBASE_OPTS="-XX:+UseConcMarkSweepGC"
 <%- conf = node['cluster_configuration']['hbase']['hbase-env.sh'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>
 <%- next if %w[HBASE_CONF_DIR HBASE_LOG_DIR HBASE_PID_DIR].include?(key) %>
-export <%= key %>=<%= value %>
+export <%= key %>="<%= value %>"
 <%- end %>
 # end

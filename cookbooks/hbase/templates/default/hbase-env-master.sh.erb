@@ -1,6 +1,6 @@
 # properties specified by users
 <%- conf = node['cluster_configuration']['hbase']['hbase-env-master.sh'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>
-export <%= key %>=<%= value %>
+export <%= key %>="<%= value %>"
 <%- end %>
 # end

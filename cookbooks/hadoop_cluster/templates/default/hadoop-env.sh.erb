@@ -22,7 +22,7 @@ export HADOOP_SSH_OPTS="-o StrictHostKeyChecking=no"
 # env variables specified by users
 <%- conf = node['cluster_configuration']['hadoop']['hadoop-env.sh'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>
-export <%= key %>=<%= value %>
+export <%= key %>="<%= value %>"
 <%- end %>
 
 export JAVA_HOME
