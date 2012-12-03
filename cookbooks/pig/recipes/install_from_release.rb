@@ -25,7 +25,7 @@ include_recipe "install_from"
 # Load distro repository info
 tarball_url = current_distro['pig']
 unless ::File.exists?("#{node[:pig][:home_dir]}")
-  set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'hive')
+  set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'pig')
 end
 
 #
