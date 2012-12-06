@@ -46,11 +46,14 @@ install_from_release('zookeeper') do
 end
 
 # link Zookeeper data dir and log dir to the mounted data disk to get larger disk space
-disk_dir = disks_mount_points[0]
-if disk_dir
-  dirs = { '/var/lib/zookeeper' => 'zookeeper/data', '/var/log/zookeeper' => 'zookeeper/log' }
+# assumes we have at least two data disks
+data_dir = disks_mount_points[0]
+log_dir = disks_mount_points.size > 1? disks_mount_points[1] : data_dir
+
+if data_dir && log_dir
+  dirs = { '/var/lib/zookeeper' => data_dir + '/zookeeper/data', '/var/log/zookeeper' => log_dir + '/zookeeper/log'}
   dirs.map do |src, des|
-    target = "#{disk_dir}/#{des}"
+    target = "#{des}"
     directory target do
       owner "zookeeper"
       group "zookeeper"
@@ -65,7 +68,8 @@ if disk_dir
 end
 
 dirs = ["/var/run/zookeeper"]
-dirs += ["/var/lib/zookeeper", "/var/log/zookeeper"] unless disk_dir
+dirs += ["/var/lib/zookeeper"] unless data_dir
+dirs += ["/var/log/zookeeper"] unless log_dir
 dirs.each do |dir|
   directory dir do
     owner "zookeeper"

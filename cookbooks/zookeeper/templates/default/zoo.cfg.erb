@@ -12,6 +12,12 @@ syncLimit=<%= @node[:zookeeper][:sync_limit] %>
 # the directory where the snapshot is stored.
 dataDir=/var/lib/zookeeper
 
+# This option will direct the machine to write the transaction log to the
+# dataLogDir rather than the dataDir. This allows a dedicated log device to
+# be used, and helps avoid competition between logging and snaphots.
+# refer to http://zookeeper.apache.org/doc/r3.3.3/zookeeperAdmin.html please
+dataLogDir=/var/log/zookeeper
+
 # the port at which the clients will connect
 clientPort=<%= @node[:zookeeper][:client_port] %>
 
