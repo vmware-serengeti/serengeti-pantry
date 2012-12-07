@@ -32,7 +32,4 @@ execute 'format namenode' do
     if [ $exit_status -eq 0 ]; then touch /mnt/hadoop/.namenode_formatted.log ; fi
     exit $exit_status
   }
-
-  # creates '/mnt/hadoop/.namenode_formatted.log'
-  # notifies  :restart, resources(:service => "#{node[:hadoop][:hadoop_handle]}-namenode")
 end

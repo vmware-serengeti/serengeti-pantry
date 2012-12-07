@@ -26,5 +26,9 @@ end
 include_recipe "java"
 
 # Install Pig
-#package node[:hadoop][:packages][:pig][:name]
-include_recipe "pig::install_from_release"
+set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'pig', true)
+if node[:hadoop][:install_from_tarball] then
+  include_recipe "pig::install_from_tarball"
+else
+  include_recipe "pig::install_from_package"
+end

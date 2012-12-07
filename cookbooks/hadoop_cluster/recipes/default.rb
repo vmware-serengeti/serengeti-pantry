@@ -27,6 +27,8 @@ class Chef::Recipe; include HadoopCluster ; end
 
 # Setup package repository
 include_recipe "hadoop_cluster::add_repo"
+# Update some node attributes
+include_recipe "hadoop_cluster::update_attributes"
 
 #
 # Hadoop users and group
@@ -97,5 +99,5 @@ end
 # Hadoop packages
 #
 
-hadoop_package nil
-
+hadoop_package node[:hadoop][:packages][:hadoop][:name]
+check_hadoop_daemon_sh

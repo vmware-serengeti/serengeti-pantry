@@ -13,29 +13,14 @@
 #   limitations under the License.
 #
 
-default[:hadoop][:install_from_tarball] = true
+default[:hadoop][:install_from_tarball] = true # install hadoop components using tarball or rpm
 default[:hadoop][:is_hadoop_yarn] = false # is deploying a Hadoop version with YARN (e.g hadoop 0.23) ?
-default[:hadoop][:hadoop_handle] = 'hadoop-0.20' # the prefix of the name of hadoop directory and service files
+default[:hadoop][:hadoop_handle] = 'hadoop' # the prefix of the name of hadoop directory and package files
 default[:hadoop][:distro_name] = 'apache' # which hadoop distro to deploy
 default[:hadoop][:package_version]   = 'current' # hadoop package version
-default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # direcotry that HADOOP is installed in 
+default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
 
-# hadoop system services
 default[:hadoop][:service_stop_time] = 6 # waiting time for the hadoop service process to stop completely.
-default[:hadoop][:namenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-namenode"
-default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:hadoop_handle]}-secondarynamenode"
-default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:hadoop_handle]}-datanode"
-default[:hadoop][:jobtracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-jobtracker"
-default[:hadoop][:tasktracker_service_name] = "#{node[:hadoop][:hadoop_handle]}-tasktracker"
-default[:hadoop][:namenode_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9000 : 8020
-default[:hadoop][:jobtracker_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9001 : 8021
-
-# hadoop packages
-default[:hadoop][:packages][:namenode][:name] = "namenode"
-default[:hadoop][:packages][:secondarynamenode][:name] = "secondarynamenode"
-default[:hadoop][:packages][:datanode][:name] = "datanode"
-default[:hadoop][:packages][:jobtracker][:name] = "jobtracker"
-default[:hadoop][:packages][:tasktracker][:name] = "tasktracker"
 
 default[:hadoop][:namenode_wait_for_safemode_timeout] = 180 # 3 minutes
 

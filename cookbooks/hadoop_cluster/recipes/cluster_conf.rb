@@ -28,19 +28,15 @@ force_link("/usr/lib/hadoop", "/usr/lib/#{node[:hadoop][:hadoop_handle]}")
 
 # Make hadoop logs live on /mnt/hadoop
 hadoop_log_dir = local_hadoop_log_dir
-make_hadoop_dir(hadoop_log_dir, 'hdfs', "0775")
+make_hadoop_dir(hadoop_log_dir, 'hdfs', '0775')
 force_link("/var/log/hadoop", hadoop_log_dir )
 force_link("/var/log/#{node[:hadoop][:hadoop_handle]}", hadoop_log_dir )
 
 # Make hadoop point to /var/run for pids
-make_hadoop_dir("/var/run/#{node[:hadoop][:hadoop_handle]}", 'root', "0775")
+make_hadoop_dir("/var/run/#{node[:hadoop][:hadoop_handle]}", 'root', '0775')
 force_link('/var/run/hadoop', "/var/run/#{node[:hadoop][:hadoop_handle]}")
 
-# Set HADOOP_HOME in /etc/profile
-execute 'set HADOOP_HOME in /etc/profile' do
-  command %Q{echo 'export HADOOP_HOME=#{node[:hadoop][:hadoop_home_dir]} ; export HADOOP_HOME_WARN_SUPPRESS="TRUE"' >> /etc/profile}
-  not_if "grep '^export HADOOP_HOME=' /etc/profile"
-end
+make_hadoop_dir(hadoop_home_dir + '/logs', 'root', '0775')
 
 # Fix '-jvm server' option in bin/yarn and bin/hdfs. Have no idea why hadoop-0.23 add this option.
 %w[bin/yarn bin/hdfs].each do |file|
@@ -52,7 +48,7 @@ end
 
 logger = node['cluster_configuration']['hadoop']['log4j.properties']['hadoop.root.logger'] rescue logger = nil
 if logger
-  %w[/usr/lib/hadoop/bin/hadoop-daemon.sh].each do |file|
+  %w[ path_of_hadoop_daemon_sh ].each do |file|
     execute "set HADOOP_ROOT_LOGGER to hadoop.root.logger value in log4j.properties" do
       command %Q{sed -i -e 's|^export HADOOP_ROOT_LOGGER=.*|export HADOOP_ROOT_LOGGER=#{logger}|' #{file}}
     end

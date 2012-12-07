@@ -13,23 +13,11 @@
 #   limitations under the License.
 #
 
-module HadoopCluster
-  def distro(name)
-    data_bag_item("hadoop_distros", name)
-  end
+include_recipe "pig::default"
 
-  def current_distro
-    @current_distro ||= distro(node[:hadoop][:distro_name])
-  end
+include_recipe "hadoop_cluster::add_repo"
 
-  def package_repos
-    current_distro['package_repos'] || []
-  end
-
-  def is_install_from_tarball
-    current_distro['is_install_from_tarball']
-  end
-
-  class Chef::Recipe ; include HadoopCluster ; end
-  class Chef::Resource::Directory ; include HadoopCluster ; end
-end
+#
+# Install package
+#
+package node[:hadoop][:packages][:hive][:name]

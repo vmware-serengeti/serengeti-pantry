@@ -23,5 +23,10 @@
 include_recipe "java::sun"
 
 # Install Hive
-# package node[:hadoop][:packages][:hive][:name]
-include_recipe "hive::install_from_tarball"
+set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'hive', true)
+if node[:hadoop][:install_from_tarball] then
+  include_recipe "hive::install_from_tarball"
+else
+  include_recipe "hive::install_from_package"
+end
+

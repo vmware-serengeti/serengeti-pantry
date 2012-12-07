@@ -47,6 +47,7 @@ end
 # but the sql file for hive 0.8.0 in hive svn trunk doesn't work for hive-0.8.1: http://svn.apache.org/viewvc/hive/trunk/metastore/scripts/upgrade/postgres/hive-schema-0.8.0.postgres.sql?revision=1334537&view=markup
 execute "Import metastore schema" do
   only_if "sudo service postgresql status"
+  only_if { File.exists?(schema_file_path) }
   not_if { File.exists?("#{node[:hive][:log_dir]}/.imported_metastore_schema.log") }
   user "hive"
   cwd "#{node[:hive][:home_dir]}"

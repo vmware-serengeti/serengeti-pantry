@@ -21,16 +21,15 @@
 
 include_recipe "pig::default"
 
-include_recipe "hadoop_cluster::add_cloudera_repo"
+include_recipe "hadoop_cluster::add_repo"
 
 #
 # Install package
 #
+package node[:hadoop][:packages][:pig][:name]
 
-package "hadoop-pig"
-
-# why does this need to be here?
-link "/usr/local/bin/pig" do
-  to          File.join(node[:pig][:home_dir], 'bin', 'pig')
-  action      :create
-end
+## why does this need to be here?
+#link "/usr/local/bin/pig" do
+#  to          File.join(node[:pig][:home_dir], 'bin', 'pig')
+#  action      :create
+#end

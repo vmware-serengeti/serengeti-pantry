@@ -7,4 +7,4 @@ default[:java][:java_home]        = '/usr/lib/jvm/java-6-sun/jre'
 
 default[:pig][:combine_splits]    = "true"
 
-default[:hadoop][:packages][:pig][:name] = "hadoop-pig" # "pig" for cdh4
+default[:hadoop][:packages][:pig][:name] = "pig" # "pig" for cdh4, "hadoop-pig" for cdh3
