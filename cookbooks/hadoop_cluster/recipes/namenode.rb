@@ -25,7 +25,7 @@ include_recipe "hadoop_cluster::wait_for_hdfs"
 
 # Install
 hadoop_package node[:hadoop][:packages][:namenode][:name]
-hadoop_ha_package node[:hadoop][:packages][:namenode][:name]
+hadoop_ha_package "namenode"
 
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
@@ -37,7 +37,7 @@ include_recipe "hadoop_cluster::bootstrap_format_namenode"
 resource_wait_for_namenode = resources(:execute => "wait_for_namenode")
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:namenode_service_name])
 
-is_namenode_running = system("service #{node[:hadoop][:namenode_service_name]} status")
+is_namenode_running = system("service #{node[:hadoop][:namenode_service_name]} status 1>2 2>/dev/null")
 service "restart-#{node[:hadoop][:namenode_service_name]}" do
   service_name node[:hadoop][:namenode_service_name]
   supports :status => true, :restart => true
@@ -74,4 +74,4 @@ provide_service(node[:hadoop][:namenode_service_name])
 include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"
 
 # Launch service level ha monitor
-enable_ha_service node[:hadoop][:packages][:namenode][:name], "hmonitor-namenode-monitor"
+enable_ha_service "hmonitor-namenode-monitor"

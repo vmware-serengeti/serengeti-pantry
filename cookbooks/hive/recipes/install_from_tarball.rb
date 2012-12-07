@@ -17,9 +17,6 @@ include_recipe "install_from"
 
 # Load distro repository info
 tarball_url = current_distro['hive']
-unless ::File.exists?("#{node[:hive][:home_dir]}")
-  set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'hive')
-end
 
 install_from_release('hive') do
   release_url   tarball_url

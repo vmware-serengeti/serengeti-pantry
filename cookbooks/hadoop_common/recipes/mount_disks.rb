@@ -19,6 +19,7 @@
 #
 # Format attached disk devices
 #
+set_bootstrap_action(ACTION_FORMAT_DISK, 'format_disk', true)
 node[:disk][:disk_devices].each do |dev, disk|
   execute "formatting disk device #{disk}" do
     only_if do File.exist?(disk) end
@@ -36,6 +37,7 @@ node[:disk][:disk_devices].each do |dev, disk|
     }
   end
 end
+clear_bootstrap_action(true)
 
 #
 # Mount big ephemeral drives, make hadoop dirs on them
@@ -63,14 +65,10 @@ node[:disk][:data_disks].each do |mount_point, dev|
   # Chef Resource mount doesn't enable automatically mount disks when OS starts up. We add it here.
   mount_device_command = "#{dev}\t\t#{mount_point}\t\t#{dev_fstype}\tdefaults\t0 0"
   execute 'add mount info into /etc/fstab if not added' do
+    only_if "grep '#{dev}' /etc/mtab  > /dev/null"
+    not_if  "grep '#{dev}' /etc/fstab > /dev/null"
     command %Q{
-      grep "#{dev}" /etc/mtab > /dev/null
-      if [ $? == 0 ]; then
-        grep "#{dev}" /etc/fstab > /dev/null
-        if [ $? == 1 ]; then
-          echo "#{mount_device_command}" >> /etc/fstab
-        fi
-      fi
+      echo "#{mount_device_command}" >> /etc/fstab
     }
   end
 end

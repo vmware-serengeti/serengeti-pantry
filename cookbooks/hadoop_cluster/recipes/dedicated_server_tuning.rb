@@ -15,13 +15,15 @@ end
 set_proc_sys_limit "VM overcommit ratio", '/proc/sys/vm/overcommit_memory', overcommit_memory
 set_proc_sys_limit "VM overcommit memory", '/proc/sys/vm/overcommit_ratio',  overcommit_ratio
 
+file = path_of_hadoop_daemon_sh
 bash "Increase nofile and noproc for hadoop-daemon.sh" do
-  not_if "egrep -q '^ulimit' /usr/lib/hadoop/bin/hadoop-daemon.sh"
+  only_if { File.exists?(file) }
+  not_if "egrep -q '^ulimit' #{file}"
   code <<EOF
-    sed -i '/^pid=/ a\\ulimit -n 32768' /usr/lib/hadoop/bin/hadoop-daemon.sh
-    sed -i '/^pid=/ a\\ulimit -u 32000' /usr/lib/hadoop/bin/hadoop-daemon.sh
-    sed -i '/^pid=/ a\# set nproc and nofile' /usr/lib/hadoop/bin/hadoop-daemon.sh
-    sed -i '/^pid=/G' /usr/lib/hadoop/bin/hadoop-daemon.sh
+    sed -i '/^pid=/ a\\ulimit -n 32768' #{file}
+    sed -i '/^pid=/ a\\ulimit -u 32000' #{file}
+    sed -i '/^pid=/ a\# set nproc and nofile' #{file}
+    sed -i '/^pid=/G' #{file}
 EOF
 end
 

@@ -1,7 +1,7 @@
 #
 # Cookbook Name::       pig
 # Description::         Install From the release tarball.
-# Recipe::              install_from_release
+# Recipe::              install_from_tarball
 # Author::              Philip (flip) Kromer - Infochimps, Inc
 #
 # Copyright 2009, Infochimps, Inc.
@@ -24,9 +24,6 @@ include_recipe "install_from"
 
 # Load distro repository info
 tarball_url = current_distro['pig']
-unless ::File.exists?("#{node[:pig][:home_dir]}")
-  set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'hive')
-end
 
 #
 # Install pig from latest release

@@ -28,7 +28,7 @@ hadoop_package node[:hadoop][:packages][:datanode][:name]
 ## Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:datanode_service_name])
 
-is_datanode_running = system("service #{node[:hadoop][:datanode_service_name]} status")
+is_datanode_running = system("service #{node[:hadoop][:datanode_service_name]} status 1>2 2>/dev/null")
 service "restart-#{node[:hadoop][:datanode_service_name]}" do
   service_name node[:hadoop][:datanode_service_name]
   supports :status => true, :restart => true

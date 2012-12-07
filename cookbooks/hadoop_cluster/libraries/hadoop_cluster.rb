@@ -98,10 +98,11 @@ module HadoopCluster
     vars
   end
 
-  def hadoop_package component
+  def hadoop_package package_name
     hadoop_major_version = node[:hadoop][:hadoop_handle]
-    package_name = "#{hadoop_major_version}#{component ? '-' : ''}#{component}"
     hadoop_home = hadoop_home_dir
+    # component is one of ['hadoop', 'namenode', 'datanode', 'jobtracker', 'tasktracker', 'secondarynamenode']
+    component = package_name.split('-').last
 
     # Install from tarball
     if node[:hadoop][:install_from_tarball] then
@@ -109,7 +110,7 @@ module HadoopCluster
       tarball_filename = tarball_url.split('/').last
       tarball_pkgname = tarball_filename.split('.tar.gz').first
 
-      if component == nil then
+      if package_name == node[:hadoop][:packages][:hadoop][:name] then
         # install hadoop base package
         install_dir = [File.dirname(hadoop_home), tarball_pkgname].join('/')
         already_installed = File.exists?("#{install_dir}/lib")
@@ -118,7 +119,7 @@ module HadoopCluster
           return
         end
 
-        set_bootstrap_action(ACTION_INSTALL_PACKAGE, package_name, true)
+        set_action(ACTION_INSTALL_PACKAGE, component)
 
         execute "install #{tarball_pkgname} from tarball if not installed" do
           not_if do already_installed end
@@ -165,12 +166,17 @@ EOF
             chmod 777 /usr/bin/hadoop
             test -d #{hadoop_home}
           }
-        end
+
+          # Install the hadoop package at Chef compile phase instead of converge phase,
+          # so other nodes depends on namenode (or hbase master) service can download and install the package first,
+          # and then wait for namenode service to be ready. This can reduce the cluster creation time remarkably.
+          action :nothing
+        end.run_action(:run)
 
       end
 
       if ['namenode', 'datanode', 'jobtracker', 'tasktracker', 'secondarynamenode'].include?(component) then
-        %W[#{node[:hadoop][:hadoop_handle]}-#{component}].each do |service_file|
+        %W[hadoop-0.20-#{component}].each do |service_file|
           Chef::Log.info "installing #{service_file} as system service"
           template "/etc/init.d/#{service_file}" do
             owner "root"
@@ -178,13 +184,15 @@ EOF
             mode  "0755"
             variables( {:hadoop_version => hadoop_major_version} )
             source "#{service_file}.erb"
-          end
+            action :nothing
+          end.run_action(:create)
         end
       end
       return
     end
 
     # Install from rpm/apt packages
+    set_bootstrap_action(ACTION_INSTALL_PACKAGE, component, true)
     package package_name do
       if node[:hadoop][:package_version] != 'current'
         version node[:hadoop][:package_version]
@@ -193,7 +201,7 @@ EOF
   end
 
   # Make a hadoop-owned directory
-  def make_hadoop_dir dir, dir_owner, dir_mode="0755"
+  def make_hadoop_dir dir, dir_owner="hadoop", dir_mode="0755"
     directory dir do
       owner    dir_owner
       group    "hadoop"
@@ -215,10 +223,20 @@ EOF
   def force_link dest, src
     return if dest == src
     directory(dest) do
-      action :delete ; recursive true
-      not_if{ File.symlink?(dest) }
+      action :delete
+      recursive true
+      not_if { File.symlink?(dest) }
+      not_if { File.exists?(dest) and File.exists?(src) and File.realpath(dest) == File.realpath(src) }
     end
-    link(dest){ to src }
+    link(dest) { to src }
+  end
+
+  def make_link src, target
+    return if src == target
+    link(src) do
+      to target
+      not_if { File.exists?(src) }
+    end
   end
 
   # log dir for hadoop daemons
@@ -287,6 +305,29 @@ EOF
     node[:hadoop][:hadoop_home_dir]
   end
 
+  def bin_hadoop_daemon_sh
+    '/usr/lib/hadoop/bin/hadoop-daemon.sh'
+  end
+
+  def sbin_hadoop_daemon_sh
+    '/usr/lib/hadoop/sbin/hadoop-daemon.sh'
+  end
+
+  def path_of_hadoop_daemon_sh
+    File.exists?(bin_hadoop_daemon_sh) ? bin_hadoop_daemon_sh : sbin_hadoop_daemon_sh
+  end
+
+  # in Hadoop 0.23 hadoop-daemon.sh is in /usr/lib/hadoop/bin/, while in Hadoop 0.20 it's in /usr/lib/hadoop/sbin/
+  def check_hadoop_daemon_sh
+    from = bin_hadoop_daemon_sh
+    target = sbin_hadoop_daemon_sh
+    link(from) do
+      not_if { File.exist?(from) }
+      only_if { File.exist?(target) }
+      to target
+    end
+  end
+
   # this is just a stub to prevent code broken
   def all_cluster_volumes
     nil
@@ -307,13 +348,15 @@ EOF
           action :install
           notifies :create, resources("ruby_block[#{pkg}]"), :immediately
         end
+
+        # put libVMGuestAppMonitorNative.so in /usr/lib/hadoop/lib/native/, so hadoop daemons can find it.
+        force_link('/usr/lib/hadoop/lib/native/libVMGuestAppMonitorNative.so', '/usr/lib/hadoop/monitor/libVMGuestAppMonitorNative.so')
       end
     end
   end
 
-  def enable_ha_service component, service_name
+  def enable_ha_service svc
     if node[:hadoop][:ha_enabled] then
-      svc = "hmonitor-#{component}-monitor"
       set_bootstrap_action(ACTION_START_SERVICE, svc)
       service svc do
         action [ :enable, :start ]

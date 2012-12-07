@@ -13,3 +13,6 @@ default[:hive][:metastore_user]     = "hive"
 default[:groups][:hive][:gid]       = 503
 
 default[:postgresql][:dir]          = "/var/lib/pgsql/data"
+
+default[:hadoop][:packages][:hive][:name] = "hive"
+default[:hadoop][:packages][:hive_server][:name] = "hive-server"

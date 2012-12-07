@@ -24,15 +24,18 @@ class Chef::Recipe; include HadoopCluster ; end
 # Generate Hadoop xml configuration files in $HADDOP_HOME/conf/
 #
 
-template_variables = hadoop_template_variables
-Chef::Log.debug template_variables.inspect
-
 # create it in case it's not created, e.g. when this recipe is included by hbase recipes
 # which only need the hadoop conf files rather than hadoop packages and conf files)
 directory "/etc/hadoop/conf" do
   mode  "0755"
   recursive true
 end
+
+# hadoop-daemon.sh will read files in #{hadoop_home}/conf
+make_link(hadoop_home_dir + "/conf", "/etc/hadoop/conf")
+
+template_variables = hadoop_template_variables
+Chef::Log.debug template_variables.inspect
 
 files = %w[core-site.xml hdfs-site.xml mapred-site.xml hadoop-env.sh
            log4j.properties fair-scheduler.xml capacity-scheduler.xml mapred-queue-acls.xml hadoop-metrics.properties raw_settings.yaml

@@ -38,10 +38,36 @@ module HadoopCluster
   # see http://wiki.opscode.com/display/chef/Resources#Resources-RubyBlock
   def run_in_ruby_block(name, &code)
     return unless name and code
-    ruby_block name do
+    ruby_block name.to_s do
       block do
         code.call
       end
     end
+  end
+
+  # check Internet connection
+  def is_connected_to_internet
+    Chef::Log.info('checking whether this machine is connected to the Internet')
+
+    tmpfile = '/tmp/google-homepage'
+
+    file tmpfile do
+      action :nothing
+    end.run_action(:delete)
+
+    remote_file tmpfile do
+      source 'http://www.google.com/'
+      ignore_failure true
+      action :nothing
+    end.run_action(:create)
+
+    connected = File.exist?(tmpfile)
+    if connected
+      Chef::Log.info('this machine is connected to the Internet')
+    else
+      Chef::Log.info('this machine is not connected to the Internet')
+    end
+
+    connected
   end
 end

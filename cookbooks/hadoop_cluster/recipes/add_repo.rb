@@ -20,32 +20,35 @@
 
 case node[:platform]
 when 'centos'
-  if node[:disable_external_yum_repo] then
+  if !is_connected_to_internet
     directory '/etc/yum.repos.d/backup' do
-      mode "0755"
+      mode '0755'
     end
     execute 'disable all external yum repos' do
-      command 'mv -f /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup/'
-      ignore_failure true # in case no file found
+      only_if 'test -f /etc/yum.repos.d/CentOS-Base.repo'
+      command 'mv -f /etc/yum.repos.d/CentOS*.repo /etc/yum.repos.d/backup/'
     end
   else
     execute 'enable all external yum repos' do
-      only_if {File.exists?('/etc/yum.repos.d/backup')}
-      command 'mv -f /etc/yum.repos.d/backup/*.repo /etc/yum.repos.d/'
-      ignore_failure true
+      only_if 'test -f /etc/yum.repos.d/backup/CentOS-Base.repo'
+      command 'mv -f /etc/yum.repos.d/backup/CentOS*.repo /etc/yum.repos.d/'
     end
   end
 
-  yum_repos = node[:yum_repos] || []
+  yum_clean_all = execute 'clean up all yum cache to rebuild package index' do
+    command 'yum clean all'
+    action :nothing
+  end
+
+  yum_repos = package_repos
   yum_repos.each do |yum_repo|
+    Chef::Log.info("Add yum repo #{yum_repo}")
     file = "/etc/yum.repos.d/#{::File.basename(yum_repo)}"
     remote_file file do
       source yum_repo
-      mode "0644"
+      mode '0644'
+      notifies :run, yum_clean_all, :immediately
     end
   end
 
-  execute 'clean up all yum cache to rebuild package index' do
-    command 'yum clean all'
-  end
 end

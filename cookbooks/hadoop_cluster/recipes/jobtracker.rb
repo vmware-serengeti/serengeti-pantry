@@ -24,7 +24,7 @@ include_recipe "hadoop_cluster"
 
 # Install
 hadoop_package node[:hadoop][:packages][:jobtracker][:name]
-hadoop_ha_package node[:hadoop][:packages][:jobtracker][:name] unless node.role? "hadoop_namenode"
+hadoop_ha_package "jobtracker" unless node.role? "hadoop_namenode"
 
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
@@ -32,7 +32,7 @@ include_recipe "hadoop_cluster::hadoop_conf_xml"
 ## Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:jobtracker_service_name])
 
-is_jobtracker_running = system("service #{node[:hadoop][:jobtracker_service_name]} status")
+is_jobtracker_running = system("service #{node[:hadoop][:jobtracker_service_name]} status 1>2 2>/dev/null")
 service "restart-#{node[:hadoop][:jobtracker_service_name]}" do
   service_name node[:hadoop][:jobtracker_service_name]
   supports :status => true, :restart => true
@@ -62,4 +62,4 @@ end
 provide_service(node[:hadoop][:jobtracker_service_name])
 
 # Launch service level ha monitor
-enable_ha_service node[:hadoop][:packages][:jobtracker][:name], "hmonitor-jobtracker-monitor" unless node.role? "hadoop_namenode"
+enable_ha_service "hmonitor-jobtracker-monitor" unless node.role? "hadoop_namenode"

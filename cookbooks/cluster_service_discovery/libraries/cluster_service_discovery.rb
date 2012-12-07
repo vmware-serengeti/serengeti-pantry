@@ -76,6 +76,7 @@ module ClusterServiceDiscovery
 
   # Find the most recent node that registered to provide the given service
   def provider_for_service service_name, wait = true
+    set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, service_name)
     all_providers_for_service(service_name, wait).last
   end
 
