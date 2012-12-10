@@ -38,6 +38,22 @@ force_link('/var/run/hadoop', "/var/run/#{node[:hadoop][:hadoop_handle]}")
 
 make_hadoop_dir(hadoop_home_dir + '/logs', 'root', '0775')
 
+
+# CDH, Greenplum HD, Hortonworks all use Bigtop to build and deliver Hadoop rpm/apt packages
+file = '/etc/default/bigtop-utils'
+execute "Set JAVA_HOME for Bigtop hadoop packages" do
+  only_if { File.exists?(file) }
+  not_if "grep '^export JAVA_HOME' #{file}"
+  command %Q{
+cat <<EOF >> #{file}
+# detect JAVA_HOME
+. /etc/profile
+. /etc/environment
+export JAVA_HOME
+EOF
+  }
+end
+
 # Fix '-jvm server' option in bin/yarn and bin/hdfs. Have no idea why hadoop-0.23 add this option.
 %w[bin/yarn bin/hdfs].each do |file|
   execute "fix '-jvm server' option in bin/yarn and bin/hdfs" do

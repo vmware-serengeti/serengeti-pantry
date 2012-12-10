@@ -9,6 +9,7 @@ description      "Installs/Configures hive"
 depends          "java"
 depends          "hadoop_cluster"
 depends          "install_from"
+depends          "postgresql"
 
 recipe           "hive::default",                      "Base configuration for hive"
 recipe           "hive::postgresql_metastore",         "Configuration for postgresql metastore"
