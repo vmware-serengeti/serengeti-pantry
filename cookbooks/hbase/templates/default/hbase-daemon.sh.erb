@@ -166,7 +166,9 @@ case $startStop in
         --config "${HBASE_CONF_DIR}" \
         $command start "$@" > "$logout" 2>&1 < /dev/null &
     echo $! > $pid
-    sleep 1; head "$logout"
+    # wait for 10 sec then check if the process is still running.
+    sleep 10
+    kill -0 `cat $pid` > /dev/null 2>&1
     ;;
 
   (stop)
@@ -207,8 +209,7 @@ case $startStop in
     echo 'waiting <%= @zookeeper_session_timeout %> seconds for the zookeeper session times out'
     sleep <%= @zookeeper_session_timeout %>
     # start the command
-    $thiscmd --config "${HBASE_CONF_DIR}" start $command $args &
-    wait_until_done $!
+    $thiscmd --config "${HBASE_CONF_DIR}" start $command $args
     ;;
 
   (*)
