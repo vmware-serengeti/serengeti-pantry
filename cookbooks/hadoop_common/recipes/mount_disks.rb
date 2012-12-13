@@ -19,7 +19,7 @@
 #
 # Format attached disk devices
 #
-set_bootstrap_action(ACTION_FORMAT_DISK, 'format_disk', true)
+set_action(ACTION_FORMAT_DISK, 'format_disk')
 node[:disk][:disk_devices].each do |dev, disk|
   execute "formatting disk device #{disk}" do
     only_if do File.exist?(disk) end
@@ -35,9 +35,10 @@ node[:disk][:disk_devices].each do |dev, disk|
 
       echo "y" | mkfs #{dev}
     }
-  end
+    action :nothing
+  end.run_action(:run)
 end
-clear_bootstrap_action(true)
+clear_action
 
 #
 # Mount big ephemeral drives, make hadoop dirs on them
