@@ -15,7 +15,7 @@
 </property>
 
 <!-- communication -->
-
+<% if node.role?('hadoop_tasktracker') %>
 <property>
   <name>mapred.tasktracker.map.tasks.maximum</name>
   <value><%= node[:hadoop][:max_map_tasks] %></value>
@@ -25,6 +25,7 @@
   <name>mapred.tasktracker.reduce.tasks.maximum</name>
   <value><%= node[:hadoop][:max_reduce_tasks] %></value>
 </property>
+<% end %>
 
 <property>
   <name>tasktracker.http.threads</name>
@@ -78,7 +79,7 @@
 </property>
 
 <!-- child jobs -->
-
+<% if node.role?('hadoop_tasktracker') %>
 <property>
   <name>mapred.child.java.opts</name>
   <value><%= node[:hadoop][:java_child_opts] %></value>
@@ -88,6 +89,7 @@
   <name>mapred.child.ulimit</name>
   <value><%= node[:hadoop][:java_child_ulimit] %></value>
 </property>
+<% end %>
 
 <property>
   <name>mapred.job.reuse.jvm.num.tasks</name>
