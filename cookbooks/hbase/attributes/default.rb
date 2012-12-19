@@ -9,3 +9,4 @@ default[:hbase][:rest_service_name] = 'hbase-rest'
 default[:hbase][:thrift_service_name] = 'hbase-thrift'
 
 default[:hbase][:zookeeper_session_timeout] = "180000" # milliseconds
+default[:hbase][:package_name] = "hbase"

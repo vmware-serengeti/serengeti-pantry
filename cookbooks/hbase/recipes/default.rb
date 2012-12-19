@@ -19,7 +19,6 @@
 #
 
 include_recipe "java::sun"
-include_recipe "install_from"
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 group "hbase" do
@@ -45,20 +44,10 @@ end
 set_sys_limit "Increase maximum num of open files ulimit", "@hbase", "nofile", ulimit_nofile
 set_sys_limit "Increase maximum num of processes ulimit", "@hbase", "nproc", ulimit_nproc
 
-# Load distro repository info
-current_distro = data_bag_item("hadoop_distros", node[:hadoop][:distro_name])
-tarball_url = current_distro['hbase']
-unless ::File.exists?("#{node[:hbase][:home_dir]}")
-  set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'hbase')
-end
-
-install_from_release('hbase') do
-  release_url   tarball_url
-  home_dir      node[:hbase][:home_dir]
-  version       node[:hbase][:version]
-  action        [:install]
-  has_binaries  [ 'bin/hbase' ]
-  not_if { ::File.exists?("#{node[:hbase][:home_dir]}") }
+if is_install_from_tarball then
+  include_recipe "hbase::install_from_tarball"
+else
+  include_recipe "hbase::install_from_package"
 end
 
 # link HBase log dir to the mounted data disk to get larger disk space
@@ -73,10 +62,7 @@ if disk_dir
       mode  "0755"
       recursive true
     end
-
-    link src do
-      to target
-    end
+   force_link src, target
   end
 end
 
@@ -93,6 +79,7 @@ end
 hbase_conf_dir = "/etc/hbase/conf"
 link hbase_conf_dir do
   to node[:hbase][:home_dir] + "/conf"
+  not_if {File.exist?(hbase_conf_dir)} # to be compatible with CDH4 rpm
 end
 
 hbase_hdfs_home = "hdfs://#{namenode_address}:#{namenode_port}#{node[:hbase][:hdfshome]}"
