@@ -62,13 +62,12 @@ end
   end
 end
 
-logger = node['cluster_configuration']['hadoop']['log4j.properties']['hadoop.root.logger'] rescue logger = nil
-if logger
-  %w[ path_of_hadoop_daemon_sh ].each do |file|
-    execute "set HADOOP_ROOT_LOGGER to hadoop.root.logger value in log4j.properties" do
-      command %Q{sed -i -e 's|^export HADOOP_ROOT_LOGGER=.*|export HADOOP_ROOT_LOGGER=#{logger}|' #{file}}
-    end
-  end
+# Set HADOOP_ROOT_LOGGER
+logger = node['cluster_configuration']['hadoop']['log4j.properties']['hadoop.root.logger'] rescue logger = "INFO,RFA"
+file = path_of_hadoop_daemon_sh
+execute "set HADOOP_ROOT_LOGGER to hadoop.root.logger value in log4j.properties" do
+  only_if { File.exist?(file) }
+  command %Q{sed -i -e 's|^export HADOOP_ROOT_LOGGER=.*|export HADOOP_ROOT_LOGGER=#{logger}|' #{file}}
 end
 
 # Set SLEEP_TIME
