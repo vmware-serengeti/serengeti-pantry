@@ -13,8 +13,6 @@
 #   limitations under the License.
 #
 
-include_recipe "hive::postgresql_metastore"
-
 if node[:hadoop][:install_from_tarball]
   template '/etc/init.d/hive-server' do
     source 'hive-server.erb'

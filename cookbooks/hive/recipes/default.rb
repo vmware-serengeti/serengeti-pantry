@@ -67,6 +67,8 @@ else
   include_recipe "hive::install_from_package"
 end
 
+include_recipe "hive::postgresql_metastore"
+
 template "#{node[:hive][:home_dir]}/conf/hive-site.xml" do
   source "hive-site.xml.erb"
   owner node[:hive][:user]
