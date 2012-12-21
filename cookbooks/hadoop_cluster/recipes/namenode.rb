@@ -30,8 +30,19 @@ hadoop_ha_package "namenode"
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
+hadoop_dir = hadoop_home_dir
+hdfs_dir = hadoop_hdfs_dir
+link("#{hdfs_dir}/libexec") do
+  to "#{hadoop_dir}/libexec"
+  only_if { File.exists?(hdfs_dir) }
+end
+
 # Format namenode
-include_recipe "hadoop_cluster::bootstrap_format_namenode"
+if is_primary_namenode
+  include_recipe "hadoop_cluster::bootstrap_format_namenode"
+else
+  include_recipe "hadoop_cluster::bootstrap_format_standbynamenode"
+end
 
 ## Launch NameNode service
 resource_wait_for_namenode = resources(:execute => "wait_for_namenode")
@@ -67,7 +78,47 @@ end
 
 ## run this regardless namenode is already started before bootstrapping or started by this recipe
 run_in_ruby_block(resource_wait_for_namenode.name) { resource_wait_for_namenode.run_action(:run) }
-# Register with cluster_service_discovery
+
+if namenode_ha_enabled
+  # Register to provide primary namenode formatted
+  if is_primary_namenode
+    notify(node[:hadoop][:primary_namenode_format])
+  else
+    notify(node[:hadoop][:standby_namenode_format])
+  end
+
+  # Wait for standby namenode started
+  wait_for(node[:hadoop][:standby_namenode_format], {"provides_service" => node[:hadoop][:standby_namenode_format], "facet_name" => node[:facet_name]} )
+
+  # Start ZKFC service
+  include_recipe "hadoop_cluster::zkfc"
+
+  # Wait for all zkfc
+  zkfc_count = all_nodes_count({"role" => "hadoop_namenode", "facet_name" => node[:facet_name]})
+  wait_for(node[:hadoop][:zkfc_service_name], {"provides_service" => node[:hadoop][:zkfc_service_name], "facet_name" => node[:facet_name]}, true, zkfc_count)
+
+  # copy rsa pub key to other namenode for hdfs HA to automatic failover
+  if is_primary_namenode
+    rsa_pub_key = node_rsa_pub_key(1)
+  else
+    rsa_pub_key = node_rsa_pub_key(0)
+  end
+  execute "copy rsa pub key" do
+    user 'root'
+    command %Q{
+      if [ -e /root/.ssh/authorized_keys ]; then
+        if [ ! grep '#{rsa_pub_key}' /root/.ssh/authorized_keys ]; then
+          echo '#{rsa_pub_key}' >> /root/.ssh/authorized_keys
+        fi
+      else
+        echo '#{rsa_pub_key}' > /root/.ssh/authorized_keys
+      fi
+    }
+  end
+
+end
+
+# register with cluster_service_discovery
 provide_service(node[:hadoop][:namenode_service_name])
 
 # Set hdfs permission on only after formatting namenode

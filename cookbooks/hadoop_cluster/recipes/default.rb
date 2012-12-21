@@ -21,6 +21,8 @@
 # limitations under the License.
 #
 
+include_recipe "hadoop_cluster::update_attributes"
+
 include_recipe "java"
 
 class Chef::Recipe; include HadoopCluster ; end
@@ -94,6 +96,9 @@ group 'supergroup' do
   gid        node[:groups]['supergroup'][:gid]
   action     [:create]
 end
+
+# Save node rsa pub key to chef server if the key generated
+node.default[:rsa_pub_key] = File.read("/root/.ssh/id_rsa.pub") if File.exist?("/root/.ssh/id_rsa.pub")
 
 #
 # Hadoop packages

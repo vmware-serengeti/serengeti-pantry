@@ -2,35 +2,126 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!-- check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html -->
 <configuration>
+<%- if node[:hadoop][:cluster_has_hdfs_ha_or_federation] %>
+
+<property>
+  <name>dfs.nameservices</name>
+  <value><%= @nameservices.join(',') %></value>
+</property>
+<%-
+  @namenode_facets.each do | namenode_facet |
+    namenode_facet.each do | name, addresses |
+      namenode_ha_enabled = addresses.length > 1
+      if namenode_ha_enabled
+%>
+
+<property>
+  <name>dfs.ha.namenodes.<%= name %></name>
+  <value><%- addresses.each_with_index do |address, index| %><%= addresses.length - index > 1 ? "namenode#{index}," : "namenode#{index}" %><%- end %></value>
+</property>
+
+<property>
+  <name>dfs.client.failover.proxy.provider.<%= name %></name>
+  <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+</property>
+<%-
+      end
+      addresses.each_with_index do |address, index|
+        if namenode_ha_enabled
+          namenode_name = "#{name}.namenode#{index}"
+        else
+          namenode_name = "#{name}"
+        end
+%>
+
+<property>
+  <name>dfs.namenode.rpc-address.<%= namenode_name %></name>
+  <value><%= "#{address}:#{node.default[:hadoop][:namenode_service_port]}" %></value>
+</property>
+
+<property>
+  <name>dfs.namenode.http-address.<%= namenode_name %></name>
+  <value><%= "#{address}:#{node.default[:hadoop][:namenode_web_service_port]}" %></value>
+</property>
+<%-
+      end
+      if node[:hadoop][:namenode_ha_enabled]
+%>
+
+<property>
+  <name>dfs.namenode.shared.edits.dir.<%= name %></name>
+<value>qjournal://<%- @journalnodes_address.each_with_index do |address, index| %><%= @journalnodes_address.length - index > 1 ? "#{address}:#{node[:hadoop][:journalnode_service_port]};" : "#{address}:#{node[:hadoop][:journalnode_service_port]}/#{name}" %><%- end %></value>
+</property>
+<%-
+      end
+    end
+  end
+
+  if node[:hadoop][:namenode_ha_enabled]
+%>
+
+<property>
+  <name>dfs.journalnode.edits.dir</name>
+  <value>/tmp/hadoop</value>
+</property>
+
+<property>
+  <name>dfs.ha.fencing.methods</name>
+  <value>
+    sshfence
+    shell(/bin/true)
+  </value>
+</property>
+
+<property>
+  <name>dfs.ha.fencing.ssh.private-key-files</name>
+  <value>/root/.ssh/id_rsa</value>
+</property>
+
+<property>
+  <name>dfs.ha.automatic-failover.enabled</name>
+  <value>true</value>
+</property>
+<%-
+  end
+else
+%>
 
 <property>
   <name>dfs.http.address</name>
   <value><%= @namenode_address %>:50070</value>
 </property>
+<%- end %>
+
 <property>
   <name>dfs.permissions</name>
   <value>false</value>
 </property>
+
 <property>
   <name>dfs.replication</name>
   <value><%= node[:hadoop][:dfs_replication] %></value>
 </property>
+
 <property>
   <name>dfs.name.dir</name>
   <value><%= @dfs_name_dirs %></value>
   <final>true</final>
 </property>
+
 <property>
   <name>dfs.data.dir</name>
   <value><%= @dfs_data_dirs %></value>
   <final>true</final>
 </property>
+
 <property>
-  <!-- If its value is great than available diskspace on datanode, datanode will reports its available diskspace as 0, 
+  <!-- If its value is great than available diskspace on datanode, datanode will reports its available diskspace as 0,
        thus namenode will throw a java.io.IOException: File /hadoop/system/mapred/jobtracker.info could only be replicated to 0 nodes, instead of 1. -->
   <name>dfs.datanode.du.reserved</name>
   <value>0</value>
 </property>
+
 <property>
   <name>dfs.datanode.handler.count</name>
   <value><%= node[:hadoop][:datanode_handler_count] %></value>
@@ -41,6 +132,7 @@
   <name>dfs.datanode.max.xceivers</name>
   <value>4096</value>
 </property>
+
 <property>
   <!-- see https://issues.apache.org/jira/browse/HADOOP-5464 -->
   <name>dfs.datanode.socket.write.timeout</name>
@@ -51,10 +143,12 @@
   <name>dfs.hosts.exclude</name>
   <value>/etc/<%= node[:hadoop][:hadoop_handle] %>/conf/dfs.hosts.exclude</value>
 </property>
+
 <property>
   <name>dfs.namenode.handler.count</name>
   <value><%= node[:hadoop][:namenode_handler_count] %></value>
 </property>
+
 <property>
   <name>dfs.balance.bandwidthPerSec</name>
   <value><%= node[:hadoop][:max_balancer_bandwidth] %></value>
@@ -72,21 +166,21 @@
 </property>
 
 <% if node[:hadoop][:rack_topology][:enabled] %>
-<!-- turn on Rack Awareness of Hadoop -->
-<property>
-  <name>topology.script.file.name</name>
-  <value>/etc/hadoop/conf/topology.sh</value>
-  <description>Topology scripts are used by hadoop to determine the rack location of nodes. This information is used by hadoop to replicate block data to redundant racks.</description>
-</property>
+  <!-- turn on Rack Awareness of Hadoop -->
+  <property>
+    <name>topology.script.file.name</name>
+    <value>/etc/hadoop/conf/topology.sh</value>
+    <description>Topology scripts are used by hadoop to determine the rack location of nodes. This information is used by hadoop to replicate block data to redundant racks.</description>
+  </property>
 <% end %>
 
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['hdfs-site.xml'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>
-<property>
-  <name><%= key %></name>
-  <value><%= value %></value>
-</property>
+  <property>
+    <name><%= key %></name>
+    <value><%= value %></value>
+  </property>
 <%- end %>
 <!-- end -->
 

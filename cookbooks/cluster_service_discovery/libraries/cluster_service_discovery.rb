@@ -53,22 +53,56 @@ module ClusterServiceDiscovery
   # Find all nodes that have indicated they provide the given service,
   # in descending order of when they registered.
   #
-  def all_providers_for_service service_name, wait = true
-    start_time = Time.now
-    while true
-      servers = search(:node, "cluster_name:#{node[:cluster_name]} AND provides_service:#{service_name}").
+  def all_providers_for_service service_name, wait = true, num = 1
+    condition = "cluster_name:#{node[:cluster_name]} AND provides_service:#{service_name}"
+    all_providers(service_name, condition, wait, num, false) do
+      search(:node, "#{condition}").
         find_all{|server| server[:provides_service][service_name] && server[:provides_service][service_name]['timestamp'] }.
         sort_by{|server| server[:provides_service][service_name]['timestamp'] } rescue []
-      if !wait or (servers and servers.size > 0)
-        Chef::Log.info("search(:node, 'provides_service:#{service_name}') returns #{servers.count} nodes.")
-        return servers
+    end
+  end
+
+  # Find all nodes that have indicated they provide the given role.
+  #
+  def all_providers_for_role role_name, wait = true, num = 1
+    condition = "cluster_name:#{node[:cluster_name]} AND role:#{role_name}"
+    all_providers(role_name, condition, wait, num, false) do
+      search(:node, "#{condition}").
+        sort_by{ |server| server[:facet_index] } rescue []
+    end
+  end
+
+  def all_providers name, condition = "", wait = true, num = 1, run_in_ruby_block = true, &block
+    if run_in_ruby_block
+      ruby_block "provider-#{name}" do
+        block do
+          get_all_providers(name, condition, wait, num, run_in_ruby_block, &block)
+        end
+      end
+    else
+      get_all_providers(name, condition, wait, num, run_in_ruby_block, &block)
+    end
+  end
+
+  # Find all nodes that have indicated they provide the given type.
+  def get_all_providers name, condition, wait, num, run_in_ruby_block, &block
+    start_time = Time.now
+    while true
+      servers = yield
+      if !wait or (servers and servers.size >= num)
+        Chef::Log.info("search(:node, '#{condition}') returns #{servers.count} nodes.")
+        if run_in_ruby_block
+          break
+        else
+          return servers
+        end
       else
         wait_time = Time.now - start_time
         if wait_time > WAIT_TIMEOUT
-          Chef::Log.error("search(:node, 'provides_service:#{service_name}') failed, return empty.")
-          raise "Can't find any nodes which provide service #{service_name}. Did any node register this service? Or is the Chef Search Server is down?"
+          Chef::Log.error("search(:node, '#{condition}') failed, return empty.")
+          raise "Can't find any nodes which provide #{name}. Did any node provide #{name}? Or is the Chef Search Server is down?"
         end
-        Chef::Log.info("search(:node, 'provides_service:#{service_name}') returns nothing, already wait #{wait_time} seconds.")
+        Chef::Log.info("search(:node, '#{condition}') returns nothing, already wait #{wait_time} seconds.")
         sleep SLEEP_TIME
       end
     end
@@ -80,37 +114,69 @@ module ClusterServiceDiscovery
     all_providers_for_service(service_name, wait).last
   end
 
+  # Find the most recent node that registered to provide the given role
+  def provider_for_role role_name, wait = true
+    all_providers_for_role(role_name, wait).last
+  end
+
+  # Notify
+  def notify notify_name, notify_info = {}
+    provide_service(notify_name, notify_info)
+  end
+
+  # Wait for given name ready
+  def wait_for name, conditions = {}, wait = true, num = 1
+    condition = generate_condition(conditions)
+    all_providers(name, condition, wait, num, true) do
+      search(:node, "#{condition}").
+        sort_by{ |server| server[:facet_index] } rescue []
+    end
+  end
+
   # Register to provide the given service.
   # If you pass in a hash of information, it will be added to the registry, and available to clients
-  def provide_service service_name, service_info = {}
-    ruby_block "provide-#{service_name}" do
-      block do
-        Chef::Log.info("Registering to provide service '#{service_name}' with extra info: #{service_info.inspect}")
-        timestamp = ClusterServiceDiscovery.timestamp
-        node.set[:provides_service][service_name] = {
-          :timestamp  => timestamp,
-        }.merge(service_info)
-        node.save
+  def run_provide_service service_name, service_info = {}
+    Chef::Log.info("Registering to provide service '#{service_name}' with extra info: #{service_info.inspect}")
+    timestamp = ClusterServiceDiscovery.timestamp
+    node.set[:provides_service][service_name] = {
+      :timestamp  => timestamp,
+    }.merge(service_info)
+    node.save
 
-        # Typically when bootstrap the chef node for the first time, the chef node registers itself to provide some service,
-        # but the Chef Search Server is not faster enough to build index for newly added node property(e.g. 'provides_service'),
-        # and will return stale results for search(:node, "provides_service:#{service_name}").
-        # So let's wait for Chef Search Server to generate the search index.
-        found = false
-        while !found do
-          Chef::Log.info("Wait for Chef Solr Server to generate search index for property 'provides_service'")
-          sleep SLEEP_TIME
-          # a service can be provided by multi nodes, e.g. zookeeper server service
-          servers = all_providers_for_service(service_name)
-          servers.each do |server|
-            if server[:ipaddress] == node[:ipaddress] and server[:provides_service][service_name][:timestamp] == timestamp
-              found = true
-              break
-            end
-          end
+    # Typically when bootstrap the chef node for the first time, the chef node registers itself to provide some service,
+    # but the Chef Search Server is not faster enough to build index for newly added node property(e.g. 'provides_service'),
+    # and will return stale results for search(:node, "provides_service:#{service_name}").
+    # So let's wait for Chef Search Server to generate the search index.
+    found = false
+    while !found do
+      Chef::Log.info("Wait for Chef Solr Server to generate search index for property 'provides_service'")
+      sleep SLEEP_TIME
+      # a service can be provided by multi nodes, e.g. zookeeper server service
+      servers = all_providers_for_service(service_name)
+      servers.each do |server|
+        if server[:ipaddress] == node[:ipaddress] and server[:provides_service][service_name][:timestamp] == timestamp
+          found = true
+          break
         end
-        Chef::Log.info("service '#{service_name}' is registered successfully.")
       end
+    end
+    Chef::Log.info("service '#{service_name}' is registered successfully.")
+  end
+
+  # return facet name of the node
+  def facet_name_of_server server
+    server[:facet_name] rescue nil
+  end
+
+  def provide_service service_name, service_info = {}, run_in_ruby_block = true
+    if run_in_ruby_block
+      ruby_block "provide-#{service_name}" do
+        block do
+          run_provide_service(service_name, service_info)
+        end
+      end
+    else
+      run_provide_service(service_name, service_info)
     end
   end
 
@@ -128,6 +194,12 @@ module ClusterServiceDiscovery
     fqdn_of(server)
   end
 
+  # The local-only ip address for the most recent provider for role_name
+  def provider_fqdn_for_role role_name, wait = true
+    server = provider_for_role(role_name, wait) or return
+    fqdn_of(server)
+  end
+
   # The globally-accessable ip address for the most recent provider for service_name
   def provider_public_ip service_name, wait = true
     server = provider_for_service(service_name, wait) or return
@@ -137,15 +209,27 @@ module ClusterServiceDiscovery
   # given service, get many addresses
 
   # The local-only ip address for all providers for service_name
-  def all_provider_private_ips service_name, wait = true
-    servers = all_providers_for_service(service_name, wait)
+  def all_provider_private_ips service_name, wait = true, num = 1
+    servers = all_providers_for_service(service_name, wait, num)
     servers.map{ |server| private_ip_of(server) }
   end
 
   # The globally-accessable ip address for all providers for service_name
-  def all_provider_public_ips service_name, wait = true
-    servers = all_providers_for_service(service_name, wait)
+  def all_provider_public_ips service_name, wait = true, num = 1
+    servers = all_providers_for_service(service_name, wait, num)
     servers.map{ |server| public_ip_of(server) }
+  end
+
+  # The local-only ip address for all providers for role_name
+  def all_provider_private_ips_for_role role_name
+    servers = all_providers_for_role(role_name)
+    servers.map{ |server| private_ip_of(server) }
+  end
+
+  # The globally-accessable ip address for all providers for role_name
+  def all_provider_public_ips_for_role role_name
+    servers = all_providers_for_role(role_name)
+    servers.map{ |server| ip_of(server) }
   end
 
   # given server, get address
@@ -163,6 +247,31 @@ module ClusterServiceDiscovery
   # The globally-accessable ip address for the given server
   def public_ip_of server
     server[:cloud][:public_ips].first  rescue server[:ipaddress]
+  end
+
+  # The ip address for the given server
+  def ip_of server
+    server[:provision][:ip_address] rescue server[:ipaddress]
+  end
+
+  # All nodes count have given conditions
+  def all_nodes_count conditions = {}
+    all_nodes(conditions).count
+  end
+
+  # All nodes have given conditions
+  def all_nodes conditions = {}
+    condition = generate_condition(conditions)
+    search(:node, "#{condition}") rescue []
+  end
+
+  # Generate search node condition
+  def generate_condition conditions
+    condition = "cluster_name:#{node[:cluster_name]}"
+    conditions.each do |key, value|
+      condition += " AND #{key}:#{value}"
+    end
+    condition
   end
 
   # A compact timestamp, to record when services are registered

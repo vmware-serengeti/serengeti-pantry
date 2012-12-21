@@ -2,11 +2,32 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!-- check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html -->
 <configuration>
+<%- if node[:hadoop][:cluster_has_hdfs_ha_or_federation] %>
 
+<property>
+  <name>fs.default.name</name>
+  <%-
+    first_facet_has_no_hdfs_ha = @namenode_facets[0][@nameservices.first].length == 1
+    if node[:hadoop][:cluster_has_only_federation] or first_facet_has_no_hdfs_ha
+  %>
+  <value>hdfs://<%= "#{@namenode_facets[0][@nameservices.first][0]}:#{@namenode_port}" %></value>
+  <%- else %>
+  <value>hdfs://<%= @nameservices.first %></value>
+  <%- end %>
+</property>
+<%- if node[:hadoop][:namenode_ha_enabled] %>
+
+<property>
+  <name>ha.zookeeper.quorum</name>
+  <value><%- @zookeepers_address.each_with_index do |address, index| %><%= @zookeepers_address.length - index > 1 ? "#{address}:#{node[:hadoop][:zookeeper_service_port]}," : "#{address}:#{node[:hadoop][:zookeeper_service_port]}" %><%- end %></value>
+</property>
+  <%- end %>
+<%- else %>
 <property>
   <name>fs.default.name</name>
   <value>hdfs://<%= @namenode_address %>:<%= @namenode_port %></value>
 </property>
+<%- end %>
 
 <% if node[:hadoop][:rack_topology][:hve_enabled] %>
 <!-- settings for Hadoop Virtualization Extensions -->

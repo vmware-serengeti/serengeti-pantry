@@ -22,28 +22,27 @@ include_recipe "java::sun"
 include_recipe "hadoop_common::mount_disks"
 
 group "zookeeper" do
+  action [:create]
 end
 
 user "zookeeper" do
-  gid "zookeeper"
+  home    "#{node[:zookeeper][:home_dir]}"
+  group   "zookeeper"
+  shell   "/bin/bash"
+  password   nil
+  supports   :manage_home => true
+  action     [:create, :manage]
 end
 
-include_recipe "install_from"
-
-# Load distro repository info
-current_distro = data_bag_item("hadoop_distros", node[:hadoop][:distro_name])
-tarball_url = current_distro['zookeeper']
-unless ::File.exists?("#{node[:zookeeper][:home_dir]}")
-  set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'zookeeper')
+# Install Zookeeper
+if is_install_from_tarball
+  include_recipe "zookeeper::install_from_tarball"
+else
+  include_recipe "zookeeper::install_from_package"
 end
 
-install_from_release('zookeeper') do
-  release_url   tarball_url
-  home_dir      node[:zookeeper][:home_dir]
-  version       node[:zookeeper][:version]
-  action        [:install]
-  not_if { ::File.exists?("#{node[:zookeeper][:home_dir]}") }
-end
+# Launch service
+set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'zookeeper')
 
 # link Zookeeper data dir and log dir to the mounted data disk to get larger disk space
 # assumes we have at least two data disks
@@ -76,10 +75,6 @@ dirs.each do |dir|
     group "zookeeper"
     mode "0755"
   end
-end
-
-link "/etc/zookeeper" do
-  to node[:zookeeper][:home_dir] + "/conf"
 end
 
 zk_servers = search(:node, "cluster_name:#{node[:cluster_name]} AND role:zookeeper")

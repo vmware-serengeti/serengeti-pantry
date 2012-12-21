@@ -32,7 +32,7 @@ directory "/etc/hadoop/conf" do
 end
 
 # hadoop-daemon.sh will read files in #{hadoop_home}/conf
-make_link(hadoop_home_dir + "/conf", "/etc/hadoop/conf")
+make_link("#{hadoop_home_dir}/conf", "/etc/hadoop/conf")
 
 template_variables = hadoop_template_variables
 Chef::Log.debug template_variables.inspect

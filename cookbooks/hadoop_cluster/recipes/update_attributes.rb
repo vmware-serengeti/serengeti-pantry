@@ -11,6 +11,8 @@ if node[:hadoop][:distro_name] =~ /cdh4/ and !node[:hadoop][:install_from_tarbal
   node.default[:hadoop][:packages][:datanode][:name] = "hadoop-hdfs-datanode"
   node.default[:hadoop][:packages][:jobtracker][:name] = "hadoop-0.20-mapreduce-jobtracker"
   node.default[:hadoop][:packages][:tasktracker][:name] = "hadoop-0.20-mapreduce-tasktracker"
+  node.default[:hadoop][:packages][:journalnode][:name] = "hadoop-hdfs-journalnode"
+  node.default[:hadoop][:packages][:zkfc][:name] = "hadoop-hdfs-zkfc"
   # hadoop system services
   node.default[:hadoop][:jobtracker_service_name] = "hadoop-0.20-mapreduce-jobtracker"
   node.default[:hadoop][:tasktracker_service_name] = "hadoop-0.20-mapreduce-tasktracker"
@@ -32,3 +34,29 @@ node.default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:servi
 node.default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:service_name_prefix]}-datanode"
 node.default[:hadoop][:namenode_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9000 : 8020
 node.default[:hadoop][:jobtracker_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9001 : 8021
+node.default[:hadoop][:namenode_web_service_port] = 50070
+
+# hadoop 2.0 hdfs HA services
+node.default[:hadoop][:journalnode_service_name] = "hadoop-hdfs-journalnode"
+node.default[:hadoop][:journalnode_service_port] = 8485
+node.default[:hadoop][:zkfc_service_name] = "hadoop-hdfs-zkfc"
+node.default[:hadoop][:zookeeper_service_name] = 'zookeeper-server'
+node.default[:hadoop][:zookeeper_service_port] = '2181'
+node.default[:hadoop][:primary_namenode_format] = 'primary-namenode-format'
+node.default[:hadoop][:standby_namenode_format] = 'standby-namenode-format'
+node.default[:hadoop][:primary_zkfc_format] = 'primary-zkfc-format'
+
+# Save attribute cluster_has_hdfs_ha_or_federation to chef server if cluster has HDFS HA or federation
+if cluster_has_hdfs_ha_or_federation
+  node.default[:hadoop][:cluster_has_hdfs_ha_or_federation] = true
+end
+
+# Save attribute cluster_has_only_federation to chef server if cluster has only federation
+if cluster_has_only_federation
+  node.default[:hadoop][:cluster_has_only_federation] = true
+end
+
+# Save attribute namenode_ha_enabled to chef server if namenode ha is enabled
+if namenode_ha_enabled
+  node.default[:hadoop][:namenode_ha_enabled] = true
+end

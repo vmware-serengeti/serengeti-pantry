@@ -21,12 +21,14 @@
 #
 # Format Namenode
 #
+cluster_id = ""
+cluster_id = "-clusterid #{node[:cluster_name]}-#{node[:facet_name]}" if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
 execute 'format namenode' do
   not_if "service #{node[:hadoop][:namenode_service_name]} status"
   not_if { File.exists?('/mnt/hadoop/.namenode_formatted.log') }
   user 'hdfs'
-  command %q{
-    yes 'Y' | hadoop namenode -format
+  command %Q{
+    yes 'Y' | hadoop namenode -format #{cluster_id}
 
     exit_status=$?
     if [ $exit_status -eq 0 ]; then touch /mnt/hadoop/.namenode_formatted.log ; fi

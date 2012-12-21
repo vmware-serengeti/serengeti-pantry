@@ -38,7 +38,6 @@ force_link('/var/run/hadoop', "/var/run/#{node[:hadoop][:hadoop_handle]}")
 
 make_hadoop_dir(hadoop_home_dir + '/logs', 'root', '0775')
 
-
 # CDH, Greenplum HD, Hortonworks all use Bigtop to build and deliver Hadoop rpm/apt packages
 file = '/etc/default/bigtop-utils'
 execute "Set JAVA_HOME for Bigtop hadoop packages" do

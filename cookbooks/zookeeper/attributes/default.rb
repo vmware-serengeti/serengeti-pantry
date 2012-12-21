@@ -10,3 +10,4 @@ default[:zookeeper][:peer_port] = 2888
 default[:zookeeper][:leader_port] = 3888
 
 default[:zookeeper][:zookeeper_service_name] = 'zookeeper-server'
+default[:zookeeper][:package_name] = 'zookeeper'

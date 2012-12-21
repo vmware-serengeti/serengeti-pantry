@@ -14,6 +14,7 @@
 #
 
 module HadoopCluster
+
   # whether the node itself has namenode role
   def is_namenode
     node.role?("hadoop_namenode")
@@ -21,7 +22,7 @@ module HadoopCluster
 
   # The namenode's hostname, or the local node's numeric ip if 'localhost' is given.
   def namenode_address
-    return node[:fqdn] if is_namenode
+    return node[:fqdn] if is_namenode or is_journalnode
     # if the user has specified the namenode ip, use it.
     namenode_ip_conf || provider_fqdn(node[:hadoop][:namenode_service_name], !is_namenode)
   end
@@ -29,6 +30,78 @@ module HadoopCluster
   def namenode_port
     # if the user has specified the namenode port, use it.
     namenode_port_conf || node[:hadoop][:namenode_service_port]
+  end
+
+  # whether the node itself has journalnode role
+  def is_journalnode
+    node.role?("hadoop_journalnode")
+  end
+
+  # whether the node itself had zookeeper role
+  def is_zookeeper
+    node.role?("zookeeper")
+  end
+
+  # whether the node itself facet_index equal 0
+  def is_primary_namenode
+    node[:facet_index] == 0
+  end
+
+  def journalnodes_address
+    if is_journalnode
+      all_provider_public_ips_for_role("hadoop_journalnode")
+    else
+      set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:journalnode_service_name])
+      journalnode_count = all_nodes_count({"role" => "hadoop_journalnode"})
+      all_provider_public_ips(node[:hadoop][:journalnode_service_name], true, journalnode_count)
+    end
+  end
+
+  def zookeepers_address
+    if is_zookeeper
+      all_provider_public_ips_for_role("zookeeper")
+    else
+      set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:zookeeper_service_name])
+      zookeeper_count = all_nodes_count({"role" => "zookeeper"})
+      all_provider_public_ips(node[:hadoop][:zookeeper_service_name], true, zookeeper_count)
+    end
+  end
+
+  # All facet names which have hadoop_namenode role
+  def namenode_facet_names
+    servers = all_nodes({"role" => "hadoop_namenode"})
+    if !is_journalnode and !is_namenode
+      set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:namenode_service_name])
+      wait_for(node[:hadoop][:namenode_service_name], {"provides_service" => node[:hadoop][:namenode_service_name]}, true, servers.count)
+    end
+    servers.map{ |server| facet_name_of_server(server) }.uniq.sort
+  end
+
+  def namenode_facet_addresses
+    facet_names = namenode_facet_names
+    facet_names.map do | name |
+      servers = all_nodes({"role" => "hadoop_namenode", "facet_name" => name})
+      {name => servers.map{ |server| ip_of(server) }}
+    end
+  end
+
+  # The cluster HDFS Namenode HA or federation is enabled if more than 1 node has hadoop_namenode role
+  def cluster_has_hdfs_ha_or_federation
+    servers = all_nodes({"role" => "hadoop_namenode"})
+    servers.count > 1
+  end
+
+  # The cluster has only federation if namenode number equal group number which has hadoop_namenode role and namenode number more than 1
+  def cluster_has_only_federation
+    facet_name_count = namenode_facet_names.count
+    namenode_count = all_nodes({"role" => "hadoop_namenode"}).count
+    namenode_count > 1 and facet_name_count ==  namenode_count
+  end
+
+  # The node Namenode HA is enabled if more than 1 node has hadoop_namenode role in the same facet
+  def namenode_ha_enabled
+    servers = all_nodes({"role" => "hadoop_namenode", "facet_name" => node[:facet_name]})
+    servers.count > 1
   end
 
   # whether the node itself has secondarynamenode role
@@ -49,7 +122,7 @@ module HadoopCluster
 
   # whether any node in the cluster has jobtracker role
   def jobtracker_node
-    nodes = search(:node, "cluster_name:#{node[:cluster_name]} AND role:hadoop_jobtracker")
+    nodes = all_nodes({"role" => "hadoop_jobtracker"})
     (nodes and nodes.size > 0) ? nodes[0] : nil
   end
 
@@ -60,7 +133,7 @@ module HadoopCluster
     if !ip
       jobtracker = jobtracker_node
       if jobtracker
-        if is_namenode or is_secondarynamenode
+        if is_namenode or is_secondarynamenode or is_journalnode
           # namenode and secondarynamenode don't require the jobtracker service is running
           ip = jobtracker[:fqdn]
         else
@@ -83,6 +156,7 @@ module HadoopCluster
   def hadoop_template_variables
     vars = {
       :hadoop_home            => hadoop_home_dir,
+      :hadoop_hdfs_home       => hadoop_hdfs_dir,
       :namenode_address       => namenode_address,
       :namenode_port          => namenode_port,
       :jobtracker_address     => jobtracker_address,
@@ -92,9 +166,20 @@ module HadoopCluster
       :fs_checkpoint_dirs     => formalize_dirs(fs_checkpoint_dirs),
       :local_hadoop_dirs      => formalize_dirs(local_hadoop_dirs),
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
-      :all_cluster_volumes    => all_cluster_volumes,
+      :all_cluster_volumes    => all_cluster_volumes
     }
     vars[:resourcemanager_address] = resourcemanager_address if is_hadoop_yarn?
+
+    if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
+      vars[:nameservices] = namenode_facet_names
+      vars[:namenode_facets] = namenode_facet_addresses
+    end
+
+    if node[:hadoop][:namenode_ha_enabled]
+      vars[:journalnodes_address] = journalnodes_address
+      vars[:zookeepers_address] = zookeepers_address
+    end
+
     vars
   end
 
@@ -149,7 +234,7 @@ module HadoopCluster
             ln -sf -T $install_dir $prefix_dir/#{hadoop_major_version}
             ln -sf -T $install_dir #{hadoop_home}
             mkdir -p /etc/#{hadoop_major_version}
-            ln -sf -T #{hadoop_home}/conf  /etc/#{hadoop_major_version}/conf
+            ln -sf -T #{hadoop_home}/conf /etc/#{hadoop_major_version}/conf
             ln -sf -T /etc/#{hadoop_major_version} /etc/hadoop
 
             # create hadoop logs directory, otherwise created by root:root with 755
@@ -305,6 +390,11 @@ EOF
     node[:hadoop][:hadoop_home_dir]
   end
 
+  # hadoop hdfs dir
+  def hadoop_hdfs_dir
+    node[:hadoop][:hadoop_hdfs_dir]
+  end
+
   def bin_hadoop_daemon_sh
     '/usr/lib/hadoop/bin/hadoop-daemon.sh'
   end
@@ -365,6 +455,14 @@ EOF
       end
     end
   end
+
+  # Return rsa pub key
+  def node_rsa_pub_key facet_index
+    wait_for("node-rsa-pub-key", {"facet_name" => node[:facet_name], "facet_index" => facet_index, "rsa_pub_key" => "*"})
+    server = all_nodes({"facet_name" => node[:facet_name], "facet_index" => facet_index}).first
+    server[:rsa_pub_key]
+  end
+
 end
 
 class Chef::Recipe
