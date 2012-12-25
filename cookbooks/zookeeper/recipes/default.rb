@@ -26,7 +26,6 @@ group "zookeeper" do
 end
 
 user "zookeeper" do
-  home    "/var/lib/zookeeper"
   group   "zookeeper"
   shell   "/bin/bash"
   password   nil
