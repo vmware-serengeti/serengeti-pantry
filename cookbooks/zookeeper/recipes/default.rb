@@ -29,7 +29,7 @@ user "zookeeper" do
   group   "zookeeper"
   shell   "/bin/bash"
   password   nil
-  supports   :manage_home => true
+  supports   :manage_home => false
   action     [:create, :manage]
 end
 

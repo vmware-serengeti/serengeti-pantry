@@ -82,7 +82,16 @@ link hbase_conf_dir do
   not_if {File.exist?(hbase_conf_dir)} # to be compatible with CDH4 rpm
 end
 
-hbase_hdfs_home = "hdfs://#{namenode_address}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+# if federation enabled, just select the first namespace currently
+if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
+  if node[:hadoop][:cluster_has_only_federation] or namenode_facet_addresses[0][namenode_facet_names[0]].length == 1
+    hbase_hdfs_home = "hdfs://#{namenode_facet_addresses[0][namenode_facet_names[0]][0]}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+  else
+    hbase_hdfs_home = "hdfs://#{namenode_facet_names[0]}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+  end
+else
+  hbase_hdfs_home = "hdfs://#{namenode_address}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+end
 zk_service_name = node[:hbase][:zookeeper_service_name]
 zk_service_provider = provider_for_service(zk_service_name)
 zk_quorum = zk_service_provider[:provides_service][zk_service_name][:quorum]
