@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: hadoop_cluster
+# Cookbook Name:: hadoop_common
 # Recipe::        add_repo
 #
 

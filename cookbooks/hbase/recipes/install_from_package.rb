@@ -18,7 +18,7 @@
 #   limitations under the License.
 #
 
-include_recipe "hadoop_cluster::add_repo"
+include_recipe "hadoop_common::add_repo"
 
 #
 # Install package
