@@ -20,10 +20,21 @@ include_recipe "hadoop_common::add_repo"
 #
 package node[:zookeeper][:package_name]
 
-directories = ['/var/lib/zookeeper', '/var/log/zookeeper']
+link "#{node[:zookeeper][:home_dir]}/conf" do
+  action :delete
+  only_if "test -L #{node[:zookeeper][:home_dir]}/conf"
+end
+
+directories = ['/var/lib/zookeeper', '/var/log/zookeeper', '/etc/zookeeper/']
 directories.each do | directory_name |
   directory directory_name do
   recursive true
   action :delete
   end
+end
+
+directory "#{node[:zookeeper][:home_dir]}/conf" do
+  owner "zookeeper"
+  group "zookeeper"
+  mode "0755"
 end

@@ -26,7 +26,3 @@ install_from_release('zookeeper') do
   action        [:install]
   not_if { ::File.exists?("#{node[:zookeeper][:home_dir]}") }
 end
-
-link "/etc/zookeeper" do
-  to node[:zookeeper][:home_dir] + "/conf"
-end

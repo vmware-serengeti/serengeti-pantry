@@ -40,6 +40,10 @@ else
   include_recipe "zookeeper::install_from_package"
 end
 
+link "/etc/zookeeper" do
+  to node[:zookeeper][:home_dir] + "/conf"
+end
+
 # Launch service
 set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'zookeeper')
 
