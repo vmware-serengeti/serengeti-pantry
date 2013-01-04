@@ -176,8 +176,8 @@ module HadoopCluster
     end
 
     if node[:hadoop][:namenode_ha_enabled]
-      vars[:journalnodes_address] = journalnodes_address
       vars[:zookeepers_address] = zookeepers_address
+      vars[:journalnodes_address] = journalnodes_address
     end
 
     vars

@@ -28,15 +28,13 @@ service "restart-#{node[:hadoop][:journalnode_service_name]}" do
   service_name node[:hadoop][:journalnode_service_name]
   supports :status => true, :restart => true
 
-  subscribes :restart, resources("template[/etc/hadoop/conf/core-site.xml]"), :delayed
-  subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hadoop][:journalnode_service_name]}]"), :immediately
 end if is_journalnode_running
 
 service "start-#{node[:hadoop][:journalnode_service_name]}" do
   service_name node[:hadoop][:journalnode_service_name]
-  action [ :enable, :start ]
+  action [ :disable, :start ]
   supports :status => true, :restart => true
 
   notifies :create, resources("ruby_block[#{node[:hadoop][:journalnode_service_name]}]"), :immediately

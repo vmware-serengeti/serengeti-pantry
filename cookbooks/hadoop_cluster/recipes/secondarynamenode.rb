@@ -30,7 +30,7 @@ include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 # Launch service
 service "#{node[:hadoop][:secondarynamenode_service_name]}" do
-  action [ :enable, :start ]
+  action [ :disable, :start ]
   supports :status => true, :restart => true
 end
 

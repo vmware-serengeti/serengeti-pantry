@@ -45,7 +45,7 @@
 </property>
 <%-
       end
-      if node[:hadoop][:namenode_ha_enabled]
+      if node[:hadoop][:namenode_ha_enabled] and namenode_ha_enabled
 %>
 
 <property>

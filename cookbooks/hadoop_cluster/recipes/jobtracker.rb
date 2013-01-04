@@ -52,7 +52,7 @@ end if is_jobtracker_running
 
 service "start-#{node[:hadoop][:jobtracker_service_name]}" do
   service_name node[:hadoop][:jobtracker_service_name]
-  action [ :enable, :start ]
+  action [ :disable, :start ]
   supports :status => true, :restart => true
 
   notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately

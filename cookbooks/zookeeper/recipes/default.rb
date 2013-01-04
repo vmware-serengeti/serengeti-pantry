@@ -145,7 +145,7 @@ end if is_zookeeper_running
 
 service "start-#{node[:zookeeper][:zookeeper_service_name]}" do
   service_name node[:zookeeper][:zookeeper_service_name]
-  action [ :enable, :start ]
+  action [ :disable, :start ]
   supports :status => true, :restart => true
 
   notifies :create, resources("ruby_block[#{node[:zookeeper][:zookeeper_service_name]}]"), :immediately

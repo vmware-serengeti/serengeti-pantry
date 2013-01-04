@@ -43,7 +43,7 @@ end if is_zkfc_running
 
 service "start-#{node[:hadoop][:zkfc_service_name]}" do
   service_name node[:hadoop][:zkfc_service_name]
-  action [ :enable, :start ]
+  action [ :disable, :start ]
   supports :status => true, :restart => true
 
   notifies :create, resources("ruby_block[#{node[:hadoop][:zkfc_service_name]}]"), :immediately

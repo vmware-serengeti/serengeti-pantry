@@ -21,7 +21,7 @@
 class Chef::Recipe; include HadoopCluster ; end
 
 # Hadoop xml configuration files in $HADDOP_HOME/conf/
-include_recipe "hadoop_cluster::hadoop_conf_xml" unless is_namenode or is_jobtracker or is_secondarynamenode
+include_recipe "hadoop_cluster::hadoop_conf_xml" unless is_namenode or is_jobtracker or is_secondarynamenode or is_journalnode
 
 # Add symlinks to HADOOP_HOME
 force_link("/usr/lib/hadoop", "/usr/lib/#{node[:hadoop][:hadoop_handle]}")
