@@ -463,6 +463,11 @@ EOF
     server[:rsa_pub_key]
   end
 
+  # Hortonworks hmonitor can not monitor standby namenode service and jobtracker service in the CDH4 distro
+  def hortonworks_hmonitor_enabled
+    !(node[:hadoop][:distro_name] =~ /cdh4/)
+  end
+
 end
 
 class Chef::Recipe

@@ -25,7 +25,7 @@ include_recipe "hadoop_cluster::wait_for_hdfs"
 
 # Install
 hadoop_package node[:hadoop][:packages][:namenode][:name]
-hadoop_ha_package "namenode"
+hadoop_ha_package "namenode" if hortonworks_hmonitor_enabled
 
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
@@ -127,4 +127,4 @@ provide_service(node[:hadoop][:namenode_service_name])
 include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"
 
 # Launch service level ha monitor
-enable_ha_service "hmonitor-namenode-monitor"
+enable_ha_service "hmonitor-namenode-monitor" if hortonworks_hmonitor_enabled
