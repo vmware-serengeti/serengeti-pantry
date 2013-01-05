@@ -449,7 +449,7 @@ EOF
     if node[:hadoop][:ha_enabled] then
       set_bootstrap_action(ACTION_START_SERVICE, svc)
       service svc do
-        action [ :enable, :start ]
+        action [ :disable, :start ]
         supports :status => true, :restart => true
         notifies :create, resources("ruby_block[#{svc}]"), :immediately
       end
