@@ -473,6 +473,11 @@ end
 class Chef::Recipe
   include HadoopCluster
 end
+
 class Chef::Resource::Directory
+  include HadoopCluster
+end
+
+class Chef::Resource::Service
   include HadoopCluster
 end
