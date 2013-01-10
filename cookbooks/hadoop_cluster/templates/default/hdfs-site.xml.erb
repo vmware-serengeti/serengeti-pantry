@@ -56,14 +56,17 @@
       end
     end
   end
-
-  if node[:hadoop][:namenode_ha_enabled]
+  if node.role?("hadoop_journalnode")
 %>
 
 <property>
   <name>dfs.journalnode.edits.dir</name>
-  <value>/tmp/hadoop</value>
+  <value><%= @journalnode_edits_dir %></value>
 </property>
+<%
+  end
+  if node[:hadoop][:namenode_ha_enabled]
+%>
 
 <property>
   <name>dfs.ha.fencing.methods</name>
