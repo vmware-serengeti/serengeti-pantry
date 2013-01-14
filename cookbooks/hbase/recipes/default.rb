@@ -84,16 +84,53 @@ link hbase_conf_dir do
   not_if {File.exist?(hbase_conf_dir)} # to be compatible with CDH4 rpm
 end
 
-# if federation enabled, just select the first namespace currently
+valid_namespaces_map = {}
+default_namespace = ''
 if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
+  # map valid namespace name to all all its addresses and facet
+  namenode_facet_addresses.each do |facet_addresses|
+    facet_addresses.each do |facet, addresses|
+      if addresses.length == 1
+        valid_namespaces_map[addresses[0]] = addresses << facet
+      else
+        valid_namespaces_map[facet] = addresses << facet
+      end
+    end
+  end
+
+  # the default namespace, just select the first namespace
   if node[:hadoop][:cluster_has_only_federation] or namenode_facet_addresses[0][namenode_facet_names[0]].length == 1
-    hbase_hdfs_home = "hdfs://#{namenode_facet_addresses[0][namenode_facet_names[0]][0]}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+    default_namespace = namenode_facet_addresses[0][namenode_facet_names[0]][0]
   else
-    hbase_hdfs_home = "hdfs://#{namenode_facet_names[0]}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+    default_namespace = namenode_facet_names[0]
   end
 else
-  hbase_hdfs_home = "hdfs://#{namenode_address}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+  default_namespace = namenode_address
+  valid_namespaces_map[namenode_address] = [namenode_address]
 end
+
+matched_namespace = ''
+matched_pattern = ''
+# try to guess a valid namespace name if user defined hbase.rootdir attr
+conf = node['cluster_configuration']['hbase']['hbase-site.xml'] || {} rescue {}
+if !conf['hbase.rootdir'].nil?
+  user_defined_namespace = conf['hbase.rootdir']
+  valid_namespaces_map.each do |namespace, patterns|
+    patterns.each do |pattern|
+      if user_defined_namespace.include? pattern and pattern.length > matched_pattern.length
+        matched_pattern = pattern
+        matched_namespace = namespace
+      end
+    end
+  end
+end
+
+if matched_namespace == ''
+  hbase_hdfs_home = "hdfs://#{default_namespace}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+else
+  hbase_hdfs_home = "hdfs://#{matched_namespace}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+end
+
 zk_service_name = node[:hbase][:zookeeper_service_name]
 zk_service_provider = provider_for_service(zk_service_name)
 zk_quorum = zk_service_provider[:provides_service][zk_service_name][:quorum]
