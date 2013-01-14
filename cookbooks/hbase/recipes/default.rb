@@ -26,6 +26,8 @@ end
 
 user "hbase" do
   gid "hbase"
+  shell "/bin/bash"
+  password nil
 end
 
 ulimit_nofile = 32768
