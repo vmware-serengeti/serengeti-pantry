@@ -330,7 +330,7 @@ EOF
 
   # log dir for hadoop daemons
   def local_hadoop_log_dir
-    dir = node[:disk][:data_disks].keys[0] if node[:hadoop][:use_data_disk_as_log_vol]
+    dir = node[:disk][:data_disks].keys.last if node[:hadoop][:use_data_disk_as_log_vol]
     dir ||= '/mnt/hadoop'
     File.join(dir, 'hadoop/log')
   end
