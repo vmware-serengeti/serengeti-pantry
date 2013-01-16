@@ -326,8 +326,17 @@ EOF
 
   # log dir for hadoop daemons
   def local_hadoop_log_dir
-    dir = node[:disk][:data_disks].keys[0] if node[:hadoop][:use_data_disk_as_log_vol]
-    dir ||= '/mnt/hadoop'
+    dir = ""
+    if node[:hadoop][:use_data_disk_as_log_vol]
+      if node[:nfs_mapred_dirs].nil?
+        dir = node[:disk][:data_disks].keys.last
+      else
+        dir = node[:nfs_mapred_dirs].last
+      end
+    end
+    if dir == ""
+      dir = "/mnt/hadoop"
+    end
     File.join(dir, 'hadoop/log')
   end
 
@@ -368,7 +377,11 @@ EOF
   end
   # Local storage during map-reduce jobs. Point at every local disk.
   def mapred_local_dirs
-    local_hadoop_dirs.map{|dir| File.join(dir, 'mapred/local')}
+    if node[:nfs_mapred_dirs].nil?
+      return local_hadoop_dirs.map{|dir| File.join(dir, 'mapred/local')}
+    else
+      return node[:nfs_mapred_dirs]
+    end
   end
 
   # Hadoop 0.23 requires hadoop directory path in conf files to be in URI format

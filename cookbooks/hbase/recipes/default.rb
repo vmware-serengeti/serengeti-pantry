@@ -62,7 +62,7 @@ if disk_dir
       mode  "0755"
       recursive true
     end
-   force_link src, target
+    force_link src, target
   end
 end
 

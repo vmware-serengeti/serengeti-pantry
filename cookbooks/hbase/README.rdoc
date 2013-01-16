@@ -1,6 +1,6 @@
 = DESCRIPTION:
 
-Installs and configures Hbase using apache official tar.gz packages.
+Installs and configures Hbase using tar.gz or rpm packages.
 
 = REQUIREMENTS:
 

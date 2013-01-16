@@ -1,10 +1,8 @@
 = DESCRIPTION:
 
-Installs and configures Zookeeper using tar.gz or rpm packages.
+Installs and configures NFS Server and Client
 
 = REQUIREMENTS:
-
-This cookbook works for Zookeeper 3.4.x, and should also work for 3.3.x.
 
 = ATTRIBUTES:
 
