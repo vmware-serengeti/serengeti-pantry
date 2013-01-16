@@ -175,6 +175,10 @@ module HadoopCluster
       vars[:namenode_facets] = namenode_facet_addresses
     end
 
+    if is_journalnode
+      vars[:journalnode_edits_dir] = journalnode_edits_dir
+    end
+
     if node[:hadoop][:namenode_ha_enabled]
       vars[:zookeepers_address] = zookeepers_address
       vars[:journalnodes_address] = journalnodes_address
@@ -382,6 +386,10 @@ EOF
     else
       return node[:nfs_mapred_dirs]
     end
+  end
+
+  def journalnode_edits_dir
+    "/var/lib/journalnode"
   end
 
   # Hadoop 0.23 requires hadoop directory path in conf files to be in URI format

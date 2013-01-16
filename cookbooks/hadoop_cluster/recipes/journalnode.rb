@@ -20,6 +20,17 @@ hadoop_package node[:hadoop][:packages][:journalnode][:name]
 
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
+# Create journalnode edits dir
+edits_dir = "#{disks_mount_points[0]}/journalnode"
+directory edits_dir do
+  owner "hdfs"
+  group "hdfs"
+  mode "0755"
+  recursive true
+end
+
+make_link("/var/lib/journalnode", edits_dir)
+
 # Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:journalnode_service_name])
 
