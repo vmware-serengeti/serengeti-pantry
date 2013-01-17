@@ -31,6 +31,7 @@ end
 # Check how to use Resource User: http://wiki.opscode.com/display/chef/Resources#Resources-User
 username = node[:hadoop][:client][:admin][:username]
 user username do
+  not_if {File.exist?("/etc/.set-joe-password")}
   comment    'A sample user for submitting Hadoop jobs'
   home       "/var/lib/#{username}"
   shell      "/bin/bash"
@@ -47,3 +48,25 @@ execute "grant SUDO priviledge to user #{username}" do
   }
 end
 
+usermod_command = 'if id joe >/dev/null 2>&1; then /usr/sbin/usermod -p "$cryptpasswd" joe; fi'
+execute "add usermod command to serengeti-password" do
+  only_if {File.exist?("/usr/sbin/serengeti-password")}
+  command %Q{
+    grep '#{usermod_command}' /usr/sbin/serengeti-password
+    if [ $? != 0 ]; then
+      echo '#{usermod_command}' >> /usr/sbin/serengeti-password
+    fi
+  }
+end
+
+execute "generate random password" do
+  not_if {File.exist?("/etc/.set-joe-password")}
+  only_if {File.exist?("/usr/sbin/serengeti-password")}
+  command %Q{
+    /usr/sbin/serengeti-password -a
+
+    exit_status=$?
+    if [ $exit_status -eq 0 ]; then touch /etc/.set-joe-password; fi
+    exit $exit_status
+  }
+end
