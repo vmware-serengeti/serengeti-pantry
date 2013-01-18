@@ -24,11 +24,13 @@ include_recipe "hadoop_common::add_repo"
 
 group 'hadoop' do
   group_name 'hadoop'
+  gid         300
   action      [:create, :manage]
 end
 
 user 'mapred' do
   comment    'Hadoop Mapred Runner'
+  uid        303
   group      'hadoop'
   shell      "/bin/bash"
   password   nil
@@ -48,4 +50,11 @@ service "start-portmap" do
   service_name "portmap"
   action [ :enable, :start ]
   supports :status => true, :restart => true
+end
+
+bash "configure service rpcidmapd" do
+  code <<EOF
+  sed -i 's/^Nobody-User.*/Nobody-User = mapred/' /etc/idmapd.conf
+  sed -i 's/^Nobody-Group.*/Nobody-Group = hadoop/' /etc/idmapd.conf
+EOF
 end

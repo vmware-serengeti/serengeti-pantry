@@ -35,41 +35,45 @@ while (Time.now.to_i - start_time < SERVICE_WAIT_TIME_SEC)
   # try to avoid attaching all compute nodes to one data nodes
   sleep(3) and next if my_servers.size < expect_servers_num
   server_selected = my_servers[node[:ipaddress].hash % my_servers.size]
-
+  export_entries = server_selected[:provides_service][node[:nfs][:nfs_service_name]][:export_entries]
   map_dirs = []
-  export_dirs = server_selected[:provides_service][node[:nfs][:nfs_service_name]][:export_dirs]
   nfs_server_ip = server_selected[:ipaddress]
-  mount_count = 0
 
-  export_dirs.each do |remote_dir|
-    begin
-      mount_dir = "/mnt/mapred#{mount_count}"
-      # Remove dir
-      directory mount_dir do
-        action :delete
-        recursive true
-      end
+  begin
+    mount_dir = "/mnt/mapred"
+    # Remove dir
+    directory mount_dir do
+      action :delete
+      recursive true
+    end
 
-      # Create Dir
-      directory mount_dir do
-        owner "mapred"
-        group "hadoop"
-        mode  '0755'
-        action :create
-        recursive true
-      end
-      mount_count += 1
+    # Create Dir
+    directory mount_dir do
+      owner "mapred"
+      group "hadoop"
+      mode  '0755'
+      action :create
+      recursive true
+    end
 
-      Chef::Log.info("Processing mount of #{mount_dir} from #{nfs_server_ip} (#{remote_dir})")
-      mount mount_dir do
-        fstype      "nfs"
-        options     "rw,nointr,rsize=131072,wsize=131072,tcp"
-        device      "#{nfs_server_ip}:#{remote_dir}"
-        dump        0
-        pass        0
-        action      :mount
-      end
-      mount_map_dir = "#{mount_dir}/#{node[:ipaddress]}"
+    service "start-rpcidmapd" do
+      service_name "rpcidmapd"
+      action [ :enable, :start ]
+      supports :status => true, :restart => true
+    end
+
+    Chef::Log.info("Processing mount of #{mount_dir} from #{nfs_server_ip}:/")
+    mount mount_dir do
+      fstype      "nfs4"
+      options     "rw,nointr,rsize=131072,wsize=131072"
+      device      "#{nfs_server_ip}:/"
+      dump        0
+      pass        0
+      action      :mount
+    end
+
+    export_entries.each do |entry|
+      mount_map_dir = "#{mount_dir}/#{entry}/#{node[:cluster_name]}-#{node[:facet_name]}-#{node[:facet_index]}"
       directory mount_map_dir do
         owner "mapred"
         group "hadoop"
@@ -77,10 +81,10 @@ while (Time.now.to_i - start_time < SERVICE_WAIT_TIME_SEC)
         action :create
       end
       map_dirs << mount_map_dir
-    rescue StandardError => err
-      Chef::Log.warn "Problem setting up NFS:"
-      Chef::Log.warn err
     end
+  rescue StandardError => err
+    Chef::Log.warn "Problem setting up NFS:"
+    Chef::Log.warn err
   end
   node[:nfs_mapred_dirs] = map_dirs
   node.save

@@ -20,15 +20,29 @@
 
 include_recipe "tempfs::default"
 
-export_dirs = []
+export_dirs = {}
 
 # refer to http://linux.die.net/man/5/exports
-nfs_option = "*(rw,async,no_root_squash,no_all_squash)"
+nfs_option = "rw,nohide,no_root_squash,no_all_squash,async,insecure,no_acl,no_auth_nlm,no_subtree_check"
 
 # clean up /etc/exports
-execute "create exports" do
+execute "clean exports" do
   command %Q{cat /dev/null > /etc/exports}
 end
+
+directory node[:nfs][:pseudo_root_dir] do
+  recursive true
+  action :delete
+end
+
+directory node[:nfs][:pseudo_root_dir] do
+  owner "mapred"
+  group "hadoop"
+  mode "0755"
+  action :create
+end
+
+pseudo_count = 0
 
 # Announce as a TempFS server, and announce each share as a capability
 disks_mount_points.each do |mount_point|
@@ -39,22 +53,34 @@ disks_mount_points.each do |mount_point|
   end
 
   mount_dir = "#{mount_point}/tempfs"
+  pseudo_dir = "#{node[:nfs][:pseudo_root_dir]}/export#{pseudo_count}"
+  pseudo_count += 1
 
   # Create Dir
-  directory mount_dir do
-    owner "mapred"
-    group "hadoop"
-    mode  '0755'
-    recursive true
-    action    :create
+  [ mount_dir, pseudo_dir ].each do |dir|
+    directory dir do
+      owner "mapred"
+      group "hadoop"
+      mode  '0755'
+      recursive true
+      action    :create
+    end
   end
-  export_dirs << mount_dir
+  export_dirs[mount_dir] = pseudo_dir
 end
 
 # write configuration
-export_dirs.each do |dir|
-  execute "write exports" do
-    command %Q{ echo "#{dir} #{nfs_option}" >> /etc/exports }
+execute "write pseudo root dir to exports config file" do
+  command %Q{ echo "#{node[:nfs][:pseudo_root_dir]} *(#{nfs_option},fsid=0)" >> /etc/exports }
+end
+
+export_dirs.each do |mount_dir, pseudo_dir|
+  execute "mount bind pseudo_dirs" do
+    not_if "grep '#{pseudo_dir}' /etc/mtab > /dev/null"
+    command %Q{ mount --bind #{mount_dir} #{pseudo_dir} }
+  end
+  execute "write each export dirs" do
+    command %Q{ echo "#{pseudo_dir} *(#{nfs_option})" >> /etc/exports }
   end
 end
 
@@ -64,4 +90,12 @@ service "start-#{node[:nfs][:nfs_service_name]}" do
   supports :status => true, :restart => true
 end
 
-provide_service(node[:nfs][:nfs_service_name], :server => "nfs", :addr => node[:ipaddress], :export_dirs => export_dirs)
+service "start-rpcidmapd" do
+  service_name "rpcidmapd"
+  action [ :enable, :start ]
+  supports :status => true, :restart => true
+end
+
+export_entries = export_dirs.values.map{ |dir| dir.split(/\//).last }
+
+provide_service(node[:nfs][:nfs_service_name], :server => "nfs", :addr => node[:ipaddress], :export_entries => export_entries)
