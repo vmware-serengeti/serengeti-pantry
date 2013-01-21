@@ -17,13 +17,23 @@
 <!-- communication -->
 <% if node.role?('hadoop_tasktracker') %>
 <property>
-  <name>mapred.tasktracker.map.tasks.maximum</name>
-  <value><%= node[:hadoop][:max_map_tasks] %></value>
+  <name>mapred.map.tasks.speculative.execution</name>
+  <value>false</value>
 </property>
 
 <property>
-  <name>mapred.task.timeout</name>
-  <value>602000</value>
+  <name>mapred.reduce.tasks.speculative.execution</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>mapreduce.tasktracker.outofband.heartbeat</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>mapred.tasktracker.map.tasks.maximum</name>
+  <value><%= node[:hadoop][:max_map_tasks] %></value>
 </property>
 
 <property>

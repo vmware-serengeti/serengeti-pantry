@@ -67,7 +67,7 @@ default[:hadoop][:client][:admin][:username] = 'joe'
 set[:hadoop][:extra_nn_metadata_path] = nil
 
 # Other hadoop settings
-default[:hadoop][:max_balancer_bandwidth]     = 1048576  # bytes per second -- 1MB/s by default
+default[:hadoop][:max_balancer_bandwidth]     = 10485760  # bytes per second -- 10MB/s by default
 
 #
 # Tune cluster settings for size of instance
@@ -120,7 +120,7 @@ hadoop_performance_settings =
     # heap_size/ulimit is not in effect right now
     heap_size    = 0.75 * (ram.to_f / 1000) / (n_mappers + n_reducers)
     heap_size    = [550, heap_size.to_i].max
-    child_ulimit = 2 * heap_size * 1024
+    child_ulimit = 3 * heap_size * 1024
     { :max_map_tasks => n_mappers, :max_reduce_tasks => n_reducers, :java_child_opts => "-Xmx#{heap_size}m", :java_child_ulimit => child_ulimit, :io_sort_factor => 10, :io_sort_mb => 100, }
   end
 
