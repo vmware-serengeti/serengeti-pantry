@@ -31,11 +31,6 @@ execute "clean exports" do
 end
 
 directory node[:nfs][:pseudo_root_dir] do
-  recursive true
-  action :delete
-end
-
-directory node[:nfs][:pseudo_root_dir] do
   owner "mapred"
   group "hadoop"
   mode "0755"
@@ -46,11 +41,6 @@ pseudo_count = 0
 
 # Announce as a TempFS server, and announce each share as a capability
 disks_mount_points.each do |mount_point|
-  # Remove dir
-  directory "#{mount_point}/tempfs" do
-    action :delete
-    recursive true
-  end
 
   mount_dir = "#{mount_point}/tempfs"
   pseudo_dir = "#{node[:nfs][:pseudo_root_dir]}/export#{pseudo_count}"
@@ -86,7 +76,7 @@ end
 
 service "start-#{node[:nfs][:nfs_service_name]}" do
   service_name node[:nfs][:nfs_service_name]
-  action [ :enable, :start ]
+  action [ :disable, :start ]
   supports :status => true, :restart => true
 end
 
