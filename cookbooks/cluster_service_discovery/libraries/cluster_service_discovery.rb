@@ -53,13 +53,16 @@ module ClusterServiceDiscovery
   # Find all nodes that have indicated they provide the given service,
   # in descending order of when they registered.
   #
-  def all_providers_for_service service_name, wait = true, num = 1
+  def all_providers_for_service service_name, wait = true, num = 1, monitor = true
+    set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, service_name) if monitor
     condition = "cluster_name:#{node[:cluster_name]} AND provides_service:#{service_name}"
-    all_providers(service_name, condition, wait, num, false) do
+    nodes = all_providers(service_name, condition, wait, num, false) do
       search(:node, "#{condition}").
         find_all{|server| server[:provides_service][service_name] && server[:provides_service][service_name]['timestamp'] }.
         sort_by{|server| server[:provides_service][service_name]['timestamp'] } rescue []
     end
+    clear_action if monitor
+    nodes
   end
 
   # Find all nodes that have indicated they provide the given role.
@@ -74,7 +77,7 @@ module ClusterServiceDiscovery
 
   def all_providers name, condition = "", wait = true, num = 1, run_in_ruby_block = true, &block
     if run_in_ruby_block
-      ruby_block "provider-#{name}" do
+      ruby_block "find-provider-for-#{name}" do
         block do
           get_all_providers(name, condition, wait, num, run_in_ruby_block, &block)
         end
@@ -110,7 +113,6 @@ module ClusterServiceDiscovery
 
   # Find the most recent node that registered to provide the given service
   def provider_for_service service_name, wait = true
-    set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, service_name)
     all_providers_for_service(service_name, wait).last
   end
 
@@ -124,13 +126,27 @@ module ClusterServiceDiscovery
     provide_service(notify_name, notify_info)
   end
 
-  # Wait for given name ready
-  def wait_for name, conditions = {}, wait = true, num = 1
+  # Wait until some nodes match the given condition. This will run in a ruby block by default.
+  def wait_for name, conditions = {}, wait = true, num = 1, run_in_ruby_block = true
+    providers_for(name, conditions, wait, num, run_in_ruby_block)
+  end
+
+  # Get the nodes which match the given condition. This will not run in a ruby block by default.
+  def providers_for name, conditions = {}, wait = true, num = 1, run_in_ruby_block = false
     condition = generate_condition(conditions)
-    all_providers(name, condition, wait, num, true) do
-      search(:node, "#{condition}").
-        sort_by{ |server| server[:facet_index] } rescue []
+    all_providers(name, condition, wait, num, run_in_ruby_block) do
+      search(:node, "#{condition}").sort_by{ |server| server[:facet_index] } rescue []
     end
+  end
+
+  # Return the node which matches the given condition.
+  def provider_for name, conditions = {}, wait = true
+    providers_for(name, conditions, wait).last
+  end
+
+  # Wait for the service to be started or provided. This will not run in a ruby block.
+  def wait_for_service(service_name)
+    provider_for_service(service_name)
   end
 
   # Register to provide the given service.
@@ -152,7 +168,7 @@ module ClusterServiceDiscovery
       Chef::Log.info("Wait for Chef Solr Server to generate search index for property 'provides_service'")
       sleep SLEEP_TIME
       # a service can be provided by multi nodes, e.g. zookeeper server service
-      servers = all_providers_for_service(service_name)
+      servers = all_providers_for_service(service_name, true, 1, false)
       servers.each do |server|
         if server[:ipaddress] == node[:ipaddress] and server[:provides_service][service_name][:timestamp] == timestamp
           found = true
@@ -198,6 +214,11 @@ module ClusterServiceDiscovery
   def provider_fqdn_for_role role_name, wait = true
     server = provider_for_role(role_name, wait) or return
     fqdn_of(server)
+  end
+
+  def provider_ip_for_role role_name, wait = true
+    server = provider_for_role(role_name, wait) or return
+    ip_of(server)
   end
 
   # The globally-accessable ip address for the most recent provider for service_name
