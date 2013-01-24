@@ -308,26 +308,6 @@ EOF
     end
   end
 
-  # Create a symlink to a directory, wiping away any existing dir that's in the way
-  def force_link dest, src
-    return if dest == src
-    directory(dest) do
-      action :delete
-      recursive true
-      not_if { File.symlink?(dest) }
-      not_if { File.exists?(dest) and File.exists?(src) and File.realpath(dest) == File.realpath(src) }
-    end
-    link(dest) { to src }
-  end
-
-  def make_link src, target
-    return if src == target
-    link(src) do
-      to target
-      not_if { File.exists?(src) }
-    end
-  end
-
   # log dir for hadoop daemons
   def local_hadoop_log_dir
     dir = ""

@@ -17,6 +17,26 @@
 
 module HadoopCluster
 
+  # Create a symlink to a directory, wiping away any existing dir that's in the way
+  def force_link dest, src
+    return if dest == src
+    directory(dest) do
+      action :delete
+      recursive true
+      not_if { File.symlink?(dest) }
+      not_if { File.exists?(dest) and File.exists?(src) and File.realpath(dest) == File.realpath(src) }
+    end
+    link(dest) { to src }
+  end
+
+  def make_link src, target
+    return if src == target
+    link(src) do
+      to target
+      not_if { File.exists?(src) }
+    end
+  end
+
   # Use `file -s` to identify volume type: ohai doesn't seem to want to do so.
   def fstype_from_file_magic(dev)
     return 'ext4' unless File.exists?(dev)
@@ -69,5 +89,124 @@ module HadoopCluster
     end
 
     connected
+  end
+
+  def set_java_home(file)
+    execute "Set JAVA_HOME in #{file}" do
+      only_if { File.exists?(file) }
+      not_if "grep '^export JAVA_HOME' #{file}"
+      command %Q{
+cat <<EOF >> #{file}
+# detect JAVA_HOME
+. /etc/profile
+. /etc/environment
+export JAVA_HOME
+EOF
+      }
+    end
+  end
+
+  # format and mount local data disks
+  def mount_disks(dev2disk, mp2dev)
+    ## Format attached disk devices
+    set_action(ACTION_FORMAT_DISK, 'format_disk')
+    dev2disk.each do |dev, disk|
+      execute "formatting disk device #{disk}" do
+        only_if do File.exist?(disk) end
+        not_if do File.exist?(dev) end
+        command %Q{
+        flag=1
+        while [ $flag -ne 0 ] ; do
+          echo 'Running: sfdisk -uM #{disk}. Occasionally it will fail, we will re-run.'
+          echo ",,L" | sfdisk -uM #{disk}
+          flag=$?
+          sleep 3
+        done
+
+        echo "y" | mkfs #{dev}
+        }
+        action :nothing
+      end.run_action(:run)
+    end
+    clear_action
+
+    ## Mount data disk, make hadoop dirs on them
+    mp2dev.each do |mount_point, dev|
+      next unless File.exists?(node[:disk][:disk_devices][dev])
+
+      Chef::Log.info "mounting data disk #{dev} at #{mount_point} if not mounted"
+      directory mount_point do
+        only_if{ File.exists?(dev) }
+        owner     'root'
+        group     'root'
+        mode      '0755'
+        action    :create
+      end
+
+      dev_fstype = fstype_from_file_magic(dev)
+      mount mount_point do
+        only_if{ dev && dev_fstype }
+        only_if{ File.exists?(dev) }
+        device dev
+        fstype dev_fstype
+      end
+
+      # Chef Resource mount doesn't enable automatically mount disks when OS starts up. We add it here.
+      mount_device_command = "#{dev}\t\t#{mount_point}\t\t#{dev_fstype}\tdefaults\t0 0"
+      execute 'add mount info into /etc/fstab if not added' do
+        only_if "grep '#{dev}' /etc/mtab  > /dev/null"
+        not_if  "grep '#{dev}' /etc/fstab > /dev/null"
+        command %Q{
+        echo "#{mount_device_command}" >> /etc/fstab
+        }
+      end
+    end
+  end
+
+  # Generate ssh rsa keypair for the specified user
+  def generate_ssh_rsa_keypair(username, homedir = nil)
+    homedir ||= "/home/#{username}"
+    directory "#{homedir}/.ssh" do
+      owner username
+      group username
+      mode  '0700'
+      action :nothing
+    end.run_action(:create)
+
+    rsa_file = "#{homedir}/.ssh/id_rsa"
+    execute "generate ssh keypair for user #{username}" do
+      not_if { File.exist?(rsa_file) }
+      user username
+      command "ssh-keygen -t rsa -N '' -f #{rsa_file}"
+      action :nothing
+    end.run_action(:run)
+
+    ssh_config_file = "#{homedir}/.ssh/config"
+    if !File.exist?(ssh_config_file)
+      file ssh_config_file do
+        owner username
+        group username
+        mode  '0640'
+        content 'StrictHostKeyChecking no'
+        action :nothing
+      end.run_action(:create)
+    end
+
+    # save public key of username to Chef Node
+    keyname = "rsa_pub_key_of_#{username}"
+    rsa_pub_key = File.read("#{homedir}/.ssh/id_rsa.pub")
+    if node[keyname] != rsa_pub_key
+      node[keyname] = rsa_pub_key
+      node.save
+    end
+  end
+
+  # Return rsa public keys of the specified user on the nodes with the specified role
+  def rsa_pub_keys_of_user(username, role)
+    nodes_num = all_nodes_count({"role" => role});
+    return [] if nodes_num == 0
+    key = "rsa_pub_key_of_#{username}"
+    nodes = providers_for(key, {"role" => role, key => "*"}, true, nodes_num)
+    nodes.map { |node| node[key] }
   end
 end

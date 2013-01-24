@@ -19,7 +19,7 @@
 #
 
 case node[:platform]
-when 'centos'
+when 'centos', 'redhat'
   if !is_connected_to_internet
     directory '/etc/yum.repos.d/backup' do
       mode '0755'
