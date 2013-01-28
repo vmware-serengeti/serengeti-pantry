@@ -44,6 +44,11 @@ module HadoopCluster
     uri ? uri.split('://')[1].split(':') : nil rescue nil
   end
 
+  # Return user defined hadoop log dir
+  def hadoop_log_dir_conf
+    hadoop_conf('hadoop-env.sh', 'HADOOP_LOG_DIR') rescue nil
+  end
+
   # Return user defined hadoop configuration by file and attr
   def hadoop_conf(file, attr)
     all_hadoop_conf[file][attr] rescue nil

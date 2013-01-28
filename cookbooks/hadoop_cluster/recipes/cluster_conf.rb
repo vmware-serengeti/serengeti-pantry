@@ -26,8 +26,8 @@ include_recipe "hadoop_cluster::hadoop_conf_xml" unless is_namenode or is_jobtra
 # Add symlinks to HADOOP_HOME
 force_link("/usr/lib/hadoop", "/usr/lib/#{node[:hadoop][:hadoop_handle]}")
 
-# Make hadoop logs live on /mnt/hadoop
-hadoop_log_dir = local_hadoop_log_dir
+# Make hadoop logs live on /mnt/hadoop or user defined log dir
+hadoop_log_dir = hadoop_log_dir_conf || local_hadoop_log_dir
 make_hadoop_dir(hadoop_log_dir, 'hdfs', '0775')
 force_link("/var/log/hadoop", hadoop_log_dir )
 force_link("/var/log/#{node[:hadoop][:hadoop_handle]}", hadoop_log_dir )

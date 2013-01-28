@@ -466,7 +466,11 @@ EOF
 
   # Hortonworks hmonitor can not monitor standby namenode service and jobtracker service in the CDH4 distro
   def hortonworks_hmonitor_enabled
-    !(node[:hadoop][:distro_name] =~ /cdh4/)
+    !is_cdh4_distro
+  end
+
+  def is_cdh4_distro
+    distro_vendor.downcase == 'cdh' and (distro_version =~ /4/) == 0
   end
 
 end

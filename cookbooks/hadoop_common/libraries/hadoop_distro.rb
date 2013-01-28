@@ -22,6 +22,14 @@ module HadoopCluster
     @current_distro ||= distro(node[:hadoop][:distro_name])
   end
 
+  def distro_vendor
+    node[:hadoop][:distro_vendor]
+  end
+
+  def distro_version
+    node[:hadoop][:distro_version]
+  end
+
   def package_repos
     current_distro['package_repos'] || []
   end

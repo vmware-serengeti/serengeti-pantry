@@ -12,7 +12,7 @@ export HADOOP_CONF_DIR="${HADOOP_CONF_DIR:-/etc/hadoop/conf}"
 ## HADOOP_HDFS_HOME is not used by Hadoop 0.20, but used by CDH4 and other Hadoop 2.0 distros
 export HADOOP_HDFS_HOME="${HADOOP_HDFS_HOME:-/usr/lib/hadoop-hdfs}"
 export HADOOP_PID_DIR="${HADOOP_PID_DIR:-/var/run/hadoop}"
-export HADOOP_LOG_DIR="${HADOOP_LOG_DIR:-/var/log/hadoop}"
+export HADOOP_LOG_DIR="/var/log/hadoop"
 
 ## YARN_HOME is used by CDH4
 export YARN_HOME=${HADOOP_HOME}

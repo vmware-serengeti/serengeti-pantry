@@ -1,7 +1,7 @@
 node[:hadoop][:install_from_tarball] = is_install_from_tarball
 Chef::Log.info("Will install the packages using #{node[:hadoop][:install_from_tarball] ? 'tarball' : 'rpm'}")
 
-if node[:hadoop][:distro_name] =~ /cdh4/ and !node[:hadoop][:install_from_tarball]
+if is_cdh4_distro and !node[:hadoop][:install_from_tarball]
   ## For CDH4 MRv1
   node.default[:hadoop][:service_name_prefix] = 'hadoop-hdfs'
   # hadoop packages
