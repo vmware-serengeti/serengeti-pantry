@@ -20,18 +20,21 @@
 
 case node[:platform]
 when 'centos', 'redhat'
+  prefix = node[:platform] == 'centos' ? 'CentOS' : 'rhel'
   if !is_connected_to_internet
     directory '/etc/yum.repos.d/backup' do
       mode '0755'
     end
-    execute 'disable all external yum repos' do
-      only_if 'test -f /etc/yum.repos.d/CentOS-Base.repo'
-      command 'mv -f /etc/yum.repos.d/CentOS*.repo /etc/yum.repos.d/backup/'
+    file = "/etc/yum.repos.d/#{prefix}*.repo"
+    execute 'disable all standard yum repos' do
+      only_if "ls #{file}"
+      command "mv -f #{file} /etc/yum.repos.d/backup/; rm -rf /etc/yum.repos.d/*.repo"
     end
   else
-    execute 'enable all external yum repos' do
-      only_if 'test -f /etc/yum.repos.d/backup/CentOS-Base.repo'
-      command 'mv -f /etc/yum.repos.d/backup/CentOS*.repo /etc/yum.repos.d/'
+    file = "/etc/yum.repos.d/backup/#{prefix}*.repo"
+    execute 'enable all standard yum repos' do
+      only_if "ls #{file}"
+      command "mv -f #{file} /etc/yum.repos.d/"
     end
   end
 
