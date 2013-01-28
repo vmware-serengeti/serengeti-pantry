@@ -69,17 +69,17 @@ module HadoopCluster
   def is_connected_to_internet
     Chef::Log.info('checking whether this machine is connected to the Internet')
 
-    tmpfile = '/tmp/google-homepage'
-
-    file tmpfile do
+    # wget will time out in 4*5 seconds if the given url is not reachable
+    # wget will create an empty file even if it can't download the remote file
+    tmpfile = '/tmp/internet-connected'
+    execute 'try to access google homepage' do
+      command %Q{
+        rm -f #{tmpfile}
+        wget --timeout=4 http://www.google.com/ -O /tmp/google-homepage 1>2 2>/dev/null && touch #{tmpfile}
+        rm -f /tmp/google-homepage
+      }
       action :nothing
-    end.run_action(:delete)
-
-    remote_file tmpfile do
-      source 'http://www.google.com/'
-      ignore_failure true
-      action :nothing
-    end.run_action(:create)
+    end.run_action(:run)
 
     connected = File.exist?(tmpfile)
     if connected
