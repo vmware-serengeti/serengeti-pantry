@@ -209,4 +209,14 @@ EOF
     nodes = providers_for(key, {"role" => role, key => "*"}, true, nodes_num)
     nodes.map { |node| node[key] }
   end
+
+  def grant_sudo_to_user(username)
+    sudo_setting = "#{username}     ALL=(ALL) NOPASSWD: ALL"
+    execute "grant sudo priviledge to user #{username}" do
+      not_if "grep '#{sudo_setting}' /etc/sudoers"
+      command %Q{
+        echo "#{sudo_setting}" >> /etc/sudoers
+      }
+    end
+  end
 end

@@ -40,13 +40,7 @@ user username do
   action     [:create]
 end
 
-sudo_setting = "#{username}     ALL=(ALL) NOPASSWD: ALL"
-execute "grant SUDO priviledge to user #{username}" do
-  not_if "grep '#{sudo_setting}' /etc/sudoers"
-  command %Q{
-    echo "#{sudo_setting}" >> /etc/sudoers
-  }
-end
+grant_sudo_to_user(username)
 
 usermod_command = 'if id joe >/dev/null 2>&1; then /usr/sbin/usermod -p "$cryptpasswd" joe; fi'
 execute "add usermod command to serengeti-password" do

@@ -80,6 +80,8 @@ user "mapr" do
   action :nothing
 end.run_action(:create)
 
+grant_sudo_to_user('mapr')
+
 # Generate SSH keypair for MapR user
 generate_ssh_rsa_keypair('mapr')
 
