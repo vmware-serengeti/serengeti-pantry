@@ -34,6 +34,7 @@ DESC="Hadoop datanode daemon"
 PID_FILE=$HADOOP_PID_DIR/hadoop-$HADOOP_IDENT_STRING-datanode.pid
 
 SLEEP_TIME=5 # Time to wait for the server to start or stop
+TIMEOUT=5
 
 DODTIME=3                   # Time to wait for the server to die, in seconds
                             # If this value is set too low you might not
@@ -43,7 +44,7 @@ DODTIME=3                   # Time to wait for the server to die, in seconds
 # Checks if the given pid represents a live process.
 # Returns 0 if the pid is a live process, 1 otherwise
 hadoop_is_process_alive() {
-  local pid="$1" 
+  local pid="$1"
   ps -fp $pid | grep $pid | grep datanode > /dev/null 2>&1
 }
 
@@ -55,10 +56,10 @@ hadoop_check_pidfile() {
 
   pid=`cat "$pidfile" 2>/dev/null`
   if [ "$pid" = '' ]; then
-    # The file probably does not exist or is empty. 
+    # The file probably does not exist or is empty.
     return 1
   fi
-  
+
   set -- $pid
   pid="$1"
 
@@ -96,7 +97,7 @@ hadoop_stop_pidfile() {
       # The file probably does not exist or is empty. Success
       return 0
    fi
-   
+
    set -- $pid
    pid="$1"
 
@@ -116,15 +117,20 @@ hadoop_stop_pidfile() {
 start() {
     $DAEMON_SCRIPT start datanode $DAEMON_FLAGS
 
-    if [ "datanode" = "datanode" ]; then
-      # Some processes are slow to start
-      sleep $SLEEP_TIME
-    fi
-
+    # Some processes are slow to start
+    sleep $SLEEP_TIME
 }
 
 stop() {
     $DAEMON_SCRIPT stop datanode
+
+    count=1
+    while [ $count -le $TIMEOUT ]; do
+      if hadoop_check_pidfile $PID_FILE ; then
+        sleep 1
+      fi
+      let "count++"
+    done
 }
 
 is_hadoop_23_or_above() {

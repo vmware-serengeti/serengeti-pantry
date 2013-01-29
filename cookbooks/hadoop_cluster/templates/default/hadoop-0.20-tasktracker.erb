@@ -33,6 +33,7 @@ NAME=<%= @hadoop_version %>-tasktracker
 DESC="Hadoop tasktracker daemon"
 PID_FILE=$HADOOP_PID_DIR/hadoop-$HADOOP_IDENT_STRING-tasktracker.pid
 SLEEP_TIME=5
+TIMEOUT=5
 
 DODTIME=3                   # Time to wait for the server to die, in seconds
                             # If this value is set too low you might not
@@ -42,7 +43,7 @@ DODTIME=3                   # Time to wait for the server to die, in seconds
 # Checks if the given pid represents a live process.
 # Returns 0 if the pid is a live process, 1 otherwise
 hadoop_is_process_alive() {
-  local pid="$1" 
+  local pid="$1"
   ps -fp $pid | grep $pid | grep tasktracker > /dev/null 2>&1
 }
 
@@ -54,10 +55,10 @@ hadoop_check_pidfile() {
 
   pid=`cat "$pidfile" 2>/dev/null`
   if [ "$pid" = '' ]; then
-    # The file probably does not exist or is empty. 
+    # The file probably does not exist or is empty.
     return 1
   fi
-  
+
   set -- $pid
   pid="$1"
 
@@ -95,7 +96,7 @@ hadoop_stop_pidfile() {
       # The file probably does not exist or is empty. Success
       return 0
    fi
-   
+
    set -- $pid
    pid="$1"
 
@@ -115,19 +116,17 @@ hadoop_stop_pidfile() {
 start() {
     $DAEMON_SCRIPT start tasktracker $DAEMON_FLAGS
 
-    if [ "tasktracker" = "datanode" ]; then
-      # Some processes are slow to start
-      sleep $SLEEP_TIME
-    fi
-
 }
 stop() {
     $DAEMON_SCRIPT stop tasktracker
 
-    if [ "tasktracker" = "datanode" ]; then
-      # Some processes are slow to stop
-      sleep $SLEEP_TIME
-    fi
+    count=1
+    while [ $count -le $TIMEOUT ]; do
+      if hadoop_check_pidfile $PID_FILE ; then
+        sleep 1
+      fi
+      let "count++"
+    done
 }
 
 is_hadoop_23_or_above() {
