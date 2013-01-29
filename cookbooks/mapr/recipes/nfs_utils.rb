@@ -13,9 +13,8 @@
 #   limitations under the License.
 #
 
-include_recipe 'mapr::prereqs'
-
-# mapr-nfsserver service needs these packages
-include_recipe 'mapr::nfs_utils'
-
-package 'mapr-nfs'
+package 'nfs-utils'
+package 'portmap'
+service 'portmap' do
+  action :start
+end

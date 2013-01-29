@@ -96,11 +96,13 @@ package "sendmail"
 package "unzip"
 package "pdsh"
 
-# Install MapR basic package
-# mapr-client and mapr-core are conflicted
+## Install MapR basic package
+# mapr-client and mapr-core are conflicted, so only one can be installed
 name = node.role?('mapr_client') ? 'mapr-client' : 'mapr-core'
 set_bootstrap_action(ACTION_INSTALL_PACKAGE, name, true)
 package name
+
+include_recipe 'mapr::nfs_utils' if node.role?('mapr_client') # so the user can mount nfs on mapr_client node
 
 # Set JAVA_HOME
 set_mapr_java_home
