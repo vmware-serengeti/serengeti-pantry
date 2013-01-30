@@ -123,7 +123,7 @@ EOF
           sleep 3
         done
 
-        echo "y" | mkfs #{dev}
+        echo "y" | mkfs -t ext4 -i 4194304 -b 4096 #{dev}
         }
         action :nothing
       end.run_action(:run)
@@ -148,6 +148,7 @@ EOF
         only_if{ dev && dev_fstype }
         only_if{ File.exists?(dev) }
         device dev
+        options 'noatime'
         fstype dev_fstype
       end
 
