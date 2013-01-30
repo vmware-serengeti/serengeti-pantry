@@ -22,30 +22,39 @@ include_recipe "tempfs::default"
 
 SERVICE_WAIT_TIME_SEC = 1800
 start_time = Time.now.to_i
-expect_servers_num = (ref_servers_num("tempfs_server") + 1) / 2
+servers_num =  ref_servers_num("tempfs_server")
 while (Time.now.to_i - start_time < SERVICE_WAIT_TIME_SEC)
-  my_servers = []
-  all_servers = all_providers_for_service node[:nfs][:nfs_service_name]
-  all_servers.each { |server|
-    if server[:provision][:physical_host] == node[:provision][:physical_host] and server[:cluster_name] == node[:cluster_name]
-      my_servers << server
+  server_selected = nil
+  retrieved_servers = all_providers_for_service(node[:nfs][:nfs_service_name]).select{ |n| n[:cluster_name] == node[:cluster_name]}
+  candidate_servers = retrieved_servers
+  if !node[:selected_nfs_server].nil?
+    retrieved_servers.each do |server|
+      if full_name(server) == node[:selected_nfs_server]
+        server_selected = server
+        break
+      end
     end
-  }
+    sleep(3) and next if retrieved_servers.size < servers_num[:all_hosts] && server_selected.nil?
+  else # this recipe has never been ran before or the data server this compute node attached is missed
+    if servers_num[:this_host] > 0
+      candidate_servers = retrieved_servers.select{ |n| n[:provision][:physical_host] == node[:provision][:physical_host]}
+      sleep(3) and next if candidate_servers.size < ( servers_num[:this_host] + 1 ) / 2
+    else
+      sleep(3) and next if candidate_servers.size < ( servers_num[:all_hosts] + 1 ) / 2
+    end
+  end
 
-  # try to avoid attaching all compute nodes to one data nodes
-  sleep(3) and next if my_servers.size < expect_servers_num
-  server_selected = my_servers[node[:ipaddress].hash % my_servers.size]
+  if server_selected.nil?
+    # avoid attaching all compute nodes to one data nodes
+    server_selected = candidate_servers[node[:ipaddress].hash % candidate_servers.size]
+  end
+
   export_entries = server_selected[:provides_service][node[:nfs][:nfs_service_name]][:export_entries]
   map_dirs = []
   nfs_server_ip = server_selected[:ipaddress]
 
   begin
     mount_dir = "/mnt/mapred"
-    # Remove dir
-    directory mount_dir do
-      action :delete
-      recursive true
-    end
 
     # Create Dir
     directory mount_dir do
@@ -64,6 +73,7 @@ while (Time.now.to_i - start_time < SERVICE_WAIT_TIME_SEC)
 
     Chef::Log.info("Processing mount of #{mount_dir} from #{nfs_server_ip}:/")
     mount mount_dir do
+      not_if      "grep '#{nfs_server_ip}' /etc/mtab > /dev/null"
       fstype      "nfs4"
       options     "rw,nointr,rsize=131072,wsize=131072"
       device      "#{nfs_server_ip}:/"
@@ -87,6 +97,7 @@ while (Time.now.to_i - start_time < SERVICE_WAIT_TIME_SEC)
     Chef::Log.warn err
   end
   node[:nfs_mapred_dirs] = map_dirs
+  node[:selected_nfs_server] = full_name(server_selected)
   node.save
   break
 end

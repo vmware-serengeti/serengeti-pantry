@@ -16,7 +16,13 @@ module NFS
   def  ref_servers_num role
     condition = "cluster_name:#{node[:cluster_name]} AND role:#{role}"
     nodes = search(:node, "#{condition}")
-    nodes.select{ |n| n[:provision][:physical_host] == node[:provision][:physical_host] }.size
+    servers_on_all_hosts = nodes.size
+    servers_on_this_host = nodes.select{ |n| n[:provision][:physical_host] == node[:provision][:physical_host] }.size
+    {:all_hosts => servers_on_all_hosts, :this_host => servers_on_this_host}
+  end
+
+  def full_name server
+    "#{server[:cluster_name]}-#{server[:facet_name]}-#{server[:facet_index]}"
   end
 end
 
