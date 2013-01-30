@@ -204,10 +204,16 @@ EOF
 
   # Return rsa public keys of the specified user on the nodes with the specified role
   def rsa_pub_keys_of_user(username, role)
-    nodes_num = all_nodes_count({"role" => role});
+    rsa_pub_keys_of_user_for_condition(username, {"role" => role})
+  end
+
+  # Return rsa public keys of the specified user on the nodes with the conditions
+  def rsa_pub_keys_of_user_for_condition(username, conditions)
+    nodes_num = all_nodes_count(conditions)
     return [] if nodes_num == 0
     key = "rsa_pub_key_of_#{username}"
-    nodes = providers_for(key, {"role" => role, key => "*"}, true, nodes_num)
+    conditions.merge!(key => "*")
+    nodes = providers_for(key, conditions, true, nodes_num)
     nodes.map { |node| node[key] }
   end
 

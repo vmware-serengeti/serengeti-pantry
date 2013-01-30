@@ -72,7 +72,7 @@ module HadoopCluster
     servers = all_nodes({"role" => "hadoop_namenode"})
     if !is_journalnode and !is_namenode
       set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:namenode_service_name])
-      wait_for(node[:hadoop][:namenode_service_name], {"provides_service" => node[:hadoop][:namenode_service_name]}, true, servers.count)
+      wait_for(node[:hadoop][:namenode_service_name], {"provides_service" => node[:hadoop][:namenode_service_name]}, true, servers.count, false)
     end
     servers.map{ |server| facet_name_of_server(server) }.uniq.sort
   end
@@ -455,13 +455,6 @@ EOF
         notifies :create, resources("ruby_block[#{svc}]"), :immediately
       end
     end
-  end
-
-  # Return rsa pub key
-  def node_rsa_pub_key facet_index
-    wait_for("node-rsa-pub-key", {"facet_name" => node[:facet_name], "facet_index" => facet_index, "rsa_pub_key" => "*"})
-    server = all_nodes({"facet_name" => node[:facet_name], "facet_index" => facet_index}).first
-    server[:rsa_pub_key]
   end
 
   # Hortonworks hmonitor can not monitor standby namenode service and jobtracker service in the CDH4 distro

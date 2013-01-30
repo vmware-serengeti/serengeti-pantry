@@ -97,8 +97,8 @@ group 'supergroup' do
   action     [:create]
 end
 
-# Save node rsa pub key to chef server if the key generated
-node.default[:rsa_pub_key] = File.read("/root/.ssh/id_rsa.pub") if File.exist?("/root/.ssh/id_rsa.pub")
+# Generate ssh rsa keypair for user root
+generate_ssh_rsa_keypair('root', '/root')
 
 #
 # Hadoop packages

@@ -101,10 +101,11 @@ if namenode_ha_enabled
 
   # copy rsa pub key to other namenode for hdfs HA to automatic failover
   if is_primary_namenode
-    rsa_pub_key = node_rsa_pub_key(1)
+    rsa_pub_key_conditions = {"facet_name" => node[:facet_name], "facet_index" => 1}
   else
-    rsa_pub_key = node_rsa_pub_key(0)
+    rsa_pub_key_conditions = {"facet_name" => node[:facet_name], "facet_index" => 0}
   end
+  rsa_pub_key = rsa_pub_keys_of_user_for_condition("root", rsa_pub_key_conditions).first
   execute "copy rsa pub key" do
     user 'root'
     command %Q{
