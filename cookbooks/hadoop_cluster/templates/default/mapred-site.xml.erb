@@ -14,8 +14,6 @@
   <final>true</final>
 </property>
 
-<!-- communication -->
-<% if node.role?('hadoop_tasktracker') %>
 <property>
   <name>mapred.map.tasks.speculative.execution</name>
   <value>false</value>
@@ -31,6 +29,8 @@
   <value>true</value>
 </property>
 
+<!-- communication -->
+<% if node.role?('hadoop_tasktracker') %>
 <property>
   <name>mapred.tasktracker.map.tasks.maximum</name>
   <value><%= node[:hadoop][:max_map_tasks] %></value>
