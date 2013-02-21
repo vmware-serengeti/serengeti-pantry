@@ -26,8 +26,8 @@ default[:hadoop][:service_stop_time] = 6 # waiting time for the hadoop service p
 default[:hadoop][:namenode_wait_for_safemode_timeout] = 180 # 3 minutes
 
 # HDFS and MapReduce settings
-default[:hadoop][:dfs_replication             ] =  3
-default[:hadoop][:reduce_parallel_copies      ] =  5
+default[:hadoop][:dfs_replication             ] = 3
+default[:hadoop][:reduce_parallel_copies      ] = 20
 default[:hadoop][:tasktracker_http_threads    ] = 40
 default[:hadoop][:jobtracker_handler_count    ] = 10
 default[:hadoop][:namenode_handler_count      ] = 10
@@ -121,7 +121,7 @@ hadoop_performance_settings =
     heap_size    = 0.75 * (ram.to_f / 1000) / (n_mappers + n_reducers)
     heap_size    = [550, heap_size.to_i].max
     child_ulimit = 3 * heap_size * 1024
-    { :max_map_tasks => n_mappers, :max_reduce_tasks => n_reducers, :java_child_opts => "-Xmx#{heap_size}m", :java_child_ulimit => child_ulimit, :io_sort_factor => 10, :io_sort_mb => 100, }
+    { :max_map_tasks => n_mappers, :max_reduce_tasks => n_reducers, :java_child_opts => "-Xmx#{heap_size}m", :java_child_ulimit => child_ulimit, :io_sort_factor => 100, :io_sort_mb => 300, :io_sort_record_percent => 0.14}
   end
 
 hadoop_performance_settings.each{ |k,v| set[:hadoop][k] = v }
