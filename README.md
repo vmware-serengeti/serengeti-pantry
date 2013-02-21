@@ -9,11 +9,13 @@ To understand the basic concept of Cookbooks and Roles (defined by Chef), please
 ## Main Changes in VMware Serengeti Cookbooks
 
 * Generate user defined hadooop configuration (in cluster/facet roles) in hadoop conf files 
-* Add support for deploying a Hadoop cluster using various Hadoop Distributions (e.g. Apache Hadoop, GreenPlum HD, Cloudera CDH, Hortonworks, etc.).
-* The cookbooks are targeted for deploying a Hadoop 0.20 or 1.0 cluster with support for HDFS, MapReduce, Pig and Hive.
-* The cookbooks now only run well on a VM or server with RHEL 5.x and CentOS 5.x installed.
+* Add support for deploying a Hadoop cluster using various Hadoop Distributions (e.g. Apache Hadoop, GreenPlum HD, Cloudera CDH3 and CDH4(MR1 only), Hortonworks, MapR etc.).
+* The cookbooks are targeted for deploying a Hadoop 0.20 or 1.0 cluster with support for HDFS, MapReduce, HBase, Pig and Hive.
+* The cookbooks now only run well on a VM or server with CentOS 5.6+ installed. RHEL 5.6+ should also work but not tested.
 
-Note: Hadoop 0.23 is not supported yet.
+Note:
+* Hadoop 0.23 is not supported yet.
+* To deploy CDH4 and MapR cluster, you need to specify the yum server which contains CDH4/MapR packages. This is different from deploy Apache Hadoop, Hortonworks and GreenPlum HD cluster.
 
 ## Roles
 
@@ -33,6 +35,7 @@ We mainly define the following roles for deploying a Hadoop cluster via Chef.
 * hbase_master: install and run Apache HBase Master service
 * hbase_regionserver: install and run Apache HBase RegionServer service
 * hbase_client: install Apache HBase package and setup HBase configuration
+* mapr_*: install MapR packages
 
 Each role points to recipes contained in several cookbooks.
 
@@ -51,6 +54,7 @@ We mainly create the following cookbooks and recipes for deploying a Hadoop clus
 * hive : install Hive package
 * hbase : install HBase package
 * zookeeper : install Zookeeper package
+* mapr: install MapR package
 * postgresql : install a Postgresql Server
 * install_from : install a package from a tarball
 

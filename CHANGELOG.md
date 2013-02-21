@@ -1,3 +1,10 @@
+# 0.8.0 (2013-2-21)
+
+New Features:
+* Add cookbooks and roles for deploying CDH4(MR1) cluster w/ or w/o HDFS HA and HDFS Federation
+* Add cookbooks and roles for deploying MapR cluster.
+* Some enhancement and bug fix.
+
 # 0.7.0 (2012-10-8)
 
 New Features:
