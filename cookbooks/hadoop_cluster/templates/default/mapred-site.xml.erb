@@ -84,11 +84,6 @@
 </property>
 
 <property>
-  <name>io.sort.record.percent</name>
-  <value><%= node[:hadoop][:io_sort_record_percent] %></value>
-</property>
-
-<property>
   <name>mapred.inmem.merge.threshold</name>
   <value>0</value>
 </property>
@@ -109,16 +104,6 @@
   <name>mapred.child.ulimit</name>
   <value><%= node[:hadoop][:java_child_ulimit] %></value>
 </property>
-<% else %>
-<!-- <property> -->
-<!-- <name>mapred.child.java.opts</name> -->
-<!-- <value>This value is only set on nodes with hadoop_tasktracker role, please check that kind of nodes if you want to inspect this attribute</value> -->
-<!-- </property> -->
-
-<!-- <property> -->
-<!-- <name>mapred.child.ulimit</name> -->
-<!-- <value>This value is only set on nodes with hadoop_tasktracker role, please check that kind of nodes if you want to inspect this attribute</value> -->
-<!-- </property> -->
 <% end %>
 
 <property>
