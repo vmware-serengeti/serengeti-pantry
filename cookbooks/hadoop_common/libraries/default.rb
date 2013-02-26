@@ -69,15 +69,18 @@ module HadoopCluster
   def is_connected_to_internet
     Chef::Log.info('checking whether this machine is connected to the Internet')
 
-    # wget will time out in 4*5 seconds if the given url is not reachable
     # wget will create an empty file even if it can't download the remote file
+    # when not connected to Internet, in each try of wget, it will try to connect to several IPs (resolved by the dns name) 
+    # and every failed connect will take {--timeout} seconds to timeout.
     tmpfile = '/tmp/internet-connected'
     execute 'try to access google homepage' do
       command %Q{
         rm -f #{tmpfile}
-        wget --timeout=4 http://www.google.com/ -O /tmp/google-homepage 1>2 2>/dev/null && touch #{tmpfile}
+        wget --tries=1 --timeout=3 http://www.google.com/ -O /tmp/google-homepage 1>2 2>/dev/null && touch #{tmpfile}
         rm -f /tmp/google-homepage
       }
+      timeout 30
+      ignore_failure true
       action :nothing
     end.run_action(:run)
 
