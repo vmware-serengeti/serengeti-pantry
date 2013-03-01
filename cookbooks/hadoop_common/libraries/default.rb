@@ -126,7 +126,7 @@ EOF
           sleep 3
         done
 
-        echo "y" | mkfs -t ext4 -i 4194304 -b 4096 #{dev}
+        echo "y" | mkfs -t ext4 -b 4096 #{dev}
         }
         action :nothing
       end.run_action(:run)
