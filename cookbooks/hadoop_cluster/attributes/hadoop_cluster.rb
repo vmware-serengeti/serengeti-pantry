@@ -27,7 +27,7 @@ default[:hadoop][:namenode_wait_for_safemode_timeout] = 180 # 3 minutes
 
 # HDFS and MapReduce settings
 default[:hadoop][:dfs_replication             ] =  3
-default[:hadoop][:reduce_parallel_copies      ] =  5
+default[:hadoop][:reduce_parallel_copies      ] = 20
 default[:hadoop][:tasktracker_http_threads    ] = 40
 default[:hadoop][:jobtracker_handler_count    ] = 10
 default[:hadoop][:namenode_handler_count      ] = 10
@@ -113,15 +113,21 @@ hadoop_performance_settings =
   when 'm2.4xlarge' then { :max_map_tasks => 12, :max_reduce_tasks => 4, :java_child_opts => '-Xmx4378m -XX:+UseCompressedOops -XX:MaxNewSize=200m -server', :java_child_ulimit => 13447987, :io_sort_factor => 40, :io_sort_mb => 256, }
   when 'vsphere'
     cores        = node[:cpu][:total].to_i
-    ram          = node[:memory][:total].to_i
+    ram          = node[:memory][:total].to_i / 1000 # in MB
     n_mappers    = (2 + cores * 2/3).to_i
     n_reducers   = (2 + cores * 1/3).to_i
 
-    # heap_size/ulimit is not in effect right now
-    heap_size    = 0.75 * (ram.to_f / 1000) / (n_mappers + n_reducers)
-    heap_size    = [550, heap_size.to_i].max
+    roles_need_mem = ['hadoop_datanode', 'hadoop_tasktracker', 'hbase_regionserver', 'mapr_tasktracker']
+    roles_num    = node.roles.select{|role| roles_need_mem.include?(role)}.size
+
+    io_sort_mb = 100
+    if ram > 4 * 1024
+      io_sort_mb = 300
+    end
+    heap_size = (ram.to_f - 1024 - io_sort_mb * n_mappers - 1024 * roles_num * 0.6) / (n_mappers + n_reducers)
+    heap_size    = [256, heap_size.to_i].max
     child_ulimit = 3 * heap_size * 1024
-    { :max_map_tasks => n_mappers, :max_reduce_tasks => n_reducers, :java_child_opts => "-Xmx#{heap_size}m", :java_child_ulimit => child_ulimit, :io_sort_factor => 10, :io_sort_mb => 100, }
+    { :max_map_tasks => n_mappers, :max_reduce_tasks => n_reducers, :java_child_opts => "-Xmx#{heap_size}m", :java_child_ulimit => child_ulimit, :io_sort_factor => 10, :io_sort_mb => io_sort_mb, :io_sort_record_percent => 0.14 }
   end
 
 hadoop_performance_settings.each{ |k,v| set[:hadoop][k] = v }
