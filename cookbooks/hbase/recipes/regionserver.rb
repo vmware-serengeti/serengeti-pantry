@@ -18,6 +18,7 @@
 #   limitations under the License.
 #
 
+include_recipe "hadoop_cluster"
 include_recipe "hbase"
 
 hbase_conf_dir = "/etc/hbase/conf"

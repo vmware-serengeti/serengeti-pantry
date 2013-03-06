@@ -17,6 +17,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
+include_recipe "hadoop_cluster"
 include_recipe "hbase"
 
 %w[ hbase-rest hbase-thrift ].each do |file|
