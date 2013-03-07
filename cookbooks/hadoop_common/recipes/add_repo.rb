@@ -21,7 +21,7 @@
 case node[:platform]
 when 'centos', 'redhat'
   prefix = node[:platform] == 'centos' ? 'CentOS' : 'rhel'
-  if !is_connected_to_internet
+  if !node[:enable_standard_os_yum_repos] or !is_connected_to_internet
     directory '/etc/yum.repos.d/backup' do
       mode '0755'
     end
