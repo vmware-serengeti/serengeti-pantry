@@ -19,6 +19,7 @@
 #
 
 include_recipe "java::sun"
+include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 group "hbase" do
 end
