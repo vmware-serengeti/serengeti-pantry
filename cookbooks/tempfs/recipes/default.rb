@@ -54,7 +54,7 @@ end
 
 bash "configure service rpcidmapd" do
   code <<EOF
-  sed -i 's/^Nobody-User.*/Nobody-User = mapred/' /etc/idmapd.conf
-  sed -i 's/^Nobody-Group.*/Nobody-Group = hadoop/' /etc/idmapd.conf
+  sed -i 's/^Nobody-User.*/Nobody-User = root/' /etc/idmapd.conf
+  sed -i 's/^Nobody-Group.*/Nobody-Group = root/' /etc/idmapd.conf
 EOF
 end
