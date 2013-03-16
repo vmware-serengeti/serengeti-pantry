@@ -29,6 +29,11 @@
   <value>true</value>
 </property>
 
+<property>
+  <name>mapreduce.cluster.administrators</name> 
+  <value>root,mapred</value> 
+</property>
+
 <!-- communication -->
 <% if node.role?('hadoop_tasktracker') %>
 <property>
