@@ -21,8 +21,6 @@
 # limitations under the License.
 #
 
-include_recipe "hadoop_cluster::update_attributes"
-
 include_recipe "java"
 
 class Chef::Recipe; include HadoopCluster ; end

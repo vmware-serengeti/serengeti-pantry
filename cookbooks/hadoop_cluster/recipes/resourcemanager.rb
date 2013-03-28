@@ -1,11 +1,10 @@
 #
 # Cookbook Name:: hadoop_cluster
-# Recipe::        jobtracker
+# Recipe::        resourcemanager
 #
 
 #
-# Copyright 2009, Opscode, Inc.
-# Portions Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,45 +22,61 @@
 include_recipe "hadoop_cluster"
 
 # Install
-hadoop_package node[:hadoop][:packages][:jobtracker][:name]
-hadoop_ha_package "jobtracker" if !is_namenode and hortonworks_hmonitor_enabled
+hadoop_package 'hadoop-mapreduce' # This package is not installed automatically. This is a bug of CDH4.1.2
+hadoop_package node[:hadoop][:packages][:resourcemanager][:name]
 
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
-## Launch service
-set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:jobtracker_service_name])
+service_name = node[:hadoop][:resourcemanager_service_name]
 
-is_jobtracker_running = system("service #{node[:hadoop][:jobtracker_service_name]} status 1>2 2>/dev/null")
-service "restart-#{node[:hadoop][:jobtracker_service_name]}" do
-  service_name node[:hadoop][:jobtracker_service_name]
+## Launch service
+set_bootstrap_action(ACTION_START_SERVICE, service_name)
+
+is_service_running = system("service #{service_name} status 1>2 2>/dev/null")
+service "restart-#{service_name}" do
+  service_name service_name
   supports :status => true, :restart => true
 
   subscribes :restart, resources("template[/etc/hadoop/conf/core-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-site.xml]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/yarn-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
+  #subscribes :restart, resources("template[/etc/hadoop/conf/yarn-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/capacity-scheduler.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-queue-acls.xml]"), :delayed
-  subscribes :restart, resources("template[/etc/hadoop/conf/yarn-site.xml]"), :delayed if is_hadoop_yarn?
-  subscribes :restart, resources("template[/etc/hadoop/conf/yarn-env.sh]"), :delayed if is_hadoop_yarn?
-  notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately
-  if node[:hadoop][:ha_enabled] and is_namenode and hortonworks_hmonitor_enabled
-    notifies :restart, resources("service[hmonitor-namenode-monitor]"), :delayed
-  end
-end if is_jobtracker_running
+  notifies :create, resources("ruby_block[#{service_name}]"), :immediately
+end if is_service_running
 
-service "start-#{node[:hadoop][:jobtracker_service_name]}" do
-  service_name node[:hadoop][:jobtracker_service_name]
+service "start-#{service_name}" do
+  service_name service_name
   action [ :disable, :start ]
   supports :status => true, :restart => true
 
-  notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately
+  notifies :create, resources("ruby_block[#{service_name}]"), :immediately
 end
 
 # Register with cluster_service_discovery
-provide_service(node[:hadoop][:jobtracker_service_name])
+provide_service(service_name)
 
-# Launch service level ha monitor
-enable_ha_service "hmonitor-jobtracker-monitor" if !is_namenode and hortonworks_hmonitor_enabled
+
+# Install HistoryServer
+hadoop_package node[:hadoop][:packages][:historyserver][:name]
+
+## Fix CDH4b1 bug: 'service stop hadoop-yarn-*' should wait for SLEEP_TIME before return
+#%w[hadoop-mapreduce-historyserver].each do |service_file|
+#  template "/etc/init.d/#{service_file}" do
+#    owner "root"
+#    group "root"
+#    mode  "0755"
+#    source "#{service_file}.erb"
+#  end
+#end
+
+# Launch HistoryServer service
+service "#{node[:hadoop][:historyserver_service_name]}" do
+  action [ :disable, :start ]
+  supports :status => true, :restart => true
+end

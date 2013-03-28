@@ -112,12 +112,18 @@ module HadoopCluster
   # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
   # The resourcemanager in hadoop-0.23 is vary similar to the jobtracker in hadoop-0.20.
   def resourcemanager_address
+    return node[:fqdn] if is_resourcemanager
     provider_fqdn(node[:hadoop][:resourcemanager_service_name])
   end
 
   # whether the node itself has jobtracker role
   def is_jobtracker
     node.role?("hadoop_jobtracker")
+  end
+
+  # whether the node itself has resourcemanager role
+  def is_resourcemanager
+    node.role?("hadoop_resourcemanager")
   end
 
   # whether any node in the cluster has jobtracker role
@@ -159,7 +165,6 @@ module HadoopCluster
       :hadoop_hdfs_home       => hadoop_hdfs_dir,
       :namenode_address       => namenode_address,
       :namenode_port          => namenode_port,
-      :jobtracker_address     => jobtracker_address,
       :mapred_local_dirs      => formalize_dirs(mapred_local_dirs),
       :dfs_name_dirs          => formalize_dirs(dfs_name_dirs),
       :dfs_data_dirs          => formalize_dirs(dfs_data_dirs),
@@ -168,7 +173,11 @@ module HadoopCluster
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
       :all_cluster_volumes    => all_cluster_volumes
     }
-    vars[:resourcemanager_address] = resourcemanager_address if is_hadoop_yarn?
+    if is_hadoop_yarn?
+      vars[:resourcemanager_address] = resourcemanager_address
+    else
+      vars[:jobtracker_address] = jobtracker_address
+    end
 
     if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
       vars[:nameservices] = namenode_facet_names
@@ -383,7 +392,10 @@ EOF
 
   # return true if installing hadoop 0.23
   def is_hadoop_yarn?
-    node[:hadoop][:is_hadoop_yarn] == true
+    # FIXME provider_for_role is not blocking, so might return wrong result
+    Chef::Log.info("is_yarn: #{node[:hadoop][:is_hadoop_yarn].inspect}")
+    #return node[:hadoop][:is_hadoop_yarn] unless node[:hadoop][:is_hadoop_yarn].nil?
+    node[:hadoop][:is_hadoop_yarn] = !! provider_for_role("hadoop_resourcemanager", false)
   end
 
   # HADOOP_HOME
