@@ -112,12 +112,18 @@ module HadoopCluster
   # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
   # The resourcemanager in hadoop-0.23 is vary similar to the jobtracker in hadoop-0.20.
   def resourcemanager_address
+    return node[:fqdn] if is_resourcemanager
     provider_fqdn(node[:hadoop][:resourcemanager_service_name])
   end
 
   # whether the node itself has jobtracker role
   def is_jobtracker
     node.role?("hadoop_jobtracker")
+  end
+
+  # whether the node itself has resourcemanager role
+  def is_resourcemanager
+    node.role?("hadoop_resourcemanager")
   end
 
   # whether any node in the cluster has jobtracker role
@@ -159,7 +165,6 @@ module HadoopCluster
       :hadoop_hdfs_home       => hadoop_hdfs_dir,
       :namenode_address       => namenode_address,
       :namenode_port          => namenode_port,
-      :jobtracker_address     => jobtracker_address,
       :mapred_local_dirs      => formalize_dirs(mapred_local_dirs),
       :dfs_name_dirs          => formalize_dirs(dfs_name_dirs),
       :dfs_data_dirs          => formalize_dirs(dfs_data_dirs),
@@ -168,7 +173,13 @@ module HadoopCluster
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
       :all_cluster_volumes    => all_cluster_volumes
     }
-    vars[:resourcemanager_address] = resourcemanager_address if is_hadoop_yarn?
+    if is_hadoop_yarn?
+      vars[:resourcemanager_address] = resourcemanager_address
+      vars[:yarn_local_dirs] = yarn_local_dirs.join(',')
+      vars[:yarn_log_dirs] = yarn_log_dirs.join(',')
+    else
+      vars[:jobtracker_address] = jobtracker_address
+    end
 
     if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
       vars[:nameservices] = namenode_facet_names
@@ -300,11 +311,19 @@ EOF
     end
   end
 
+  # the execute provider can only support one "command" item, 
+  # if there are multiple "command" items exist, only the last 
+  # one take effect
   def ensure_hadoop_owns_hadoop_dirs dir, dir_owner, dir_mode="0755"
     execute "Make sure hadoop owns hadoop dirs" do
-      command %Q{chown -R #{dir_owner}:hadoop #{dir}}
-      command %Q{chmod -R #{dir_mode}         #{dir}}
+      command %Q{chown -R #{dir_owner}:hadoop #{dir} && chmod -R #{dir_mode} #{dir}}
       not_if{ (File.stat(dir).uid == dir_owner) && (File.stat(dir).gid == 300) }
+    end
+  end
+
+  def ensure_yarn_dirs_stat dir, dir_mode="0755"
+    execute "set yarn dirs stat" do
+      command %Q{chown -R yarn:yarn #{dir} && chmod -R #{dir_mode} #{dir}}
     end
   end
 
@@ -318,10 +337,21 @@ EOF
         dir = node[:nfs_mapred_dirs].last
       end
     end
-    if dir == ""
+    if dir.nil? or dir == ""
       dir = "/mnt/hadoop"
     end
     File.join(dir, 'hadoop/log')
+  end
+
+  def yarn_system_log_dir
+    dir = ""
+    if node[:hadoop][:use_data_disk_as_log_vol]
+      dir = node[:disk][:data_disks].keys.last
+    end
+    if dir.nil? or dir == ""
+      dir = "/mnt/hadoop"
+    end
+    File.join(dir, 'hadoop-yarn/log')
   end
 
   def local_hadoop_dirs
@@ -368,6 +398,14 @@ EOF
     end
   end
 
+  def yarn_local_dirs
+    local_hadoop_dirs.map{|dir| File.join(dir, 'yarn/local')}
+  end
+
+  def yarn_log_dirs
+    local_hadoop_dirs.map{|dir| File.join(dir, 'yarn/log')}
+  end
+
   def journalnode_edits_dir
     "/var/lib/journalnode"
   end
@@ -381,9 +419,11 @@ EOF
     end
   end
 
-  # return true if installing hadoop 0.23
+  # return true if installing Hadoop YARN (i.e. Hadoop MRv2)
+  # this flag will be set in the cluster role by Ironfan before running chef-client
+  # default value is nil (i.e. Hadoop MRv1 cluster)
   def is_hadoop_yarn?
-    node[:hadoop][:is_hadoop_yarn] == true
+    node[:is_hadoop_yarn]
   end
 
   # HADOOP_HOME

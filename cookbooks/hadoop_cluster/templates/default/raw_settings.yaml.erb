@@ -16,6 +16,10 @@
 :local_hadoop_dirs:        <%= @local_hadoop_dirs.inspect           %>
 :persistent_hadoop_dirs:   <%= @persistent_hadoop_dirs.inspect      %>
 :mapred_local_dirs:        <%= @mapred_local_dirs                   %>
+<%- if node[:is_hadoop_yarn] %>
+:yarn_local_dirs:          <%= @yarn_local_dirs                     %>
+:yarn_log_dirs:            <%= @yarn_log_dirs                       %>
+<%- end %>
 :dfs_name_dirs:            <%= @dfs_name_dirs                       %>
 :fs_checkpoint_dirs:       <%= @fs_checkpoint_dirs                  %>
 :dfs_data_dirs:            <%= @dfs_data_dirs                       %>

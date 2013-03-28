@@ -3,10 +3,27 @@
 <!-- check for all settings at http://hadoop.apache.org/common/docs/stable/mapred-default.html -->
 <configuration>
 
+<%- if node[:is_hadoop_yarn] %>
+<property>
+  <name>mapreduce.framework.name</name>
+  <value>yarn</value>
+</property>
+
+<property>
+  <name>mapreduce.jobtracker.address</name>
+  <value><%= @resourcemanager_address %>:9001</value>
+</property>
+
+<property>
+  <name>yarn.app.mapreduce.am.staging-dir</name>
+  <value>/tmp/hadoop-yarn/staging</value>
+</property>
+<%- else %>
 <property>
   <name>mapred.job.tracker</name>
   <value><%= @jobtracker_address %>:8021</value>
 </property>
+<%- end %>
 
 <property>
   <name>mapred.local.dir</name>

@@ -43,4 +43,8 @@ dfs_name_dirs.each{      |dir| make_hadoop_dir(dir, 'hdfs',   "0700") }
 dfs_data_dirs.each{      |dir| make_hadoop_dir(dir, 'hdfs',   "0755") }
 fs_checkpoint_dirs.each{ |dir| make_hadoop_dir(dir, 'hdfs',   "0700") }
 mapred_local_dirs.each{  |dir| make_hadoop_dir(dir, 'mapred', "0755") }
-
+if is_hadoop_yarn?
+  yarn_local_dirs.each{    |dir| make_hadoop_dir(dir, 'yarn',   "0755")}
+  yarn_log_dirs.each{      |dir| make_hadoop_dir(dir, 'yarn',   "0755")}
+  make_hadoop_dir(yarn_system_log_dir, 'yarn',   "0755")
+end

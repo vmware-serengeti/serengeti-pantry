@@ -130,4 +130,6 @@ hadoop_performance_settings =
     { :max_map_tasks => n_mappers, :max_reduce_tasks => n_reducers, :java_child_opts => "-Xmx#{heap_size}m", :java_child_ulimit => child_ulimit, :io_sort_factor => 10, :io_sort_mb => io_sort_mb, :io_sort_record_percent => 0.14 }
   end
 
+set[:yarn][:nm_resource_mem] = (0.8 * node[:memory][:total].to_i / 1024).to_i
+set[:yarn][:am_resource_mem] = [1536, (0.3 * node[:memory][:total].to_i / 1024).to_i].max
 hadoop_performance_settings.each{ |k,v| set[:hadoop][k] = v }

@@ -1,8 +1,15 @@
 node[:hadoop][:install_from_tarball] = is_install_from_tarball
 Chef::Log.info("Will install the packages using #{node[:hadoop][:install_from_tarball] ? 'tarball' : 'rpm'}")
 
+if is_hadoop_yarn?
+  Chef::Log.info('Will deploy a Hadoop YARN cluster because YARN roles are specified.')
+else
+  Chef::Log.info('Will deploy a Hadoop MRv1 cluster because YARN roles are not specified.')
+end
+
 if is_cdh4_distro and !node[:hadoop][:install_from_tarball]
   ## For CDH4 MRv1
+  node.default[:hadoop][:hadoop_mapred_home] = '/usr/lib/hadoop-0.20-mapreduce'
   node.default[:hadoop][:service_name_prefix] = 'hadoop-hdfs'
   # hadoop packages
   node.default[:hadoop][:packages][:hadoop][:name] = "hadoop"
@@ -16,6 +23,19 @@ if is_cdh4_distro and !node[:hadoop][:install_from_tarball]
   # hadoop system services
   node.default[:hadoop][:jobtracker_service_name] = "hadoop-0.20-mapreduce-jobtracker"
   node.default[:hadoop][:tasktracker_service_name] = "hadoop-0.20-mapreduce-tasktracker"
+
+  if is_hadoop_yarn?
+    ## For CDH4 MRv2
+    node.default[:hadoop][:hadoop_mapred_home] = '/usr/lib/hadoop-mapreduce' # CDH4 MRv1 and MRv2 has different HADOOP_MAPRED_HOME
+
+    node.default[:hadoop][:packages][:resourcemanager][:name] = "hadoop-yarn-resourcemanager"
+    node.default[:hadoop][:packages][:historyserver][:name] = "hadoop-mapreduce-historyserver"
+    node.default[:hadoop][:packages][:nodemanager][:name] = "hadoop-yarn-nodemanager"
+
+    node.default[:hadoop][:resourcemanager_service_name] = "hadoop-yarn-resourcemanager"
+    node.default[:hadoop][:historyserver_service_name] = "hadoop-mapreduce-historyserver"
+    node.default[:hadoop][:nodemanager_service_name] = "hadoop-yarn-nodemanager"
+  end
 else
   node.default[:hadoop][:service_name_prefix] = 'hadoop-0.20'
   node.default[:hadoop][:packages][:hadoop][:name] = "hadoop"
@@ -32,8 +52,8 @@ end
 node.default[:hadoop][:namenode_service_name] = "#{node[:hadoop][:service_name_prefix]}-namenode"
 node.default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:service_name_prefix]}-secondarynamenode"
 node.default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:service_name_prefix]}-datanode"
-node.default[:hadoop][:namenode_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9000 : 8020
-node.default[:hadoop][:jobtracker_service_port] = node[:hadoop][:is_hadoop_yarn] ? 9001 : 8021
+node.default[:hadoop][:namenode_service_port] = is_hadoop_yarn? ? 9000 : 8020
+node.default[:hadoop][:jobtracker_service_port] = is_hadoop_yarn? ? 9001 : 8021
 node.default[:hadoop][:namenode_web_service_port] = 50070
 
 # hadoop 2.0 hdfs HA services
