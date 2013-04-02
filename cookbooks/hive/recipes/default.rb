@@ -24,7 +24,7 @@ include_recipe "java::sun"
 
 user node[:hive][:user] do
   comment "A sample user for hive server"
-  home  "/var/lib/joe"
+  home  "/var/lib/hive"
   shell "/bin/bash"
   password   '$1$tecIsaQr$3.2FCeDL9mBR2zsq579uJ1'
   supports   :manage_home => true
