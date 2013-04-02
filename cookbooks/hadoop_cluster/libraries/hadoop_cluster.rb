@@ -390,12 +390,11 @@ EOF
     end
   end
 
-  # return true if installing hadoop 0.23
+  # return true if installing Hadoop YARN (i.e. Hadoop MRv2)
+  # this flag will be set in the cluster role by Ironfan before running chef-client
+  # default value is nil (i.e. Hadoop MRv1 cluster)
   def is_hadoop_yarn?
-    # FIXME provider_for_role is not blocking, so might return wrong result
-    Chef::Log.info("is_yarn: #{node[:hadoop][:is_hadoop_yarn].inspect}")
-    #return node[:hadoop][:is_hadoop_yarn] unless node[:hadoop][:is_hadoop_yarn].nil?
-    node[:hadoop][:is_hadoop_yarn] = !! provider_for_role("hadoop_resourcemanager", false)
+    node[:is_hadoop_yarn]
   end
 
   # HADOOP_HOME

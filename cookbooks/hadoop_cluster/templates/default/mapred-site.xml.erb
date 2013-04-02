@@ -3,7 +3,7 @@
 <!-- check for all settings at http://hadoop.apache.org/common/docs/stable/mapred-default.html -->
 <configuration>
 
-<%- if node[:hadoop][:is_hadoop_yarn] %>
+<%- if node[:is_hadoop_yarn] %>
 <property>
   <name>mapreduce.framework.name</name>
   <value>yarn</value>

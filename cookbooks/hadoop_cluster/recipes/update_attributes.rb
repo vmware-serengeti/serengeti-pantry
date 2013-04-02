@@ -1,6 +1,12 @@
 node[:hadoop][:install_from_tarball] = is_install_from_tarball
 Chef::Log.info("Will install the packages using #{node[:hadoop][:install_from_tarball] ? 'tarball' : 'rpm'}")
 
+if is_hadoop_yarn?
+  Chef::Log.info('Will deploy a Hadoop YARN cluster because YARN roles are specified.')
+else
+  Chef::Log.info('Will deploy a Hadoop MRv1 cluster because YARN roles are not specified.')
+end
+
 if is_cdh4_distro and !node[:hadoop][:install_from_tarball]
   ## For CDH4 MRv1
   node.default[:hadoop][:hadoop_mapred_home] = '/usr/lib/hadoop-0.20-mapreduce'

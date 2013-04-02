@@ -22,7 +22,7 @@
 include_recipe "hadoop_cluster"
 
 # Install
-hadoop_package 'hadoop-mapreduce' # This package is not installed automatically. This is a bug of CDH4.1.2
+hadoop_package 'hadoop-mapreduce' #TODO This package is not installed automatically. This is a bug of CDH4.1.2
 hadoop_package node[:hadoop][:packages][:resourcemanager][:name]
 
 # Regenerate Hadoop xml conf files with new Hadoop server address
@@ -64,16 +64,6 @@ provide_service(service_name)
 
 # Install HistoryServer
 hadoop_package node[:hadoop][:packages][:historyserver][:name]
-
-## Fix CDH4b1 bug: 'service stop hadoop-yarn-*' should wait for SLEEP_TIME before return
-#%w[hadoop-mapreduce-historyserver].each do |service_file|
-#  template "/etc/init.d/#{service_file}" do
-#    owner "root"
-#    group "root"
-#    mode  "0755"
-#    source "#{service_file}.erb"
-#  end
-#end
 
 # Launch HistoryServer service
 service "#{node[:hadoop][:historyserver_service_name]}" do

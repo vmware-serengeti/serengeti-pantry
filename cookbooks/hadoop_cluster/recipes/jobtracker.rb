@@ -44,8 +44,6 @@ service "restart-#{node[:hadoop][:jobtracker_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/capacity-scheduler.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-queue-acls.xml]"), :delayed
-  subscribes :restart, resources("template[/etc/hadoop/conf/yarn-site.xml]"), :delayed if is_hadoop_yarn?
-  subscribes :restart, resources("template[/etc/hadoop/conf/yarn-env.sh]"), :delayed if is_hadoop_yarn?
   notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately
   if node[:hadoop][:ha_enabled] and is_namenode and hortonworks_hmonitor_enabled
     notifies :restart, resources("service[hmonitor-namenode-monitor]"), :delayed
