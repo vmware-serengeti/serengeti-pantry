@@ -40,7 +40,7 @@ service "restart-#{service_name}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/yarn-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
-  #subscribes :restart, resources("template[/etc/hadoop/conf/yarn-env.sh]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/yarn-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/capacity-scheduler.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-queue-acls.xml]"), :delayed

@@ -50,4 +50,44 @@
     $YARN_HOME/lib/*
   </value>
 </property>
+
+<property>
+  <name>yarn.nodemanager.local-dirs</name>
+  <value><%= @yarn_local_dirs %></value>
+</property>
+
+<property>
+  <name>yarn.nodemanager.log-dirs</name>
+  <value><%= @yarn_log_dirs %></value>
+</property>
+
+<property>
+  <name>yarn.nodemanager.remote-app-log-dir</name>
+  <value>/var/log/hadoop-yarn/apps</value>
+</property>
+
+<!-- need performance team's investigation -->
+<property>
+  <description>Amount of physical memory, in MB, that can be allocated
+    for containers.</description>
+  <name>yarn.nodemanager.resource.memory-mb</name>
+  <value><%= node[:yarn][:nm_resource_mem] %></value>
+</property>
+
+<property>
+  <name>yarn.app.mapreduce.am.resource.mb</name>
+  <value><%= node[:yarn][:am_resource_mem] %></value>
+  <description>The amount of memory the MR AppMaster needs.</description>
+</property>
+
+<!-- properties specified by users -->
+<%- conf = node['cluster_configuration']['hadoop']['yarn-site.xml'] || {} rescue conf = {} %>
+<%- conf.map do |key, value| %>
+<property>
+  <name><%= key %></name>
+  <value><%= value %></value>
+</property>
+<%- end %>
+<!-- end -->
+
 </configuration>

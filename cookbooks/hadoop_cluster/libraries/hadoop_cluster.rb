@@ -175,6 +175,8 @@ module HadoopCluster
     }
     if is_hadoop_yarn?
       vars[:resourcemanager_address] = resourcemanager_address
+      vars[:yarn_local_dirs] = yarn_local_dirs.join(',')
+      vars[:yarn_log_dirs] = yarn_log_dirs.join(',')
     else
       vars[:jobtracker_address] = jobtracker_address
     end
@@ -309,11 +311,19 @@ EOF
     end
   end
 
+  # the execute provider can only support one "command" item, 
+  # if there are multiple "command" items exist, only the last 
+  # one take effect
   def ensure_hadoop_owns_hadoop_dirs dir, dir_owner, dir_mode="0755"
     execute "Make sure hadoop owns hadoop dirs" do
-      command %Q{chown -R #{dir_owner}:hadoop #{dir}}
-      command %Q{chmod -R #{dir_mode}         #{dir}}
+      command %Q{chown -R #{dir_owner}:hadoop #{dir} && chmod -R #{dir_mode} #{dir}}
       not_if{ (File.stat(dir).uid == dir_owner) && (File.stat(dir).gid == 300) }
+    end
+  end
+
+  def ensure_yarn_dirs_stat dir, dir_mode="0755"
+    execute "set yarn dirs stat" do
+      command %Q{chown -R yarn:yarn #{dir} && chmod -R #{dir_mode} #{dir}}
     end
   end
 
@@ -327,10 +337,21 @@ EOF
         dir = node[:nfs_mapred_dirs].last
       end
     end
-    if dir == ""
+    if dir.nil? or dir == ""
       dir = "/mnt/hadoop"
     end
     File.join(dir, 'hadoop/log')
+  end
+
+  def yarn_system_log_dir
+    dir = ""
+    if node[:hadoop][:use_data_disk_as_log_vol]
+      dir = node[:disk][:data_disks].keys.last
+    end
+    if dir.nil? or dir == ""
+      dir = "/mnt/hadoop"
+    end
+    File.join(dir, 'hadoop-yarn/log')
   end
 
   def local_hadoop_dirs
@@ -375,6 +396,14 @@ EOF
     else
       return node[:nfs_mapred_dirs]
     end
+  end
+
+  def yarn_local_dirs
+    local_hadoop_dirs.map{|dir| File.join(dir, 'yarn/local')}
+  end
+
+  def yarn_log_dirs
+    local_hadoop_dirs.map{|dir| File.join(dir, 'yarn/log')}
   end
 
   def journalnode_edits_dir

@@ -83,3 +83,9 @@ if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
   YARN_OPTS="$YARN_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
 fi
 YARN_OPTS="$YARN_OPTS -Dyarn.policy.file=$YARN_POLICYFILE"
+
+# env variables specified by users
+<%- conf = node['cluster_configuration']['hadoop']['yarn-env.sh'] || {} rescue conf = {} %>
+<%- conf.map do |key, value| %>
+export <%= key %>="<%= value %>"
+<%- end %>
