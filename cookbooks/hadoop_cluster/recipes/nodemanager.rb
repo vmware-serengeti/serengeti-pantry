@@ -22,7 +22,6 @@
 include_recipe "hadoop_cluster"
 
 # Install
-hadoop_package 'hadoop-mapreduce' #TODO This package is not installed automatically. This is a bug of CDH4.1.2
 hadoop_package node[:hadoop][:packages][:nodemanager][:name]
 
 service_name = node[:hadoop][:nodemanager_service_name]

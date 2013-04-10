@@ -201,14 +201,14 @@ module HadoopCluster
   def hadoop_package package_name
     hadoop_major_version = node[:hadoop][:hadoop_handle]
     hadoop_home = hadoop_home_dir
-    # component is one of ['hadoop', 'namenode', 'datanode', 'jobtracker', 'tasktracker', 'secondarynamenode']
-    component = package_name.split('-').last
 
     # Install from tarball
     if node[:hadoop][:install_from_tarball] then
       tarball_url = current_distro['hadoop']
       tarball_filename = tarball_url.split('/').last
       tarball_pkgname = tarball_filename.split('.tar.gz').first
+      # component is one of ['hadoop', 'namenode', 'datanode', 'jobtracker', 'tasktracker', 'secondarynamenode']
+      component = package_name.split('-').last
 
       if package_name == node[:hadoop][:packages][:hadoop][:name] then
         # install hadoop base package
@@ -272,7 +272,6 @@ EOF
           # and then wait for namenode service to be ready. This can reduce the cluster creation time remarkably.
           action :nothing
         end.run_action(:run)
-
       end
 
       if ['namenode', 'datanode', 'jobtracker', 'tasktracker', 'secondarynamenode'].include?(component) then
@@ -292,10 +291,12 @@ EOF
     end
 
     # Install from rpm/apt packages
-    set_bootstrap_action(ACTION_INSTALL_PACKAGE, component, true)
-    package package_name do
-      if node[:hadoop][:package_version] != 'current'
-        version node[:hadoop][:package_version]
+    set_bootstrap_action(ACTION_INSTALL_PACKAGE, package_name, true)
+    package_name.split.each do |name|
+      package name do
+        if node[:hadoop][:package_version] != 'current'
+          version node[:hadoop][:package_version]
+        end
       end
     end
   end

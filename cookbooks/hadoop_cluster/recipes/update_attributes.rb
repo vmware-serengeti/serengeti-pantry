@@ -28,6 +28,8 @@ if is_cdh4_distro and !node[:hadoop][:install_from_tarball]
     ## For CDH4 MRv2
     node.default[:hadoop][:hadoop_mapred_home] = '/usr/lib/hadoop-mapreduce' # CDH4 MRv1 and MRv2 has different HADOOP_MAPRED_HOME
 
+    #FIXME package hadoop-hdfs and hadoop-mapreduce are not installed automatically but they contains some common jar files. This is a bug of CDH4.1.2.
+    node.default[:hadoop][:packages][:hadoop][:name] = "hadoop hadoop-hdfs hadoop-mapreduce"
     node.default[:hadoop][:packages][:resourcemanager][:name] = "hadoop-yarn-resourcemanager"
     node.default[:hadoop][:packages][:historyserver][:name] = "hadoop-mapreduce-historyserver"
     node.default[:hadoop][:packages][:nodemanager][:name] = "hadoop-yarn-nodemanager"
