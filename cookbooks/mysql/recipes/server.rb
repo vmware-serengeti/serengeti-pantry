@@ -80,7 +80,7 @@ service "mysql" do
     start_command "start mysql"
   end
   supports :status => true, :restart => true, :reload => true
-  action :nothing
+  action :enable
 end
 
 skip_federated = case node['platform']
