@@ -109,24 +109,12 @@ module HadoopCluster
     node.role?("hadoop_secondarynamenode")
   end
 
-  # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
-  # The resourcemanager in hadoop-0.23 is vary similar to the jobtracker in hadoop-0.20.
-  def resourcemanager_address
-    return node[:fqdn] if is_resourcemanager
-    provider_fqdn(node[:hadoop][:resourcemanager_service_name])
-  end
-
   # whether the node itself has jobtracker role
   def is_jobtracker
     node.role?("hadoop_jobtracker")
   end
 
-  # whether the node itself has resourcemanager role
-  def is_resourcemanager
-    node.role?("hadoop_resourcemanager")
-  end
-
-  # whether any node in the cluster has jobtracker role
+  # Find the node which has jobtracker role
   def jobtracker_node
     nodes = all_nodes({"role" => "hadoop_jobtracker"})
     (nodes and nodes.size > 0) ? nodes[0] : nil
@@ -143,7 +131,7 @@ module HadoopCluster
           # namenode and secondarynamenode don't require the jobtracker service is running
           ip = jobtracker[:fqdn]
         else
-          ip = provider_fqdn(node[:hadoop][:jobtracker_service_name], !is_jobtracker)
+          ip = provider_fqdn(node[:hadoop][:jobtracker_service_name])
         end
       else
         # return empty string if the cluster doesn't have a jobtracker (e.g. an HBase cluster)
@@ -156,6 +144,39 @@ module HadoopCluster
   def jobtracker_port
     # if the user has specified the jobtracker port, use it.
     jobtrackerport_conf || node[:hadoop][:jobtracker_service_port]
+  end
+
+  # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
+  # The resourcemanager in hadoop-0.23 is vary similar to the jobtracker in hadoop-0.20.
+  def resourcemanager_address
+    return node[:fqdn] if is_resourcemanager
+    ip = resourcemanager_ip_conf
+    if !ip
+      node = resourcemanager_node
+      if node
+        if is_namenode or is_secondarynamenode or is_journalnode
+          # namenode and secondarynamenode don't require the resourcemanager service is running
+          ip = node[:fqdn]
+        else
+          ip = provider_fqdn(node[:hadoop][:resourcemanager_service_name])
+        end
+      else
+        # return empty string if the cluster doesn't have a resourcemanager (e.g. an HBase cluster)
+        ip = ""
+      end
+    end
+    ip
+  end
+
+  # whether the node itself has resourcemanager role
+  def is_resourcemanager
+    node.role?("hadoop_resourcemanager")
+  end
+
+  # Find the node which has resourcemanager role
+  def resourcemanager_node
+    nodes = all_nodes({"role" => "hadoop_resourcemanager"})
+    (nodes and nodes.size > 0) ? nodes[0] : nil
   end
 
   # The erb template variables for generating Hadoop xml configuration files in $HADDOP_HOME/conf/

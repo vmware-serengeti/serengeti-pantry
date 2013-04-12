@@ -44,6 +44,21 @@ module HadoopCluster
     uri ? uri.split('://')[1].split(':') : nil rescue nil
   end
 
+  def resourcemanager_ip_conf
+    resourcemanager_uri_conf[0] rescue nil
+  end
+
+  def resourcemanager_port_conf
+    resourcemanager_uri_conf[1] rescue nil
+  end
+
+  # Return user defined resourcemanager uri
+  def resourcemanager_uri_conf
+    uri = hadoop_conf('mapred-site.xml', 'mapreduce.jobtracker.address')
+    # mapreduce.jobtracker.address is something like : '192.168.1.100:9001'
+    uri ? uri.split(':') : nil rescue nil
+  end
+
   # Return user defined hadoop log dir
   def hadoop_log_dir_conf
     hadoop_conf('hadoop-env.sh', 'HADOOP_LOG_DIR') rescue nil
