@@ -29,6 +29,9 @@ role2pkg = {
   'mapr_client' => 'mapr-client',
   'mapr_pig' => 'mapr-pig',
   'mapr_hive' => 'mapr-hive',
+  'mapr_hbase_master' => 'mapr-hbase-master',
+  'mapr_hbase_regionserver' => 'mapr-hbase-regionserver',
+  'mapr_hbase_client' => 'mapr-hbase-internal',
 }
 role2pkg.each do |role_name, pkg_name|
   if node.role?(role_name)

@@ -14,11 +14,8 @@
 #
 
 # Config IPs of Zookeeper and CLDB nodes
-if node.role?('mapr_client')
-  config_command = "/opt/mapr/server/configure.sh -c -N #{node[:cluster_name]} -C " + cldbs_address
-else
-  config_command = "/opt/mapr/server/configure.sh -N #{node[:cluster_name]} -C " + cldbs_address + " -Z " + zookeepers_address
-end
+client = node.role?('mapr_client') ? "-c" : ""
+config_command = "/opt/mapr/server/configure.sh #{client} -N #{node[:cluster_name]} -C " + cldbs_address + " -Z " + zookeepers_address
 execute "config IPs of MapR Zookeeper and CLDB nodes" do
   user "root"
   command config_command
