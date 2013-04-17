@@ -69,9 +69,49 @@ end
 
 include_recipe "hive::postgresql_metastore"
 
-template "#{node[:hive][:home_dir]}/conf/hive-site.xml" do
+#gem_package "xml-simple" do
+#  action :install
+#end
+
+# copy hive-default.xml.template to generate temp hive-site.xml
+file "#{node[:hive][:home_dir]}/conf/hive-site.xml.tmp" do
+  content IO.read("#{node[:hive][:home_dir]}/conf/hive-default.xml.template")
+  action :create
+  owner node[:hive][:user]
+  group node[:hive][:group]
+  mode 0664
+  only_if { File.exists?("#{node[:hive][:home_dir]}/conf/hive-default.xml.template")}
+end
+
+# if hive-default.xml.tempalte does not exist, use template to generate temp hive-site.xml
+template "#{node[:hive][:home_dir]}/conf/hive-site.xml.tmp" do
   source "hive-site.xml.erb"
   owner node[:hive][:user]
   group node[:hive][:group]
   mode 0664
+  not_if { File.exists?("#{node[:hive][:home_dir]}/conf/hive-site.xml.tmp")}
+end
+
+#update temp hive-site.xml configuration items
+property_kvs = {}
+property_kvs["javax.jdo.option.ConnectionURL"]="jdbc:postgresql://#{node[:ipaddress]}:5432/#{node[:hive][:metastore_db]}"
+property_kvs["javax.jdo.option.ConnectionDriverName"]="org.postgresql.Driver"
+property_kvs["javax.jdo.option.ConnectionUserName"] = "#{node[:hive][:metastore_user]}"
+property_kvs["javax.jdo.option.ConnectionPassword"] = "#{node[:postgresql][:password][:postgres]}"
+property_kvs["hive.metastore.uris"] = ""
+update_properties("#{node[:hive][:home_dir]}/conf/hive-site.xml.tmp", property_kvs)
+
+# copy temp hive-site.xml to hive-site.xml
+file "#{node[:hive][:home_dir]}/conf/hive-site.xml" do
+  content IO.read("#{node[:hive][:home_dir]}/conf/hive-site.xml.tmp")
+  action :create
+  owner node[:hive][:user]
+  group node[:hive][:group]
+  mode 0664
+  only_if { File.exists?("#{node[:hive][:home_dir]}/conf/hive-site.xml.tmp")}
+end
+
+# remove temp hive-site.xml
+file "#{node[:hive][:home_dir]}/conf/hive-site.xml.tmp" do
+  action :delete
 end
