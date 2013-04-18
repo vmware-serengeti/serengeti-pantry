@@ -13,30 +13,46 @@
 #   limitations under the License.
 #
 
-require 'xmlsimple'
+require 'rexml/document'
 
 module ConfigurationHandler
 
   def update_properties config_file_name, property_kvs
     Chef::Log.debug("Updating configuration file: #{config_file_name}")
-    config = XmlSimple.xml_in(config_file_name,"keeproot" => true)
-    property_kvs.each_pair { |key,value|  update_property(config,key,value)}
-    XmlSimple.xml_out(config,"outputfile" => config_file_name, "rootname" => "")
+    if File.exists?(config_file_name)
+      file = File.new(config_file_name)
+      doc = Document.new(file)
+    else
+      new_config = <<EOF
+<configuration>
+</configuration>
+EOF
+      doc = REXML::Document.new(new_config)
+    end
+    
+    property_kvs.each_pair { |key,value|  update_property(doc,key,value)}
+    formatter = REXML::Formatters::Pretty.new
+    formatter.compact = true
+    output = formatter.write(doc.root,"")
   end
 
-  def update_property config, property_name, property_value
+  def update_property configration, property_name, property_value
     Chef::Log.debug("Configure #{property_name} to value: #{property_value}")
-    config_item = config['configuration'][0]['property'].select{ |prop| prop['name'][0] == property_name }
+    config_item = REXML::XPath.match(configration, "//name[text() = #{property_name}")
     if config_item.length > 0
-      config_item[config_item.length-1]['value'] = [property_value]
+      config_item_parent = config_item[config_item.length-1].parent
+      config_value = config_item_parent.elements["value"]
+      config_value.text = property_value
     else
       Chef::Log.warn("The configuration item does not exist, new item will be added")
-      new_config_item = {}
-      new_config_item['name'] = [property_name]
-      new_config_item['value'] = [property_value]
-      config['configuration'][0]['property'] << new_config_item
+      new_prop = Element.new("property")
+      new_prop_name = new_prop.add_element("name")
+      new_prop_name.text = property_name
+      new_prop_value = new_prop.add_element("value")
+      new_prop_value.text = property_value
+      doc.elments["configuration"] << new_prop
     end
-    config
+    configration
   end
   
 end
