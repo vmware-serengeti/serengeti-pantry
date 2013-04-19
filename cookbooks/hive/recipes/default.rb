@@ -69,19 +69,6 @@ end
 
 include_recipe "hive::postgresql_metastore"
 
-
 #update hive-site.xml configuration items
-property_kvs = {}
-property_kvs["javax.jdo.option.ConnectionURL"]="jdbc:postgresql://#{node[:ipaddress]}:5432/#{node[:hive][:metastore_db]}"
-property_kvs["javax.jdo.option.ConnectionDriverName"]="org.postgresql.Driver"
-property_kvs["javax.jdo.option.ConnectionUserName"] = "#{node[:hive][:metastore_user]}"
-property_kvs["javax.jdo.option.ConnectionPassword"] = "#{node[:postgresql][:password][:postgres]}"
-property_kvs["hive.metastore.uris"] = ""
+update_hive_config
 
-file "#{node[:hive][:home_dir]}/conf/hive-site.xml" do
-  content update_properties("#{node[:hive][:home_dir]}/conf/hive-site.xml", property_kvs)
-  action :create
-  owner node[:hive][:user]
-  group node[:hive][:group]
-  mode 0664
-end

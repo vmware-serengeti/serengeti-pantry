@@ -27,5 +27,4 @@ end
 service "hive-server" do
   supports :status => true, :restart => true, :reload => true
   action [:enable, :start]
-  subscribes :restart, resources("file[#{node[:hive][:home_dir]}/conf/hive-site.xml]"), :delayed
 end
