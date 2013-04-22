@@ -66,13 +66,11 @@ end
 
 ## Create mapr group and user
 group "mapr" do
-  gid 401
   action :nothing
 end.run_action(:create)
 
 user "mapr" do
   comment "MapR user"
-  uid 401
   group "mapr"
   shell "/bin/bash"
   home  "/home/mapr"
