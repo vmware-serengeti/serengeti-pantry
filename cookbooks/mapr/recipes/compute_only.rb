@@ -13,19 +13,12 @@
 #   limitations under the License.
 #
 
-# Config IPs of Zookeeper and CLDB nodes
-client = node.role?('mapr_client') ? "-c" : ""
-config_command = "/opt/mapr/server/configure.sh #{client} -N #{node[:cluster_name]} -C " + cldbs_address + " -Z " + zookeepers_address
-execute "config IPs of MapR Zookeeper and CLDB nodes" do
-  user "root"
-  command config_command
+# Config compute only node
+if is_compute_only_node
+  file = '/opt/mapr/conf/mfs.conf'
+  conf = 'mfs.network.location=/compute-only'
+  execute 'config this node as a compute only node' do
+    not_if "grep -q '^#{conf}' #{file}"
+    command %Q{echo '#{conf}' >> #{file}}
+  end
 end
-
-# Config disks
-include_recipe 'mapr::config_disks'
-
-# Config metrics
-include_recipe 'mapr::config_metrics'
-
-# Config compute-only node
-include_recipe 'mapr::compute_only'

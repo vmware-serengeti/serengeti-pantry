@@ -28,6 +28,10 @@ module MapR
     node.role?('mapr_mysql_server')
   end
 
+  def is_compute_only_node
+    node.role?('mapr_tasktracker') and !node.role?('mapr_nfs')
+  end
+
   def cldbs_address
     all_provider_public_ips_for_role('mapr_cldb').join(",")
   end
