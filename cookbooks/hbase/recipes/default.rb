@@ -33,6 +33,14 @@ end
 ulimit_nofile = 32768
 ulimit_nproc = 32000
 
+def get_root_dir namespace
+  if namespace =~ /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
+    return "hdfs://#{namespace}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+  else
+    return "hdfs://#{namespace}#{node[:hbase][:hdfshome]}"
+  end
+end
+
 def set_sys_limit desc, user, ulimit_type, ulimit_value
   bash desc do
     not_if "egrep -q '#{user}.*#{ulimit_type}.*#{ulimit_value}' /etc/security/limits.conf"
@@ -126,9 +134,9 @@ if !conf['hbase.rootdir'].nil?
 end
 
 if matched_namespace == ''
-  hbase_hdfs_home = "hdfs://#{default_namespace}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+  hbase_hdfs_home = get_root_dir default_namespace
 else
-  hbase_hdfs_home = "hdfs://#{matched_namespace}:#{namenode_port}#{node[:hbase][:hdfshome]}"
+  hbase_hdfs_home = get_root_dir matched_namespace
 end
 
 zk_service_name = node[:hbase][:zookeeper_service_name]
