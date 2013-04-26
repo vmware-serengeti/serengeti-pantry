@@ -27,6 +27,26 @@ module HiveSiteConfiguration
       File.open("#{node[:hive][:home_dir]}/conf/hive-site.xml", "w") { |f| f.write(output) }
     end
   end
+
+
+  def update_hive_version
+    run_in_ruby_block('update_hive_version') do
+      if node[:hadoop][:install_from_tarball] then
+        tarball_url = current_distro['hive']
+        hive_file_name = tarbal_url[tarball_url.rindex("/")+1]
+      else
+        hive_file_name = `rpm -q hive`
+      end
+
+      version_reg = /(\d+\.\d+\.\d+)/
+      matched_version = version_reg.match(hive_file_name);
+      if matched_version
+        hive_version = matched_version[0]
+      end
+      node[:hive][:version] = hive_version
+      node.save
+    end
+  end
   
 end
 

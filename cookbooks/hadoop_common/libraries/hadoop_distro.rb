@@ -38,6 +38,7 @@ module HadoopCluster
     current_distro['is_install_from_tarball']
   end
 
+
   class Chef::Recipe ; include HadoopCluster ; end
   class Chef::Resource::Directory ; include HadoopCluster ; end
 end

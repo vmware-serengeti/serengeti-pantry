@@ -67,6 +67,14 @@ template schema_file_path_ver090 do
   mode '0644'
 end
 
+# metastore schema file for postgres in HW 1.2 has bugs, we have to use template schema file
+schema_file_path_ver0100 = "#{scripts_home}/hive-schema-0.10.0.postgres.sql"
+template schema_file_path_ver0100 do
+  only_if { node[:hive][:version] == "0.10.0" }
+  source 'hive-schema-0.10.0.postgres.sql.erb'
+  mode '0644'
+end
+
 # TODO: hive-schema-[version].postgres.sql should be adapt to the hive version installed on the node
 # but the sql file for hive 0.8.0 in hive svn trunk doesn't work for hive-0.8.1: http://svn.apache.org/viewvc/hive/trunk/metastore/scripts/upgrade/postgres/hive-schema-0.8.0.postgres.sql?revision=1334537&view=markup
 log = "#{node[:hive][:log_dir]}/.hive_metastore_schema_imported.log"
@@ -76,7 +84,9 @@ execute "Import metastore schema" do
   user "hive"
   cwd "#{node[:hive][:home_dir]}"
   command %Q{
-    if [ -f #{schema_file_path_ver090} ]; then
+    if [ -f #{schema_file_path_ver0100} ]; then
+      schema_file=#{schema_file_path_ver0100}
+    elif [ -f #{schema_file_path_ver090} ]; then
       schema_file=#{schema_file_path_ver090}
     elif [ -f #{schema_file_path} ]; then
       schema_file=#{schema_file_path}

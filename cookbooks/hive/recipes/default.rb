@@ -67,6 +67,8 @@ else
   include_recipe "hive::install_from_package"
 end
 
+update_hive_version
+
 include_recipe "hive::postgresql_metastore"
 
 #update hive-site.xml configuration items
