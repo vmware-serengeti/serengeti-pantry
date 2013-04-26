@@ -30,14 +30,9 @@ module HiveSiteConfiguration
 
 
   def update_hive_version
-    run_in_ruby_block('update_hive_version') do
-      if node[:hadoop][:install_from_tarball] then
-        tarball_url = current_distro['hive']
-        hive_file_name = tarbal_url[tarball_url.rindex("/")+1]
-      else
-        hive_file_name = `rpm -q hive`
-      end
-
+    if node[:hadoop][:install_from_tarball] then
+      tarball_url = current_distro['hive']
+      hive_file_name = tarball_url[tarball_url.rindex("/")+1]
       version_reg = /(\d+\.\d+\.\d+)/
       matched_version = version_reg.match(hive_file_name);
       if matched_version
@@ -45,9 +40,19 @@ module HiveSiteConfiguration
       end
       node[:hive][:version] = hive_version
       node.save
+    else
+      run_in_ruby_block('update_hive_version') do
+        hive_file_name = `rpm -q hive`
+        version_reg = /(\d+\.\d+\.\d+)/
+        matched_version = version_reg.match(hive_file_name);
+        if matched_version
+          hive_version = matched_version[0]
+        end
+        node[:hive][:version] = hive_version
+        node.save
+      end
     end
   end
-  
 end
 
 class Chef::Recipe
