@@ -32,7 +32,7 @@ module HiveSiteConfiguration
   def update_hive_version
     if node[:hadoop][:install_from_tarball] then
       tarball_url = current_distro['hive']
-      hive_file_name = tarball_url[tarball_url.rindex("/")+1]
+      hive_file_name = tarball_url[tarball_url.rindex("/")+1..-1]
       version_reg = /(\d+\.\d+\.\d+)/
       matched_version = version_reg.match(hive_file_name);
       if matched_version
