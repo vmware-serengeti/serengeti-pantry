@@ -37,9 +37,9 @@ module HiveSiteConfiguration
       matched_version = version_reg.match(hive_file_name);
       if matched_version
         hive_version = matched_version[0]
+        node[:hive][:version] = hive_version
+        node.save
       end
-      node[:hive][:version] = hive_version
-      node.save
     else
       run_in_ruby_block('update_hive_version') do
         hive_file_name = `rpm -q hive`
@@ -47,9 +47,9 @@ module HiveSiteConfiguration
         matched_version = version_reg.match(hive_file_name);
         if matched_version
           hive_version = matched_version[0]
+          node[:hive][:version] = hive_version
+          node.save
         end
-        node[:hive][:version] = hive_version
-        node.save
       end
     end
   end
