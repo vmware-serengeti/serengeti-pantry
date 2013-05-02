@@ -16,6 +16,10 @@
 module HiveSiteConfiguration
 
   def update_hive_config
+    directory "#{node[:hive][:home_dir]}/conf" do
+      mode 0775
+    end
+
     run_in_ruby_block('update_hive_config_ruby_block') do
       property_kvs = {}
       property_kvs["javax.jdo.option.ConnectionURL"]="jdbc:postgresql://#{node[:ipaddress]}:5432/#{node[:hive][:metastore_db]}"

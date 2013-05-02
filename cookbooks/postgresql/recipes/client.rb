@@ -1,5 +1,10 @@
 #
-# Portions Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
+# Cookbook Name:: postgresql
+# Recipe:: client
+#
+# Author:: Joshua Timberman (<joshua@opscode.com>)
+# Author:: Lamont Granquist (<lamont@opscode.com>)
+# Copyright 2009-2011 Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,18 +19,6 @@
 # limitations under the License.
 #
 
-require 'openssl'
-
-module Opscode
-  module OpenSSL
-    module Password
-      def secure_password
-        pw = String.new
-        while pw.length < 20
-          pw << ::OpenSSL::Random.random_bytes(1).gsub(/\W/, '')
-        end
-        pw
-      end
-    end
-  end
+node['postgresql']['client']['packages'].each do |pg_pack|
+  package pg_pack
 end

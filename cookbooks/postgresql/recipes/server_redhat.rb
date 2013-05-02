@@ -5,7 +5,6 @@
 # Author:: Joshua Timberman (<joshua@opscode.com>)
 # Author:: Lamont Granquist (<lamont@opscode.com>)
 # Copyright 2009-2011, Opscode, Inc.
-# Portions Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +18,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+include_recipe "postgresql::client"
 
 # Create a group and user like the package will.
 # Otherwise the templates fail.
@@ -37,41 +38,11 @@ user "postgres" do
   supports :manage_home => false
 end
 
-case node.platform
-when "redhat", "centos", "scientific"
-  case
-  when node.platform_version.to_f >= 5.0
-    package "postgresql-server"
-  else
-    package "postgresql#{node['postgresql']['version'].split('.').join}-server"
-  end
-when "fedora","suse"
-  package "postgresql-server"
+node['postgresql']['server']['packages'].each do |pg_pack|
+  package pg_pack
 end
 
-template "/etc/init.d/postgresql" do
-  source "postgresql.erb"
-  owner "root"
-  group "root"
-  mode "0755"
+execute "/sbin/service #{node['postgresql']['server']['service_name']} initdb" do
+  not_if { ::FileTest.exist?(File.join(node['postgresql']['dir'], "PG_VERSION")) }
 end
 
-execute "postgresql initdb" do
-  not_if { File.exists?(File.join(node[:postgresql][:dir], "PG_VERSION")) }
-  command %Q{
-    service postgresql initdb
-  }
-  action :run
-end
-
-template "#{node[:postgresql][:dir]}/postgresql.conf" do
-  source "postgresql.conf.erb"
-  owner "postgres"
-  group "postgres"
-  mode "0600"
-end
-
-service "postgresql" do
-  supports :restart => true, :status => true, :reload => true
-  action [:enable, :start]
-end

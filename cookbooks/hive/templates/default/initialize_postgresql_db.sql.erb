@@ -1,2 +1,2 @@
 CREATE USER <%= node[:hive][:metastore_user] %> WITH PASSWORD '<%= node[:postgresql][:password][:postgres] %>';
-CREATE DATABASE <%= node[:hive][:metastore_db] %> OWNER = <%= node[:hive][:metastore_user] %> ENCODING = 'UTF8';
+CREATE DATABASE <%= node[:hive][:metastore_db] %> TEMPLATE template0 OWNER <%= node[:hive][:metastore_user] %> ENCODING 'UTF8';

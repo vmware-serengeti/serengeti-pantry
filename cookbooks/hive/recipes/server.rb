@@ -28,3 +28,9 @@ service "hive-server" do
   supports :status => true, :restart => true, :reload => true
   action [:enable, :start]
 end
+
+#FIXME this is a bug in Pivotal HD 1.0 alpha and CDH4.1.2+
+execute 'start hive server due to hive service status always returns 0' do
+  only_if "service hive-server status | grep 'not running'"
+  command 'service hive-server start'
+end

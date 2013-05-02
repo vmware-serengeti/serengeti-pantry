@@ -38,6 +38,17 @@ module HadoopCluster
     current_distro['is_install_from_tarball']
   end
 
+  def is_cdh4_distro
+    distro_vendor.downcase == 'cdh' and (distro_version =~ /4/) == 0
+  end
+
+  def is_greenplumhd_distro
+    distro_vendor.downcase == 'gphd'
+  end
+
+  def is_pivotalhd_distro
+    distro_vendor.downcase == 'phd' or (is_greenplumhd_distro and (distro_version =~ /2/) == 0)
+  end
 
   class Chef::Recipe ; include HadoopCluster ; end
   class Chef::Resource::Directory ; include HadoopCluster ; end

@@ -22,6 +22,12 @@
 
 include_recipe "java::sun"
 
+# update attributes
+if is_pivotalhd_distro
+  node[:hive][:home_dir] = '/usr/lib/gphd/hive'
+end
+
+
 user node[:hive][:user] do
   comment "A sample user for hive server"
   home  "/var/lib/hive"

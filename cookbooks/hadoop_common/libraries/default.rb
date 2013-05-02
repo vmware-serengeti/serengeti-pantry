@@ -229,4 +229,8 @@ EOF
       }
     end
   end
+
+  def is_rhel5
+    ["redhat", "centos", "oracle"].include?(node['platform']) and (node['platform_version'] =~ /5/) == 0
+  end
 end

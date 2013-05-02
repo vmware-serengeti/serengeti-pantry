@@ -16,14 +16,12 @@
 ## Install postgresql database
 include_recipe 'postgresql::server'
 
-package "postgresql-jdbc"
-execute "copy postgresql-jdbc to hive lib" do
-  not_if { File.exist?("#{node[:hive][:home_dir]}/lib/postgresql-jdbc-8.1.407.jar") }
-  command %Q{
-    cp /usr/share/java/postgresql-jdbc-8.1.407.jar #{node[:hive][:home_dir]}/lib/
-  }
-end
+include_recipe 'postgresql::jdbc'
 
+link "put postgresql-jdbc.jar into hive lib dir" do
+  target_file "#{node[:hive][:home_dir]}/lib/postgresql-jdbc.jar"
+  to node['postgresql']['jdbc']['jar']
+end
 
 ## Initialize hive metastore
 scripts_home = "#{node[:hive][:home_dir]}/scripts"
@@ -39,8 +37,7 @@ template initialize_postgresql_db_path do
 end
 
 log = "#{node[:postgresql][:dir]}/.hive_postgresql_db_initialized.log"
-execute "initialize postgresql db" do
-  only_if "sudo service postgresql status"
+execute "initialize postgresql db for hive" do
   not_if { File.exists?(log) }
   user "postgres"
   cwd "/var/lib/pgsql"
@@ -76,7 +73,7 @@ template schema_file_path_ver0100 do
 end
 
 log = "#{node[:hive][:log_dir]}/.hive_metastore_schema_imported.log"
-execute "Import metastore schema" do
+execute "Import hive metastore schema" do
   only_if "sudo service postgresql status"
   not_if { File.exists?(log) }
   user "hive"
@@ -94,7 +91,7 @@ execute "Import metastore schema" do
     fi
     echo "Use $schema_file to create Hive metastore tables"
 
-    psql -U hive -d metastore_db -f $schema_file
+    psql -U #{node[:hive][:metastore_user]} -d #{node[:hive][:metastore_db]} -f $schema_file
 
     exit_status=$?
     if [ $exit_status -eq 0 ]; then touch #{log} ; fi

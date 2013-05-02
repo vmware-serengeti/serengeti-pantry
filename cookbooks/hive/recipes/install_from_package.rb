@@ -21,3 +21,5 @@ include_recipe "hadoop_common::add_repo"
 # Install package
 #
 package node[:hadoop][:packages][:hive][:name]
+
+make_link("/usr/lib/hive", node[:hive][:home_dir])

@@ -1,11 +1,10 @@
-#/postgresql.conf.
+#
 # Cookbook Name:: postgresql
 # Recipe:: server
 #
 # Author:: Joshua Timberman (<joshua@opscode.com>)
 # Author:: Lamont Granquist (<lamont@opscode.com>)
 # Copyright 2009-2011, Opscode, Inc.
-# Portions Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,39 +21,74 @@
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
-# randomly generate postgres password
-node.set_unless[:postgresql][:password][:postgres] = secure_password
-node.save unless Chef::Config[:solo]
+include_recipe "postgresql::client"
 
-case node[:postgresql][:version]
-when "8.3"
-  node.default[:postgresql][:ssl] = "off"
-when "8.4"
-  node.default[:postgresql][:ssl] = "true"
+# randomly generate postgres password, unless using solo - see README
+if Chef::Config[:solo]
+  missing_attrs = %w{
+    postgres
+  }.select do |attr|
+    node['postgresql']['password'][attr].nil?
+  end.map { |attr| "node['postgresql']['password']['#{attr}']" }
+
+  if !missing_attrs.empty?
+    Chef::Application.fatal!([
+        "You must set #{missing_attrs.join(', ')} in chef-solo mode.",
+        "For more information, see https://github.com/opscode-cookbooks/postgresql#chef-solo-note"
+      ].join(' '))
+  end
+else
+  node.set_unless['postgresql']['password']['postgres'] = secure_password
+  node.save
 end
 
 # Include the right "family" recipe for installing the server
 # since they do things slightly differently.
-case node.platform
-when "redhat", "centos", "fedora", "suse", "scientific", "amazon"
+case node['platform_family']
+when "rhel", "fedora", "suse"
   include_recipe "postgresql::server_redhat"
-when "debian", "ubuntu"
+when "debian"
   include_recipe "postgresql::server_debian"
 end
 
-template "#{node[:postgresql][:dir]}/pg_hba.conf" do
+bash "Allow SELinux for postgresql data dir" do
+  user  'root'
+  code  "restorecon -R -v #{node['postgresql']['dir']}"
+  only_if { File.exist?("/sbin/restorecon") } 
+  action :run
+end
+
+template "#{node['postgresql']['dir']}/postgresql.conf" do
+  source "postgresql.conf.erb"
+  owner "postgres"
+  group "postgres"
+  mode 0600
+  #notifies :restart, 'service[postgresql]', :immediately
+end
+
+template "#{node['postgresql']['dir']}/pg_hba.conf" do
   source "pg_hba.conf.erb"
   owner "postgres"
   group "postgres"
-  mode "0600"
-  notifies :reload, resources(:service => "postgresql"), :immediately
+  mode 00600
+  notifies :reload, 'service[postgresql]', :immediately
 end
 
-execute "assign-postgres-password" do
-  user "postgres"
-  cwd "/var/lib/pgsql"
-  command %Q{
-    echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:password][:postgres]}';" | psql
-  }
+service "postgresql" do
+  service_name node['postgresql']['server']['service_name']
+  supports :restart => true, :status => true, :reload => true
+  action [:enable, :start]
+end
+
+# Default PostgreSQL install has 'ident' checking on unix user 'postgres'
+# and 'md5' password checking with connections from 'localhost'. This script
+# runs as user 'postgres', so we can execute the 'role' and 'database' resources
+# as 'root' later on, passing the below credentials in the PG client.
+bash "assign-postgres-password" do
+  user 'postgres'
+  code <<-EOH
+echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node['postgresql']['password']['postgres']}';" | psql
+  EOH
+  not_if "echo '\\connect' | PGPASSWORD=#{node['postgresql']['password']['postgres']} psql --username=postgres --no-password -h localhost"
   action :run
 end
