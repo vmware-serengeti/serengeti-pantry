@@ -24,7 +24,7 @@ include_recipe "hadoop_cluster"
 
 # Install
 hadoop_package node[:hadoop][:packages][:jobtracker][:name]
-hadoop_ha_package "jobtracker" if !is_namenode and hortonworks_hmonitor_enabled
+hadoop_ha_package "jobtracker" if !is_namenode
 
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
@@ -45,7 +45,7 @@ service "restart-#{node[:hadoop][:jobtracker_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/capacity-scheduler.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-queue-acls.xml]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately
-  if node[:hadoop][:ha_enabled] and is_namenode and hortonworks_hmonitor_enabled
+  if node[:hadoop][:ha_enabled] and is_namenode and is_hortonworks_hmonitor_enabled
     notifies :restart, resources("service[hmonitor-namenode-monitor]"), :delayed
   end
 end if is_jobtracker_running
@@ -62,4 +62,4 @@ end
 provide_service(node[:hadoop][:jobtracker_service_name])
 
 # Launch service level ha monitor
-enable_ha_service "hmonitor-jobtracker-monitor" if !is_namenode and hortonworks_hmonitor_enabled
+enable_ha_service "hmonitor-jobtracker-monitor" if !is_namenode and is_hortonworks_hmonitor_enabled

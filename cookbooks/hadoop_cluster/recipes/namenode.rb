@@ -25,17 +25,15 @@ include_recipe "hadoop_cluster::wait_for_hdfs"
 
 # Install
 hadoop_package node[:hadoop][:packages][:namenode][:name]
-hadoop_ha_package "namenode" if hortonworks_hmonitor_enabled
+hadoop_ha_package "namenode"
 
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
+# for Bigtop Hadoop YARN packages (e.g. CDH4, Pivotal HD 1.0)
 hadoop_dir = hadoop_home_dir
 hdfs_dir = hadoop_hdfs_dir
-link("#{hdfs_dir}/libexec") do
-  to "#{hadoop_dir}/libexec"
-  only_if { File.exists?(hdfs_dir) }
-end
+force_link("#{hdfs_dir}/libexec", "#{hadoop_dir}/libexec") if hdfs_dir
 
 # Format namenode
 if is_primary_namenode
@@ -128,4 +126,4 @@ provide_service(node[:hadoop][:namenode_service_name])
 include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"
 
 # Launch service level ha monitor
-enable_ha_service "hmonitor-namenode-monitor" if hortonworks_hmonitor_enabled
+enable_ha_service "hmonitor-namenode-monitor"

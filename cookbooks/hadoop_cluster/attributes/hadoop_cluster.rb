@@ -18,8 +18,9 @@ default[:hadoop][:is_hadoop_yarn] = false # is deploying a Hadoop version with Y
 default[:hadoop][:hadoop_handle] = 'hadoop' # the prefix of the name of hadoop directory and package files
 default[:hadoop][:distro_name] = 'apache' # which hadoop distro to deploy
 default[:hadoop][:package_version]   = 'current' # hadoop package version
+
 default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
-default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop-hdfs' # directory that HADOOP HDFS is installed in
+default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
 
 default[:hadoop][:service_stop_time] = 6 # waiting time for the hadoop service process to stop completely.
 

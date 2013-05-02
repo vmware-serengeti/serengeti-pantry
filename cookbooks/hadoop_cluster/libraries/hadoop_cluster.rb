@@ -320,6 +320,19 @@ EOF
         end
       end
     end
+
+    #FIXME this is a bug in Pivotal HD 1.0 alpha
+    if is_pivotalhd_distro
+      execute 'fix bug: service status always returns 0' do
+        only_if 'ls /etc/init.d/hadoop-*'
+        command %q{
+for i in /etc/init.d/hadoop-*
+do
+  sed -i '/      RETVAL=$?/d' $i
+done
+        }
+      end
+    end
   end
 
   # Make a hadoop-owned directory
@@ -458,6 +471,16 @@ EOF
     node[:hadoop][:hadoop_hdfs_dir]
   end
 
+  # hadoop mapreduce dir
+  def hadoop_mapreduce_dir
+    node[:hadoop][:hadoop_mapred_dir]
+  end
+
+  # hadoop conf dir
+  def hadoop_conf_dir
+    node[:hadoop][:hadoop_conf_dir]
+  end
+
   def bin_hadoop_daemon_sh
     '/usr/lib/hadoop/bin/hadoop-daemon.sh'
   end
@@ -486,7 +509,9 @@ EOF
     nil
   end
 
+  # Install VM level Namenode/Jobtracker HA provided by Hortonworks HMonitor
   def hadoop_ha_package component
+    return if !is_hortonworks_hmonitor_enabled
     if ['namenode', 'jobtracker'].include?(component) then
       if node[:hadoop][:ha_enabled] then
         ha_installed = File.exists?("/usr/lib/hadoop/monitor/vsphere-ha-#{component}-monitor.sh")
@@ -508,7 +533,9 @@ EOF
     end
   end
 
+  # Enable VM level Namenode/Jobtracker HA provided by Hortonworks HMonitor
   def enable_ha_service svc
+    return if !is_hortonworks_hmonitor_enabled
     if node[:hadoop][:ha_enabled] then
       set_bootstrap_action(ACTION_START_SERVICE, svc)
       service svc do
@@ -519,13 +546,9 @@ EOF
     end
   end
 
-  # Hortonworks hmonitor can not monitor standby namenode service and jobtracker service in the CDH4 distro
-  def hortonworks_hmonitor_enabled
-    !is_cdh4_distro
-  end
-
-  def is_cdh4_distro
-    distro_vendor.downcase == 'cdh' and (distro_version =~ /4/) == 0
+  # Hortonworks hmonitor can not monitor standby namenode service and resourcemanager service in Hadoop HDFS2 and YARN
+  def is_hortonworks_hmonitor_enabled
+    !is_hadoop_yarn? and !is_cdh4_distro and is_rhel5
   end
 
 end

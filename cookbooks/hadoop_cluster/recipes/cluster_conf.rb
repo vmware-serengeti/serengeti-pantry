@@ -24,7 +24,7 @@ class Chef::Recipe; include HadoopCluster ; end
 include_recipe "hadoop_cluster::hadoop_conf_xml" unless is_namenode or is_jobtracker or is_secondarynamenode or is_journalnode
 
 # Add symlinks to HADOOP_HOME
-force_link("/usr/lib/hadoop", "/usr/lib/#{node[:hadoop][:hadoop_handle]}")
+force_link("/usr/lib/hadoop", hadoop_home_dir)
 
 # Make hadoop logs live on /mnt/hadoop or user defined log dir
 hadoop_log_dir = hadoop_log_dir_conf || local_hadoop_log_dir

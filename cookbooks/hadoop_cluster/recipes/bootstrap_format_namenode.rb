@@ -24,7 +24,6 @@
 cluster_id = ""
 cluster_id = "-clusterid #{node[:cluster_name]}" if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
 execute 'format namenode' do
-  not_if "service #{node[:hadoop][:namenode_service_name]} status"
   not_if { File.exists?('/mnt/hadoop/.namenode_formatted.log') }
   user 'hdfs'
   command %Q{
