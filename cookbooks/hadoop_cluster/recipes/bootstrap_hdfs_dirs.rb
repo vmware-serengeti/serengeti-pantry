@@ -75,6 +75,10 @@ execute 'create common user dirs on HDFS' do
 
     hadoop fs -mkdir -p /tmp/hadoop-yarn/staging
     hadoop fs -chmod -R 777 /tmp/hadoop-yarn
+    hadoop fs -chmod -R 1777 /tmp/hadoop-yarn/staging
+    hadoop fs -mkdir -p /tmp/hadoop-yarn/staging/history/done_intermediate
+    hadoop fs -chmod -R 1777 /tmp/hadoop-yarn/staging/history/done_intermediate
+    hadoop fs -chown -R mapred:mapred /tmp/hadoop-yarn/staging
 
     exit_status=$?
     if [ $exit_status -eq 0 ]; then touch /mnt/hadoop/.made_inital_dirs.log ; fi
