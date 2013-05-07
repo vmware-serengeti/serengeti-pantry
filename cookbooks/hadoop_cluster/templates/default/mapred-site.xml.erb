@@ -165,7 +165,7 @@
   <value><%= node[:hadoop][:mapred_jobtracker_completeuserjobs_maximum] %></value>
 </property>
 
-<% if node[:hadoop][:rack_topology][:hve_enabled] %>
+<% if node[:hadoop][:rack_topology][:hve_enabled] and !node[:is_hadoop_yarn] %>
 <!-- settings for Hadoop Virtualization Extensions -->
 <property>
   <name>mapred.jobtracker.nodegroup.aware</name>

@@ -29,7 +29,16 @@
 </property>
 <%- end %>
 
-<% if node[:hadoop][:rack_topology][:hve_enabled] %>
+<%- if node[:hadoop][:rack_topology][:enabled] %>
+<!-- turn on Hadoop Rack Awareness -->
+<property>
+  <name>topology.script.file.name</name>
+  <value>/etc/hadoop/conf/topology.sh</value>
+  <description>Topology scripts are used by hadoop to determine the rack location of nodes. This information is used by hadoop to replicate block data to redundant racks.</description>
+</property>
+<%- end %>
+
+<%- if node[:hadoop][:rack_topology][:hve_enabled] %>
 <!-- settings for Hadoop Virtualization Extensions -->
 <property>
   <name>net.topology.nodegroup.aware</name>
@@ -43,10 +52,14 @@
 </property>
 <property>
   <name>dfs.block.replicator.classname</name>
+  <%- if node[:is_hadoop_yarn] %>
+  <value>org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicyWithNodeGroup</value>
+  <%- else %>
   <value>org.apache.hadoop.hdfs.server.namenode.BlockPlacementPolicyWithNodeGroup</value>
+  <%- end %>
   <description>The default implementation of BlockPlacementPolicy.</description>
 </property>
-<% end %>
+<%- end %>
 
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['core-site.xml'] || {} rescue conf = {} %>
