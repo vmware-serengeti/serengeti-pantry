@@ -19,7 +19,6 @@
   ~ limitations under the License.
   -->
 
-
 <configuration>
 
   <property>
@@ -42,9 +41,9 @@
   </property>
 
   <property>
-    <name>service.monitor.webprobe.url</name>
-    <description>Web URL to monitor</description>
-    <value>http://<%= @namenode_address %>:50070/</value>
+    <name>service.monitor.portprobe.host</name>
+    <description>Port to probe via a telnet operation</description>
+    <value><%= @namenode_address %></value>
   </property>
 
   <property>
@@ -54,31 +53,28 @@
   </property>
 
   <property>
-    <name>service.monitor.portprobe.host</name>
-    <description>Port to probe via a telnet operation</description>
-    <value><%= @namenode_address %></value>
+    <name>service.monitor.webprobe.url</name>
+    <description>Web URL to monitor</description>
+    <value>http://<%= @namenode_address %>:50070/</value>
   </property>
-
 
   <property>
     <name>service.monitor.report.classname</name>
     <description>The class to use for reporting heartbeats</description>
-    <value>com.hortonworks.servicemonitor.reporting.vsphere.VSphereReporter</value>
+    <value>org.apache.ambari.servicemonitor.reporting.vsphere.VSphereReporter</value>
   </property>
-
 
   <property>
     <name>service.monitor.report.interval</name>
     <description>Interval in milliseconds between reporting health status to the reporter</description>
     <value>7000</value>
   </property>
- 
+
   <property>
     <name>service.monitor.probe.interval</name>
     <description>Time in millis between the last probe cycle ending and the new one beginning.</description>
     <value>11000</value>
   </property>
-
 
   <property>
     <name>service.monitor.probe.timeout</name>
@@ -102,7 +98,6 @@
     <value>true</value>
   </property>
 
-
   <property>
     <name>service.monitor.portprobe.connect.timeout</name>
     <description>Port probing key : timeout of the connection attempt</description>
@@ -110,15 +105,42 @@
   </property>
 
   <property>
+    <name>service.monitor.pidprobe.enabled</name>
+    <description>Flag to indicate whether or not the Process ID Probe is enabled.</description>
+    <value>false</value>
+  </property>
+
+  <property>
+    <name>service.monitor.pidprobe.pidfile</name>
+    <description>The file containing the Process ID (PID) of the launched service.</description>
+    <value>/var/run/hadoop/hdfs/hadoop-hdfs-namenode.pid</value>
+  </property>
+
+  <property>
     <name>service.monitor.lsprobe.enabled</name>
     <description>is the LS probe enabled</description>
-    <value><%= @monitor_namenode %></value>
+    <value>true</value>
   </property>
 
   <property>
     <name>service.monitor.lsprobe.path</name>
     <description>The path for the LS probe</description>
     <value>/</value>
+  </property>
+
+  <property>
+    <name>service.monitor.jtprobe.enabled</name>
+    <description>Enable monitoring of the JT defined in the "mapred.job.tracker" property</description>
+    <value><%= @jobtracker_monitor_enabled %></value>
+  </property>
+
+  <property>
+    <name>service.monitor.dependency.dfslive</name>
+    <description>Flag to indicate the monitored application depends on DFS going live
+      before it starts -so the monitor should not worry about the application appearing not to
+      bootstrap until then.
+    </description>
+    <value><%= @jobtracker_monitor_enabled %></value>
   </property>
 
   <property>
@@ -143,21 +165,6 @@
     <name>service.monitor.webprobe.connect.timeout</name>
     <description>Timeout of the HTTP connection attempt</description>
     <value>1000</value>
-  </property>
-
-  <property>
-    <name>service.monitor.jtprobe.enabled</name>
-    <description>Enable monitoring of the JT defined in the "mapred.job.tracker" property</description>
-    <value><%= @monitor_jobtracker %></value>
-  </property>
-
-  <property>
-    <name>service.monitor.dependency.dfslive</name>
-    <description>Flag to indicate the monitored application depends on DFS going live
-      before it starts -so the monitor should not worry about the application appearing not to
-      bootstrap until then.
-    </description>
-    <value><%= @monitor_jobtracker %></value>
   </property>
 
 </configuration>

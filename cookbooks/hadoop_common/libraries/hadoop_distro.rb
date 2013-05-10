@@ -34,6 +34,16 @@ module HadoopCluster
     current_distro['package_repos'] || []
   end
 
+  # is a hadoop 2.0+ distro? Hadoop 2.0 contains HDFS2 and YARN
+  def is_hadoop2_distro
+    is_cdh4_distro or is_pivotalhd_distro
+  end
+
+  # is a hadoop 1.x or 0.20 distro?
+  def is_hadoop1_distro
+    !is_hadoop2_distro
+  end
+
   def is_install_from_tarball
     current_distro['is_install_from_tarball']
   end

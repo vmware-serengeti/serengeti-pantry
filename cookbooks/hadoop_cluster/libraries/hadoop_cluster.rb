@@ -253,7 +253,7 @@ module HadoopCluster
               wget --tries=3 #{tarball_url}
 
               if [ $? -ne 0 ]; then
-                echo '[ERROR] downloading tarball failed'
+                echo 'Downloading tarball #{tarball_url} failed.'
                 exit 1
               fi
             fi
@@ -512,15 +512,11 @@ done
   # Install VM level Namenode/Jobtracker HA provided by Hortonworks HMonitor
   def hadoop_ha_package component
     return if !is_hortonworks_hmonitor_enabled
+
     if ['namenode', 'jobtracker'].include?(component) then
       if node[:hadoop][:ha_enabled] then
-        ha_installed = File.exists?("/usr/lib/hadoop/monitor/vsphere-ha-#{component}-monitor.sh")
-        if ha_installed then
-          Chef::Log.info("HA monitor for #{component} has already been installed. Will not re-install.")
-          return
-        end
-
-        pkg = "hmonitor-vsphere-#{component}-daemon"
+        suffix = is_cdh4_distro ? '-cdh4' : ''
+        pkg = "hmonitor#{suffix}-vsphere-#{component}-daemon"
         set_bootstrap_action(ACTION_INSTALL_PACKAGE, pkg)
         package pkg do
           action :install
@@ -528,7 +524,18 @@ done
         end
 
         # put libVMGuestAppMonitorNative.so in /usr/lib/hadoop/lib/native/, so hadoop daemons can find it.
-        force_link('/usr/lib/hadoop/lib/native/libVMGuestAppMonitorNative.so', '/usr/lib/hadoop/monitor/libVMGuestAppMonitorNative.so')
+        make_link('/usr/lib/hadoop/lib/native/libVMGuestAppMonitorNative.so', '/usr/lib/hadoop/monitor/libVMGuestAppMonitorNative.so')
+
+        # generate configuration file for HMonitor HA service
+        file = "vm-#{component}.xml"
+        template_variables = hadoop_template_variables
+        template_variables[:jobtracker_monitor_enabled] = is_jobtracker
+        template "/usr/lib/hadoop/monitor/#{file}" do
+          owner "root"
+          mode "0644"
+          variables(template_variables)
+          source "#{file}.erb"
+        end
       end
     end
   end
@@ -546,9 +553,21 @@ done
     end
   end
 
-  # Hortonworks hmonitor can not monitor standby namenode service and resourcemanager service in Hadoop HDFS2 and YARN
+  # Hortonworks HMonitor vSphere HA Kit can not monitor namenode service and resourcemanager service in Hadoop HDFS2 and YARN
   def is_hortonworks_hmonitor_enabled
-    !is_hadoop_yarn? and !is_cdh4_distro and is_rhel5
+    is_hadoop1_distro or is_cdh4_distro
+  end
+
+  def is_hortonworks_hmonitor_namenode_enabled
+    is_namenode and is_hortonworks_hmonitor_enabled and !is_cdh4_distro
+  end
+
+  # The Hortonworks HMonitor 1.1 has two monitor daemons: one for Namenode, the other for Jobtracker.
+  # When the Namenode and Jobtracker run on the same machine, if the two monitor daemons are started,
+  # they will send heartbeat respectively, thus either Namenode or Jobtracker is dead will not trigger vSphere HA.
+  # So in this case, we need to config Namenode HMonitor to monitor Jobtracker as well.
+  def is_hortonworks_hmonitor_jobtracker_enabled
+    is_jobtracker and is_hortonworks_hmonitor_enabled and !is_hortonworks_hmonitor_namenode_enabled
   end
 
 end

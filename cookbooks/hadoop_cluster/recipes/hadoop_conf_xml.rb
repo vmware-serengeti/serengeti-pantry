@@ -75,22 +75,3 @@ exclude_files.each do |exclude_file|
     action :create
   end
 end
-
-files = []
-if node.role? "hadoop_namenode"
-  template_variables[:monitor_namenode] = true
-  files += %w[vm-namenode.xml]
-end
-if node.role? "hadoop_jobtracker"
-  template_variables[:monitor_jobtracker] = true
-  files += %w[vm-jobtracker.xml vsphere-ha-jobtracker-monitor.sh]
-end
-files.each do |monitor_conf_file|
-  template "/usr/lib/hadoop/monitor/#{monitor_conf_file}" do
-    owner "root"
-    mode monitor_conf_file.end_with?('.sh') ? "0755" : "0644"
-    variables(template_variables)
-    source "#{monitor_conf_file}.erb"
-    only_if "test -d /usr/lib/hadoop/monitor/"
-  end
-end

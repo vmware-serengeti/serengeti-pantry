@@ -25,7 +25,6 @@ include_recipe "hadoop_cluster::wait_for_hdfs"
 
 # Install
 hadoop_package node[:hadoop][:packages][:namenode][:name]
-hadoop_ha_package "namenode"
 
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
@@ -125,5 +124,8 @@ provide_service(node[:hadoop][:namenode_service_name])
 # Set hdfs permission on only after formatting namenode
 include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"
 
-# Launch service level ha monitor
-enable_ha_service "hmonitor-namenode-monitor"
+# install Hortonworks HMonitor vSphere HA (see http://hortonworks.com/thankyou-hdp12-hakit-vmw/?mdl=13577&ao=0&lnk=0)
+if is_hortonworks_hmonitor_namenode_enabled
+  hadoop_ha_package "namenode"
+  enable_ha_service "hmonitor-namenode-monitor"
+end
