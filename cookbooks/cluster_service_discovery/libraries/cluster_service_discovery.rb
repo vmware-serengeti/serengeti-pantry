@@ -103,7 +103,7 @@ module ClusterServiceDiscovery
         wait_time = Time.now - start_time
         if wait_time > WAIT_TIMEOUT
           Chef::Log.error("search(:node, '#{condition}') failed, return empty.")
-          raise "Can't find any nodes which provide #{name}. Did any node provide #{name}? Or is the Chef Search Server is down?"
+          raise "Can't find any nodes which provide #{name}. Did any node provide #{name}? Or is the Chef Solr Server down?"
         end
         Chef::Log.info("search(:node, '#{condition}') returns nothing, already wait #{wait_time} seconds.")
         sleep SLEEP_TIME

@@ -191,10 +191,10 @@ else
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['hdfs-site.xml'] || {} rescue conf = {} %>
 <%- conf.map do |key, value| %>
-  <property>
-    <name><%= key %></name>
-    <value><%= value %></value>
-  </property>
+<property>
+  <name><%= key %></name>
+  <value><%= value %></value>
+</property>
 <%- end %>
 <!-- end -->
 

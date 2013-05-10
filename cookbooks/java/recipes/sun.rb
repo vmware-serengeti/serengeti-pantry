@@ -35,5 +35,5 @@ when "debian","ubuntu"
     action :create
   end
 else
-  Chef::Log.warn("Installation of Sun Java packages are only supported on Debian/Ubuntu at this time. Please install it manually.")
+  Chef::Log.info("Installation of Java packages are only supported on Debian/Ubuntu at this time. Please ensure it's already installed in the OS.")
 end

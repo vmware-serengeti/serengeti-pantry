@@ -22,7 +22,7 @@ case node.platform
 when "debian","ubuntu"
   nil
 else
-  Chef::Log.warn("Installation of Java packages are only supported on Debian/Ubuntu at this time. Please install it manually.")
+  Chef::Log.info("Installation of Java packages are only supported on Debian/Ubuntu at this time. Please ensure it's already installed in the OS.")
   return
 end
 
