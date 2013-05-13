@@ -7,6 +7,8 @@ else
   Chef::Log.info('Will deploy a Hadoop MRv1 cluster because YARN roles are not specified.')
 end
 
+node.default[:hadoop][:service_name_prefix] = 'hadoop-0.20'
+
 if node[:hadoop][:install_from_tarball]
   ## For Apache Hadoop 1.0, CDH3, GPHD 1.x, Hortonworks HDP 1.0
   node.default[:hadoop][:service_name_prefix] = 'hadoop-0.20'
@@ -55,7 +57,10 @@ elsif is_hadoop_yarn?
   node.default[:hadoop][:nodemanager_service_name] = "hadoop-yarn-nodemanager"
 elsif is_cdh4_distro
   ## For CDH4 MRv1
-  node.default[:hadoop][:hadoop_mapred_home] = '/usr/lib/hadoop-0.20-mapreduce'
+  node.default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
+  node.default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
+  node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop-hdfs' # directory that HADOOP HDFS is installed in
+  node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-0.20-mapreduce'
   node.default[:hadoop][:service_name_prefix] = 'hadoop-hdfs'
   # hadoop packages
   node.default[:hadoop][:packages][:hadoop][:name] = "hadoop"
