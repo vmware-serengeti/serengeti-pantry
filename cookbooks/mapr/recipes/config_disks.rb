@@ -35,6 +35,6 @@ if !File.exists?(disk_file)
   set_bootstrap_action(ACTION_FORMAT_DISK, '', true)
   bash "format disks for MapR" do
     user "root"
-    code "/opt/mapr/server/disksetup -F #{disk_file}"
+    code "/opt/mapr/server/disksetup -F -M #{disk_file}"
   end
 end

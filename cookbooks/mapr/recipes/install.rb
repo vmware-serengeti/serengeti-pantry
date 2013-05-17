@@ -26,7 +26,7 @@ role2pkg = {
   'mapr_tasktracker' => 'mapr-tasktracker',
   'mapr_webserver' => 'mapr-webserver',
   'mapr_metrics' => 'mapr-metrics',
-  'mapr_client' => 'mapr-client',
+  'mapr_client' => 'mapr-client.x86_64', # mapr-client.i386 and mapr-client.x86_64 are conflicted in MapR 2.1.2+
   'mapr_pig' => 'mapr-pig',
   'mapr_hive' => 'mapr-hive',
   'mapr_hbase_master' => 'mapr-hbase-master',
@@ -44,3 +44,4 @@ role2pkg.each do |role_name, pkg_name|
   end
 end
 clear_bootstrap_action(true)
+
