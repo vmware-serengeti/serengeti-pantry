@@ -96,9 +96,11 @@ package "pdsh"
 
 ## Install MapR basic package
 # mapr-client and mapr-core are conflicted, so only one can be installed
-name = node.role?('mapr_client') ? 'mapr-client' : 'mapr-core'
+# mapr-client.i386 and mapr-client.x86_64 are conflicted in MapR 2.1.2+, so need to explicitly set arch x86_64
+name = node.role?('mapr_client') ? 'mapr-client.x86_64' : 'mapr-core'
 set_bootstrap_action(ACTION_INSTALL_PACKAGE, name, true)
-package name
+# because we set arch in pacakge name 'mapr-client.x86_64', we have to use 'yum_package' instead of 'package'
+yum_package name
 
 include_recipe 'mapr::nfs_utils' if node.role?('mapr_client') # so the user can mount nfs on mapr_client node
 
