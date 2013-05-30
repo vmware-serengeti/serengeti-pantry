@@ -454,10 +454,16 @@ done
     end
   end
 
-  # return true if installing Hadoop YARN (i.e. Hadoop MRv2)
+  # return true if installing Hadoop 2.0 which includs HDFS2 and Hadoop YARN/MRv2
   # this flag will be set in the cluster role by Ironfan before running chef-client
   # default value is nil (i.e. Hadoop MRv1 cluster)
   def is_hadoop_yarn?
+    # Ironfan can't tell whether it's a Hadoop 2.0 cluster when the cluster doesn't has nodes with hadoop_resourcemanager role.
+    # e.g. a Hadoop HDFS2 + HBase cluster without YARN.
+    if is_hadoop2_distro
+      node[:is_hadoop_yarn] = true
+    end
+
     node[:is_hadoop_yarn]
   end
 

@@ -21,6 +21,12 @@
 include_recipe "java::sun"
 include_recipe "hadoop_common::mount_disks"
 
+# alias home dir
+if is_pivotalhd_distro
+  node[:zookeeper][:home_dir] = '/usr/lib/gphd/zookeeper'
+end
+force_link("/usr/lib/zookeeper", node[:zookeeper][:home_dir])
+
 group "zookeeper" do
   action [:create]
 end

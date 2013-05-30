@@ -35,8 +35,9 @@ module HadoopCluster
   end
 
   # is a hadoop 2.0+ distro? Hadoop 2.0 contains HDFS2 and YARN
+  # cdh4 contains both Hadoop 1.0 (MRv1) and Hadoop 2.0
   def is_hadoop2_distro
-    is_cdh4_distro or is_pivotalhd_distro
+    is_pivotalhd_distro
   end
 
   # is a hadoop 1.x or 0.20 distro?

@@ -21,6 +21,13 @@
 include_recipe "java::sun"
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
+# alias home dir
+if is_pivotalhd_distro
+  node[:hbase][:home_dir] = '/usr/lib/gphd/hbase'
+  node[:hbase][:conf_dir] = '/etc/gphd/hbase/conf'
+end
+force_link("/usr/lib/hbase", node[:hbase][:home_dir])
+
 group "hbase" do
 end
 
@@ -34,11 +41,7 @@ ulimit_nofile = 32768
 ulimit_nproc = 32000
 
 def get_root_dir namespace
-  if namespace =~ /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
-    return "hdfs://#{namespace}:#{namenode_port}#{node[:hbase][:hdfshome]}"
-  else
-    return "hdfs://#{namespace}#{node[:hbase][:hdfshome]}"
-  end
+  "hdfs://#{namespace}#{node[:hbase][:hdfshome]}"
 end
 
 def set_sys_limit desc, user, ulimit_type, ulimit_value
@@ -86,20 +89,23 @@ dirs.each do |dir|
   end
 end
 
+# Different Hadoop distro may have different conf dir. We will link '/etc/hbase/conf' to it.
+make_link("#{node[:hbase][:home_dir]}/conf", node[:hbase][:conf_dir])
 hbase_conf_dir = "/etc/hbase/conf"
 link hbase_conf_dir do
-  to node[:hbase][:home_dir] + "/conf"
-  not_if {File.exist?(hbase_conf_dir)} # to be compatible with CDH4 rpm
+  to node[:hbase][:conf_dir]
+  not_if {File.exist?(hbase_conf_dir)} # to be compatible with CDH4
 end
 
 valid_namespaces_map = {}
 default_namespace = ''
+nn_port = namenode_port
 if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
   # map valid namespace name to all all its addresses and facet
   namenode_facet_addresses.each do |facet_addresses|
     facet_addresses.each do |facet, addresses|
       if addresses.length == 1
-        valid_namespaces_map[addresses[0]] = addresses << facet
+        valid_namespaces_map["#{addresses[0]}:#{nn_port}"] = addresses << facet
       else
         valid_namespaces_map[facet] = addresses << facet
       end
@@ -108,16 +114,16 @@ if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
 
   # the default namespace, just select the first namespace
   if node[:hadoop][:cluster_has_only_federation] or namenode_facet_addresses[0][namenode_facet_names[0]].length == 1
-    default_namespace = namenode_facet_addresses[0][namenode_facet_names[0]][0]
+    default_namespace = namenode_facet_addresses[0][namenode_facet_names[0]][0] + ":#{nn_port}"
   else
     default_namespace = namenode_facet_names[0]
   end
 else
-  default_namespace = namenode_address
-  valid_namespaces_map[namenode_address] = [namenode_address]
+  default_namespace = namenode_address + ":#{nn_port}"
+  valid_namespaces_map[default_namespace] = [default_namespace]
 end
 
-matched_namespace = ''
+matched_namespace = nil
 matched_pattern = ''
 # try to guess a valid namespace name if user defined hbase.rootdir attr
 conf = node['cluster_configuration']['hbase']['hbase-site.xml'] || {} rescue {}
@@ -133,11 +139,8 @@ if !conf['hbase.rootdir'].nil?
   end
 end
 
-if matched_namespace == ''
-  hbase_hdfs_home = get_root_dir default_namespace
-else
-  hbase_hdfs_home = get_root_dir matched_namespace
-end
+namespace = matched_namespace || default_namespace
+hbase_hdfs_home = get_root_dir(namespace)
 
 zk_service_name = node[:hbase][:zookeeper_service_name]
 zk_service_provider = provider_for_service(zk_service_name)

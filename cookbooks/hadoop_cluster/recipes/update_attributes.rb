@@ -96,15 +96,15 @@ node.default[:hadoop][:primary_zkfc_format] = 'primary-zkfc-format'
 
 # Save attribute cluster_has_hdfs_ha_or_federation to chef server if cluster has HDFS HA or federation
 if cluster_has_hdfs_ha_or_federation
-node.default[:hadoop][:cluster_has_hdfs_ha_or_federation] = true
+  node.default[:hadoop][:cluster_has_hdfs_ha_or_federation] = true
 end
 
 # Save attribute cluster_has_only_federation to chef server if cluster has only federation
 if cluster_has_only_federation
-node.default[:hadoop][:cluster_has_only_federation] = true
+  node.default[:hadoop][:cluster_has_only_federation] = true
 end
 
 # Save attribute namenode_ha_enabled to chef server if namenode ha is enabled
 if namenode_ha_enabled
-node.default[:hadoop][:namenode_ha_enabled] = true
+  node.default[:hadoop][:namenode_ha_enabled] = true
 end
