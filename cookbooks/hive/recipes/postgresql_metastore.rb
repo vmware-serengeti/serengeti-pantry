@@ -74,7 +74,6 @@ end
 
 log = "#{node[:hive][:log_dir]}/.hive_metastore_schema_imported.log"
 execute "Import hive metastore schema" do
-  only_if "sudo service postgresql status"
   not_if { File.exists?(log) }
   user "hive"
   cwd "#{node[:hive][:home_dir]}"
