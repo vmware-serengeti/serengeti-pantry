@@ -189,6 +189,7 @@ module HadoopCluster
       :mapred_local_dirs      => formalize_dirs(mapred_local_dirs),
       :dfs_name_dirs          => formalize_dirs(dfs_name_dirs),
       :dfs_data_dirs          => formalize_dirs(dfs_data_dirs),
+      :dfs_data_dirs_count    => dfs_data_dirs.size,
       :fs_checkpoint_dirs     => formalize_dirs(fs_checkpoint_dirs),
       :local_hadoop_dirs      => formalize_dirs(local_hadoop_dirs),
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
