@@ -80,6 +80,10 @@ service "postgresql" do
   action [:enable, :start]
 end
 
+execute "sleep a while to wait for the postgresql service ready to serve" do
+  command "sleep 5"
+end
+
 # Default PostgreSQL install has 'ident' checking on unix user 'postgres'
 # and 'md5' password checking with connections from 'localhost'. This script
 # runs as user 'postgres', so we can execute the 'role' and 'database' resources
