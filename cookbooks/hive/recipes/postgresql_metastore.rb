@@ -65,9 +65,10 @@ template schema_file_path_ver090 do
 end
 
 # Hive 0.10.0 metastore schema file for postgres in HW 1.2 has bugs, we have to use template schema file
+# Hive 0.11.0 in HW 1.3 is also using hive-schema-0.10.0.postgres.sql
 schema_file_path_ver0100 = "#{scripts_home}/hive-schema-0.10.0.postgres.sql"
 template schema_file_path_ver0100 do
-  only_if { node[:hive][:version].start_with?("0.10") }
+  only_if { node[:hive][:version].start_with?("0.10") || node[:hive][:version].start_with?("0.11") }
   source 'hive-schema-0.10.0.postgres.sql.erb'
   mode '0644'
 end
