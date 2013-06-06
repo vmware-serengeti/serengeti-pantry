@@ -122,6 +122,16 @@ template "#{node[:zookeeper][:home_dir]}/bin/zkEnv.sh" do
   mode  "0755"
 end
 
+# zookeeper-3.4.5 reads zkEnv.sh from dir libexec
+file = "#{node[:zookeeper][:home_dir]}/libexec/zkEnv.sh"
+template file do
+  only_if { File.exists?(file) }
+  source "zkEnv.sh.erb"
+  owner "zookeeper"
+  group "zookeeper"
+  mode  "0755"
+end
+
 template "/etc/init.d/zookeeper-server" do
   source "zookeeper-server.erb"
   owner "root"
