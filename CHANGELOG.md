@@ -1,3 +1,13 @@
+# 0.9.0 (2013-6-8)
+
+New Features:
+* Add support for deploying CDH4 Hadoop/YARN/HBase cluster
+* Add support for deploying Pivotal HD Hadoop/YARN/HBase cluster
+* Add support for deploying MapR HBase cluster
+* Add support for deploying on CentOS 6 in addition to CentOS 5
+
+Serveral bug fixes.
+
 # 0.8.0 (2013-2-21)
 
 New Features:
