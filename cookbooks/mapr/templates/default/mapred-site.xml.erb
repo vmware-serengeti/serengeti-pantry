@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+<!--
+
+<property>
+  <name>mapred.fairscheduler.assignmultiple</name>
+  <value>true</value>
+  <description>
+  MapRConf
+  </description>
+</property>
+
+<property>
+  <name>mapred.fairscheduler.eventlog.enabled</name>
+  <value>false</value>
+  <description>Enable scheduler logging in ${HADOOP_LOG_DIR}/fairscheduler/
+  MapRConf
+  </description>
+</property>
+
+<property>
+  <name>mapred.fairscheduler.smalljob.schedule.enable</name>
+  <value>true</value>
+  <description>Enable small job fast scheduling inside fair scheduler.
+  TaskTrackers should reserve a slot called ephemeral slot which
+  is used for smalljob if cluster is busy.
+  MapRConf
+  </description>
+</property>
+
+<property>
+  <name>mapred.fairscheduler.smalljob.max.maps</name>
+  <value>10</value>
+  <description>Small job definition. Max number of maps allowed in small job.
+  MapRConf
+  </description>
+</property>
+
+<property>
+  <name>mapred.fairscheduler.smalljob.max.reducers</name>
+  <value>10</value>
+  <description>Small job definition. Max number of reducers allowed in small job.
+  MapRConf
+  </description>
+</property>
+
+<property>
+  <name>mapred.fairscheduler.smalljob.max.inputsize</name>
+  <value>10737418240</value>
+  <description>Small job definition. Max input size in bytes allowed for a small job.
+  Default is 10GB.
+  MapRConf
+  </description>
+</property>
+
+
+<property>
+  <name>mapred.fairscheduler.smalljob.max.reducer.inputsize</name>
+  <value>1073741824</value>
+  <description>Small job definition.
+  Max estimated input size for a reducer allowed in small job.
+  Default is 1GB per reducer.
+  MapRConf
+  </description>
+</property>
+
+
+<property>
+  <name>mapred.cluster.ephemeral.tasks.memory.limit.mb</name>
+  <value>200</value>
+  <description>Small job definition. Max memory in mbytes reserved for an ephermal slot.
+  Default is 200mb. This value must be same on JobTracker and TaskTracker nodes.
+  MapRConf
+  </description>
+</property>
+
+<property>
+  <name>mapreduce.jobtracker.node.labels.file</name>
+  <value></value>
+  <description>File on maprfs that has mapping of nodes and labels.</description>
+</property>
+
+
+
+
+<property>
+  <name>mapred.tasktracker.ephemeral.tasks.maximum</name>
+  <value>1</value>
+  <description>Reserved slot for small job scheduling
+  MapRConf
+  </description>
+</property>
+
+<property>
+  <name>mapred.tasktracker.ephemeral.tasks.timeout</name>
+  <value>10000</value>
+  <description>Maximum time in ms a task is allowed to occupy ephemeral slot
+  MapRConf
+  </description>
+</property>
+
+<property>
+  <name>mapred.tasktracker.ephemeral.tasks.ulimit</name>
+  <value>4294967296></value>
+  <description>Ulimit (bytes) on all tasks scheduled on an ephemeral slot
+  MapRConf
+ </description>
+</property>
+
+-->
+
+<property>
+  <name>mapreduce.tasktracker.group</name>
+  <value>mapr</value>
+  <description>Expert: Group to which TaskTracker belongs.
+  If LinuxTaskController is configured via mapreduce.tasktracker.taskcontroller,
+  the group owner of the task-controller binary '$HADOOP_HOME/bin/platform/bin/task-controller'
+  should be same as this group.
+  </description>
+</property>
+<property>
+  <name>mapred.local.dir</name>
+  <value>/tmp/mapr-hadoop/mapred/local</value>
+  <description>The local directory where MapReduce stores job jar, xml files and
+  creates work dirs for tasks. MapR hadoop uses a local volume map outputs.
+  </description>
+</property>
+
+<property>
+  <name>mapreduce.cluster.administrators</name>
+  <value>root,mapred,mapr</value>
+</property>
+<property>
+  <name>mapred.hosts.exclude</name>
+  <value>/usr/lib/hadoop/conf/mapred.hosts.exclude</value>
+  <description>Names a file that contains the list of hosts that should be excluded by the jobtracker.
+  If the value is empty, no hosts are excluded.
+  </description>
+</property>
+
+</configuration>

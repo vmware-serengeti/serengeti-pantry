@@ -29,3 +29,6 @@ include_recipe 'mapr::config_metrics'
 
 # Config compute-only node
 include_recipe 'mapr::compute_only'
+
+# Config Hadoop
+include_recipe 'mapr::config_hadoop'
