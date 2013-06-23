@@ -3,6 +3,11 @@
 . /etc/profile
 . /etc/environment
 
+# This is for CDH4 MRv1 only
+if [ -f /etc/default/hadoop-0.20-mapreduce ]; then
+  export HADOOP_HOME=/usr/lib/hadoop-0.20-mapreduce
+fi
+
 # Hadoop env
 export HADOOP_HOME_WARN_SUPPRESS=TRUE
 export HADOOP_COMMON_HOME=<%= @hadoop_home %>
@@ -15,7 +20,6 @@ export HADOOP_LOG_DIR="/var/log/hadoop"
 #export YARN_COMMON_HOME=${YARN_HOME}
 #export YARN_PID_DIR="${YARN_PID_DIR:-/var/run/hadoop-yarn}"
 
-export HADOOP_COMMON_HOME=<%= @hadoop_home %>
 export HADOOP_HDFS_HOME="${HADOOP_HDFS_HOME:-<%= @hadoop_hdfs_home %>}"
 <%- if node[:hadoop][:hadoop_mapred_dir] %>
 export HADOOP_MAPRED_HOME=<%= node[:hadoop][:hadoop_mapred_dir] %>
@@ -36,4 +40,4 @@ export <%= key %>="<%= value %>"
 <%- end %>
 
 export JAVA_HOME
-export PATH=$HADOOP_HOME/bin:$JAVA_HOME/bin:$PATH
+export PATH=$HADOOP_COMMON_HOME/bin:$JAVA_HOME/bin:$PATH
