@@ -112,7 +112,7 @@ hadoop_stop_pidfile() {
 }
 
 start() {
-    $DAEMON_SCRIPT start secondarynamenode $DAEMON_FLAGS
+    su -s /bin/bash "hdfs" -c "$DAEMON_SCRIPT start secondarynamenode $DAEMON_FLAGS"
 
     if [ "secondarynamenode" = "datanode" ]; then
       # Some processes are slow to start

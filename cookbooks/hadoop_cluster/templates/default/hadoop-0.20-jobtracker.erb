@@ -114,8 +114,9 @@ hadoop_stop_pidfile() {
 }
 
 start() {
-    $DAEMON_SCRIPT start jobtracker $DAEMON_FLAGS
+   su -s /bin/bash "mapred" -c "$DAEMON_SCRIPT start jobtracker $DAEMON_FLAGS"
 }
+
 stop() {
     $DAEMON_SCRIPT stop jobtracker
 

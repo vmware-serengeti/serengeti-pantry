@@ -114,8 +114,9 @@ hadoop_stop_pidfile() {
 }
 
 start() {
-    $DAEMON_SCRIPT start namenode $DAEMON_FLAGS
+   su -s /bin/bash "hdfs" -c "$DAEMON_SCRIPT start namenode $DAEMON_FLAGS"
 }
+
 stop() {
     $DAEMON_SCRIPT stop namenode
 

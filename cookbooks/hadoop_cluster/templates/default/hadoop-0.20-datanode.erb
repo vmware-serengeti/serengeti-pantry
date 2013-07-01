@@ -115,7 +115,7 @@ hadoop_stop_pidfile() {
 }
 
 start() {
-    $DAEMON_SCRIPT start datanode $DAEMON_FLAGS
+    su -s /bin/bash "hdfs" -c  "$DAEMON_SCRIPT start datanode $DAEMON_FLAGS"
 
     # Some processes are slow to start
     sleep $SLEEP_TIME
