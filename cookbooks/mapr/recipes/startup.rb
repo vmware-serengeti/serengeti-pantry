@@ -18,7 +18,7 @@
 if is_mapr_zookeeper
   # Start Zookeeper service
   service node[:mapr][:zookeeper_service_name] do
-    action :start
+    action [:disable, :start]
   end
   # Register MapR Zookeeper service provider
   provide_service(node[:mapr][:zookeeper_service_name])
@@ -30,7 +30,7 @@ end
 set_bootstrap_action(ACTION_START_SERVICE, 'mapr-warden', true)
 service 'mapr-warden' do
   only_if { File.exist?('/opt/mapr/initscripts/mapr-warden') }
-  action :start
+  action [:disable, :start]
 end
 
 if is_mapr_cldb
