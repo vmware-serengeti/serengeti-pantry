@@ -73,6 +73,7 @@ module HadoopCluster
     if !is_journalnode and !is_namenode
       set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:namenode_service_name])
       wait_for(node[:hadoop][:namenode_service_name], {"provides_service" => node[:hadoop][:namenode_service_name]}, true, servers.count, false)
+      clear_action
     end
     servers.map{ |server| facet_name_of_server(server) }.uniq.sort
   end
@@ -93,12 +94,14 @@ module HadoopCluster
 
   # The cluster has only federation if namenode number equal group number which has hadoop_namenode role and namenode number more than 1
   def cluster_has_only_federation
-    facet_name_count = namenode_facet_names.count
-    namenode_count = all_nodes({"role" => "hadoop_namenode"}).count
-    namenode_count > 1 and facet_name_count ==  namenode_count
+    servers = all_nodes({"role" => "hadoop_namenode"})
+    namenode_count = servers.count
+    namenode_facet_count = servers.map{ |server| facet_name_of_server(server) }.uniq.count
+    namenode_count > 1 and namenode_count == namenode_facet_count
   end
 
   # The node Namenode HA is enabled if more than 1 node has hadoop_namenode role in the same facet
+  # This methond must be called and takes effect on the namenodes only
   def namenode_ha_enabled
     servers = all_nodes({"role" => "hadoop_namenode", "facet_name" => node[:facet_name]})
     servers.count > 1
