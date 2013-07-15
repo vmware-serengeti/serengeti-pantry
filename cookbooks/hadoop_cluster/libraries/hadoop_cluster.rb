@@ -268,6 +268,10 @@ module HadoopCluster
             mkdir -p $install_dir
             cd $install_dir
             tar xzf /usr/local/src/#{tarball_filename} --strip-components=1
+            if [ $? -ne 0 ]; then
+              echo 'untar #{tarball_filename} failed. Is it a tar gzip file?'
+              exit 2
+            fi
             chown -R hdfs:hadoop $install_dir
 
             echo 'create symbolic links'
