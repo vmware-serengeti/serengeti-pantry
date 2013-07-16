@@ -111,33 +111,56 @@ EOF
 
   # format and mount local data disks
   def mount_disks(dev2disk, mp2dev)
-    ## Format attached disk devices
-    set_action(ACTION_FORMAT_DISK, 'format_disk')
+    ## Format all attached disk devices in parallel
+    # use '&' to run as background shell job and 'wait' to wait for all jobs.
+    # if the background jobs fail (e.g format disk fails), 'wait' will always return 0,
+    # but the resource 'mount' afterward will throw error.
+    log = '/tmp/serengeti-format-disks.log'
+    filename = '/tmp/serengeti-format-disks.sh'
+    format_disks = ''
     dev2disk.each do |dev, disk|
-      execute "formatting disk device #{disk}" do
-        only_if do File.exist?(disk) end
-        not_if do File.exist?(dev) end
-        command %Q{
-        flag=1
-        while [ $flag -ne 0 ] ; do
-          echo 'Running: sfdisk -uM #{disk}. Occasionally it will fail, we will re-run.'
-          echo ",,L" | sfdisk -uM #{disk}
-          flag=$?
-          sleep 3
-        done
+      next if !File.exist?(disk) or File.exist?(dev) # disk not exists or already formatted
+      format_disks << "format_disk #{disk} #{dev} & \n"
+    end
 
-        echo "y" | mkfs -t ext4 -b 4096 #{dev}
+    if !format_disks.empty?
+      set_action(ACTION_FORMAT_DISK, 'format_disk')
+      file filename do
+        mode "0755"
+        content %Q{
+function format_disk()
+{
+  flag=1
+  while [ $flag -ne 0 ] ; do
+    echo "Running sfdisk -uM $1. Occasionally it will fail, we will re-run."
+    echo ",,L" | sfdisk -uM $1
+    flag=$?
+    sleep 3
+  done
+
+  echo "y" | mkfs -t ext4 -b 4096 $2
+}
+
+echo Started on `date`
+#{format_disks}
+wait
+echo Finished on `date`
         }
         action :nothing
+      end.run_action(:create)
+
+      execute "formatting data disks" do
+        command "#{filename} > #{log}"
+        action :nothing
       end.run_action(:run)
+      clear_action
     end
-    clear_action
 
     ## Mount data disk, make hadoop dirs on them
     mp2dev.each do |mount_point, dev|
       next unless File.exists?(node[:disk][:disk_devices][dev])
 
-      Chef::Log.info "mounting data disk #{dev} at #{mount_point} if not mounted"
+      Chef::Log.info "mounting data disk #{dev} at #{mount_point}" unless File.exists?(mount_point)
       directory mount_point do
         only_if{ File.exists?(dev) }
         owner     'root'
@@ -149,7 +172,6 @@ EOF
       dev_fstype = fstype_from_file_magic(dev)
       mount mount_point do
         only_if{ dev && dev_fstype }
-        only_if{ File.exists?(dev) }
         device dev
         options 'noatime'
         fstype dev_fstype
