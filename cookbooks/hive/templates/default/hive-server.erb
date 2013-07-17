@@ -8,9 +8,12 @@
 . /etc/rc.d/init.d/functions
 
 # Paths to configuration, binaries, etc
+NAME="Hive Server"
 HIVE_BIN="<%= node[:hive][:home_dir] %>/bin/hive"
 HIVE_ARGS="--service hiveserver"
-HIVE_LOG="<%= node[:hive][:log_dir] %>/hive-thrift.log"
+HIVE_LOG_DIR=<%= node[:hive][:log_dir] %>
+HIVE_LOG_FILE="<%= node[:hive][:log_dir] %>/hive-server.log"
+DAEMON_OUT="<%= node[:hive][:log_dir] %>/hive-server.out"
 HIVE_USER="<%= node[:hive][:user] %>"
 ANT_LIB=/usr/share/java
 
@@ -20,31 +23,34 @@ if [ ! -f $HIVE_BIN ]; then
 fi
 
 # pid file for /sbin/runuser
-pidfile=${PIDFILE-<%= node[:hive][:pid_dir] %>/hive-thrift.pid}
+pidfile=${PIDFILE-<%= node[:hive][:pid_dir] %>/hive-server.pid}
 RETVAL=0
 
 start() {
   # check to see if hive is already running by looking at the pid file and grepping
   # the process table.
   if [ -f $pidfile ] && checkpid `cat $pidfile`; then
-    echo "hive-thrift is already running"
+    echo "$NAME is already running"
     exit 0
   fi
-  echo -n $"Starting $prog: "
-  nohup sudo -u $HIVE_USER $HIVE_BIN $HIVE_ARGS >> $HIVE_LOG 2>&1 &
-  java_pid=$!
-  echo $java_pid > $pidfile
-  ps $java_pid > /dev/null
-  return $?
+  echo -n $"Starting $NAME: "
+
+    exec_env="HADOOP_OPTS=\"-Dhive.log.dir=$HIVE_LOG_DIR -Dhive.log.file=`basename $HIVE_LOG_FILE` -Dhive.log.threshold=INFO\""
+    su -s /bin/sh $HIVE_USER -c "$exec_env nohup nice -n 0 \
+        $HIVE_BIN $HIVE_ARGS > $DAEMON_OUT 2>&1 < /dev/null & "'echo $! '"> $pidfile"
+
+  sleep 3
+  checkpid `cat $pidfile`
+  RETVAL=$?
 }
 
 stop() {
   # check if the process is already stopped by seeing if the pid file exists.
   if [ ! -f $pidfile ]; then
-    echo "hive-thrift is already stopped"
+    echo "$NAME is already stopped"
     exit 0
   fi
-  echo -n $"Stopping $prog: "
+  echo -n $"Stopping $NAME: "
   if kill `cat $pidfile`; then
     RETVAL=0
     echo_success
@@ -58,10 +64,10 @@ stop() {
 
 status_fn() {
   if [ -f $pidfile ] && checkpid `cat $pidfile`; then
-    echo "hive-thrift is running"
+    echo "$NAME is running"
     exit 0
   else
-    echo "hive-thrift is stopped"
+    echo "$NAME is stopped"
     exit 1
   fi
 }
@@ -81,7 +87,7 @@ case "$1" in
     start
     ;;
   *)
-    echo $"Usage: $prog {start|stop|restart|status}"
+    echo $"Usage: $0 {start|stop|restart|status}"
     RETVAL=3
 esac
 
