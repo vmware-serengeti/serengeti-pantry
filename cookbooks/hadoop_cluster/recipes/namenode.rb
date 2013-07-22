@@ -75,7 +75,7 @@ service "start-#{node[:hadoop][:namenode_service_name]}" do
   notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
 end
 
-## run this regardless namenode is already started before bootstrapping or started by this recipe
+# run this regardless namenode is already started before bootstrapping or started by this recipe
 run_in_ruby_block(resource_wait_for_namenode.name) { resource_wait_for_namenode.run_action(:run) }
 
 if namenode_ha_enabled
@@ -118,11 +118,14 @@ if namenode_ha_enabled
 
 end
 
+if is_primary_namenode
+  # initialize hdfs dirs after namenode is formatted and started,
+  # and before jobtracker/resourcemanager is started.
+  include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"
+end
+
 # register with cluster_service_discovery
 provide_service(node[:hadoop][:namenode_service_name])
-
-# Set hdfs permission on only after formatting namenode
-include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"
 
 # install Hortonworks HMonitor vSphere HA (see http://hortonworks.com/thankyou-hdp12-hakit-vmw/?mdl=13577&ao=0&lnk=0)
 if is_hortonworks_hmonitor_namenode_enabled

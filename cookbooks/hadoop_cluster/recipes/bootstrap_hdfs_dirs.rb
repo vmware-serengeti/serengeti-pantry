@@ -41,7 +41,7 @@
 execute 'create common user dirs on HDFS' do
   only_if "service #{node[:hadoop][:namenode_service_name]} status"
   #only_if "hadoop dfsadmin -safemode wait | grep -q OFF"
-  not_if { File.exists?('/mnt/hadoop/.made_inital_dirs.log') }
+  not_if { File.exists?('/mnt/hadoop/.initialize_hdfs_dirs.log') }
   #creates '/mnt/hadoop/.made_inital_dirs.log' # this doesn't work; may be a bug of 'execute' resource ?
   user 'hdfs'
   command %q{
@@ -81,7 +81,7 @@ execute 'create common user dirs on HDFS' do
     hadoop fs -chown -R mapred:mapred /tmp/hadoop-yarn/staging
 
     exit_status=$?
-    if [ $exit_status -eq 0 ]; then touch /mnt/hadoop/.made_inital_dirs.log ; fi
+    if [ $exit_status -eq 0 ]; then touch /mnt/hadoop/.initialize_hdfs_dirs.log ; fi
     exit $exit_status
   }
 end
