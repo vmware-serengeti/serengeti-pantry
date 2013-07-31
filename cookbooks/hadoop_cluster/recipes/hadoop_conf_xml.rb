@@ -75,14 +75,3 @@ exclude_files.each do |exclude_file|
     action :create
   end
 end
-
-# when restart cluster and recipe comes here, /etc/rc.local should already finished
-bootup_uuid_mtime = Time.parse(File.mtime("/opt/vmware/etc/serengeti_bootup_uuid").to_s)
-if (node[:bootstrap_time] - bootup_uuid_mtime).abs < 60
-  execute 'clean up hosts.exclude files' do
-    command %Q{
-      cat /dev/null > /etc/hadoop/conf/mapred.hosts.exclude
-      cat /dev/null > /etc/hadoop/conf/dfs.hosts.exclude
-    }
-  end
-end

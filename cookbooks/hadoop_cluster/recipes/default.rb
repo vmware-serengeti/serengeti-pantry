@@ -25,9 +25,6 @@ include_recipe "java"
 
 class Chef::Recipe; include HadoopCluster ; end
 
-# place at the startpoint of cookbook
-node[:bootstrap_time] = Time.now
-
 # Setup package repository
 include_recipe "hadoop_common::add_repo"
 # Update some node attributes
