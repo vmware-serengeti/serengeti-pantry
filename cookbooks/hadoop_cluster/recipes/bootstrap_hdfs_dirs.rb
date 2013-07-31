@@ -48,6 +48,10 @@ execute 'create common user dirs on HDFS' do
     hadoop fs -chmod 775           /
     hadoop fs -chown hdfs:hadoop   /
 
+    hadoop fs -mkdir               /tmp
+    hadoop fs -chmod 777           /tmp
+    hadoop fs -chown hdfs:hadoop   /tmp
+
     hadoop fs -mkdir               /hadoop
     hadoop fs -chmod 775           /hadoop
     hadoop fs -chown hdfs:hadoop   /hadoop
@@ -67,8 +71,8 @@ execute 'create common user dirs on HDFS' do
     hadoop_users=/user/"`grep supergroup /etc/group | cut -d: -f4 | sed -e 's|,| /user/|g'`"
     if [ "$hadoop_users" = "/user/" ]; then hadoop_users='' ; fi
     hadoop_users="$hadoop_users"
-    hadoop fs -mkdir     /tmp /user /user/hive/ /user/hive/warehouse $hadoop_users;
-    hadoop fs -chmod a+w /tmp /user /user/hive/ /user/hive/warehouse;
+    hadoop fs -mkdir     /user /user/hive/ /user/hive/warehouse $hadoop_users;
+    hadoop fs -chmod a+w user /user/hive/ /user/hive/warehouse;
     for user in $hadoop_users ; do
       hadoop fs -chown ${user#/user/} $user;
     done ;
