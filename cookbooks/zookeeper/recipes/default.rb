@@ -169,3 +169,5 @@ end
 
 # Register with cluster_service_discovery
 provide_service(node[:zookeeper][:zookeeper_service_name], { :quorum => quorum, :id => myid })
+
+clear_bootstrap_action(true)

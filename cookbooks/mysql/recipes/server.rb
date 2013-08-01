@@ -142,3 +142,5 @@ execute "mysql-install-privileges" do
   action :nothing
   subscribes :run, resources("template[#{grants_path}]"), :immediately
 end
+
+clear_bootstrap_action(true)

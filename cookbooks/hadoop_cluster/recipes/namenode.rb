@@ -132,3 +132,5 @@ if is_hortonworks_hmonitor_namenode_enabled
   hadoop_ha_package "namenode"
   enable_ha_service "hmonitor-namenode-monitor"
 end
+
+clear_bootstrap_action(true)

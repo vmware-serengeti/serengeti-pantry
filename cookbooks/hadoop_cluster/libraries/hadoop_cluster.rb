@@ -53,7 +53,9 @@ module HadoopCluster
     else
       set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:journalnode_service_name])
       journalnode_count = all_nodes_count({"role" => "hadoop_journalnode"})
-      all_provider_public_ips(node[:hadoop][:journalnode_service_name], true, journalnode_count)
+      ret = all_provider_public_ips(node[:hadoop][:journalnode_service_name], true, journalnode_count)
+      clear_action
+      ret
     end
   end
 
@@ -63,7 +65,9 @@ module HadoopCluster
     else
       set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:zookeeper_service_name])
       zookeeper_count = all_nodes_count({"role" => "zookeeper"})
-      all_provider_public_ips(node[:hadoop][:zookeeper_service_name], true, zookeeper_count)
+      ret = all_provider_public_ips(node[:hadoop][:zookeeper_service_name], true, zookeeper_count)
+      clear_action
+      ret
     end
   end
 
@@ -245,7 +249,6 @@ module HadoopCluster
         end
 
         set_action(ACTION_INSTALL_PACKAGE, component)
-
         execute "install #{tarball_pkgname} from tarball if not installed" do
           not_if do already_installed end
 
@@ -301,6 +304,7 @@ EOF
           # and then wait for namenode service to be ready. This can reduce the cluster creation time remarkably.
           action :nothing
         end.run_action(:run)
+        clear_action
       end
 
       if ['namenode', 'datanode', 'jobtracker', 'tasktracker', 'secondarynamenode'].include?(component) then
@@ -328,6 +332,7 @@ EOF
         end
       end
     end
+    clear_bootstrap_action(true)
 
     #FIXME this is a bug in Pivotal HD 1.0 alpha
     if is_pivotalhd_distro
@@ -550,6 +555,8 @@ done
           variables(template_variables)
           source "#{file}.erb"
         end
+
+        clear_bootstrap_action(true)
       end
     end
   end
@@ -564,6 +571,7 @@ done
         supports :status => true, :restart => true
         notifies :create, resources("ruby_block[#{svc}]"), :immediately
       end
+      clear_bootstrap_action(true)
     end
   end
 

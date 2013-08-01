@@ -57,6 +57,8 @@ end
 set_sys_limit "Increase maximum num of open files ulimit", "@hbase", "nofile", ulimit_nofile
 set_sys_limit "Increase maximum num of processes ulimit", "@hbase", "nproc", ulimit_nproc
 
+set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'hbase', true)
+
 if is_install_from_tarball then
   include_recipe "hbase::install_from_tarball"
 else
@@ -174,3 +176,5 @@ end
     variables(template_variables)
   end
 end
+
+clear_bootstrap_action(true)

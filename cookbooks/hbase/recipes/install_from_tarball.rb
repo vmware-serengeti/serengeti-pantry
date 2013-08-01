@@ -23,9 +23,6 @@ include_recipe "install_from"
 # Load distro repository info
 current_distro = data_bag_item("hadoop_distros", node[:hadoop][:distro_name])
 tarball_url = current_distro['hbase']
-unless ::File.exists?("#{node[:hbase][:home_dir]}")
-  set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'hbase')
-end
 
 install_from_release('hbase') do
   release_url   tarball_url
@@ -35,4 +32,5 @@ install_from_release('hbase') do
   has_binaries  [ 'bin/hbase' ]
   not_if{ ::File.exists?("#{node[:hbase][:home_dir]}") }
 end
+
 

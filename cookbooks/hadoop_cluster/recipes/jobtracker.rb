@@ -65,3 +65,5 @@ if is_hortonworks_hmonitor_jobtracker_enabled
   hadoop_ha_package "jobtracker"
   enable_ha_service "hmonitor-jobtracker-monitor"
 end
+
+clear_bootstrap_action(true)

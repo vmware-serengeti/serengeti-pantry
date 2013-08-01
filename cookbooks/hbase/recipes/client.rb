@@ -34,7 +34,7 @@ run_in_ruby_block(log) do
   provider_for_service(node[:hbase][:master_service_name])
 end
 
-set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:rest_service_name])
+set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:rest_service_name], true)
 service "start-#{node[:hbase][:rest_service_name]}" do
   service_name node[:hbase][:rest_service_name]
   supports :status => true, :restart => true
@@ -42,10 +42,12 @@ service "start-#{node[:hbase][:rest_service_name]}" do
 end
 provide_service(node[:hbase][:rest_service_name])
 
-set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:thrift_service_name])
+set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:thrift_service_name], true)
 service "start-#{node[:hbase][:thrift_service_name]}" do
   service_name node[:hbase][:thrift_service_name]
   supports :status => true, :restart => true
   action [:enable, :start]
 end
 provide_service(node[:hbase][:thrift_service_name])
+
+clear_bootstrap_action(true)

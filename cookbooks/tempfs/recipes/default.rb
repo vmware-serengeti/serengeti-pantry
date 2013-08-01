@@ -38,10 +38,8 @@ user 'mapred' do
 end
 
 unless File.exist?("/etc/init.d/nfs")
-  set_bootstrap_action(ACTION_INSTALL_PACKAGE, node[:nfs][:package_name])
   package node[:nfs][:package_name] do
     action :install
-    notifies :create, resources("ruby_block[#{node[:nfs][:package_name]}]"), :immediately
   end
 end
 

@@ -70,3 +70,5 @@ end
 
 # Register with cluster_service_discovery
 provide_service(node[:hbase][:master_service_name])
+
+clear_bootstrap_action(true)

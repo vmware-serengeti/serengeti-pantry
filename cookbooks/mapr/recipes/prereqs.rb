@@ -116,3 +116,5 @@ include_recipe 'mapr::nfs_utils' if node.role?('mapr_client') # so the user can 
 
 # Set JAVA_HOME
 set_mapr_java_home
+
+clear_bootstrap_action(true)
