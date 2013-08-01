@@ -151,7 +151,7 @@ module ClusterServiceDiscovery
 
   # Register to provide the given service.
   # If you pass in a hash of information, it will be added to the registry, and available to clients
-  def run_provide_service service_name, service_info = {}
+  def run_provide_service service_name, service_info = {}, wait = false
     Chef::Log.info("Registering to provide service '#{service_name}' with extra info: #{service_info.inspect}")
     timestamp = ClusterServiceDiscovery.timestamp
     node.set[:provides_service][service_name] = {
@@ -163,16 +163,21 @@ module ClusterServiceDiscovery
     # but the Chef Search Server is not faster enough to build index for newly added node property(e.g. 'provides_service'),
     # and will return stale results for search(:node, "provides_service:#{service_name}").
     # So let's wait for Chef Search Server to generate the search index.
-    found = false
-    while !found do
-      Chef::Log.info("Wait for Chef Solr Server to generate search index for property 'provides_service'")
-      sleep SLEEP_TIME
-      # a service can be provided by multi nodes, e.g. zookeeper server service
-      servers = all_providers_for_service(service_name, true, 1, false)
-      servers.each do |server|
-        if server[:ipaddress] == node[:ipaddress] and server[:provides_service][service_name][:timestamp] == timestamp
-          found = true
-          break
+    # However in large scale cluster, Chef Search API is very time consuming(comparing to Chef Get/Delete/Update API),
+    # we need to reduce Chef Search API calls to Chef Server. Since provider_for_service() will by default wait for
+    # Chef Solr to generate the index, so we don't need to wait here by default.
+    if wait
+      found = false
+      while !found do
+        Chef::Log.info("Wait for Chef Solr Server to generate search index for property 'provides_service'")
+        sleep SLEEP_TIME
+        # a service can be provided by multi nodes, e.g. zookeeper server service
+        servers = all_providers_for_service(service_name, true, 1, false)
+        servers.each do |server|
+          if server[:ipaddress] == node[:ipaddress] and server[:provides_service][service_name][:timestamp] == timestamp
+            found = true
+            break
+          end
         end
       end
     end
