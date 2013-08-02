@@ -1,3 +1,11 @@
+# 1.0.0 (2013-8-2)
+
+Enhancement:
+* Use non root account to start hadoop service
+* Format all attached data disks in parallel instead of one by one to speed up bootstrap
+* Reduce unneccessary Chef Search API calls when registering a service to support large scale cluster provision (200+ nodes)
+* Other bug fix
+
 # 0.9.0 (2013-6-8)
 
 New Features:

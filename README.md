@@ -60,6 +60,7 @@ We mainly create the following cookbooks and recipes for deploying a Hadoop clus
 * zookeeper : install Zookeeper package
 * mapr: install MapR package
 * postgresql : install a Postgresql Server
+* mysql: install a MySQL server
 * install_from : install a package from a tarball
 
 ## New Features
@@ -105,7 +106,7 @@ We have tested that VMware Serengeti Cookbooks can be used to successfully deplo
 * [Apache Hadoop 1.x and 1.2](http://newverhost.com/pub/hadoop/common/hadoop-1.2.0/), [Apache Pig 0.9.2](http://www.us.apache.org/dist/pig/pig-0.9.2/), [Apache Hive 0.8.1](http://www.us.apache.org/dist/hive/hive-0.8.1/), [Apache HBase 0.94.0](http://www.us.apache.org/dist/hbase/), and [Apache Zookeeper 3.4.3](http://www.us.apache.org/dist/zookeeper/zookeeper-3.4.3/)
 * [GreenPlum HD 1.x](http://www.greenplum.com/products/greenplum-hd) which includes Hadoop 1.0.0, Hive 0.7.1 and Pig 0.9.1
 * [Cloudera CDH3u6](http://archive.cloudera.com/cdh/3/hadoop-0.20.2-cdh3u3/) which includes Hadoop 0.20.2, Hive 0.7.1 and Pig 0.8.1
-* [Cloudear CDH4.1.x and CDH4.2.x](http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/4/) which includes Hadoop 2.0.0, Hive 0.10.0 and Pig 0.11.0
+* [Cloudera CDH4.1.x, CDH4.2.x and CDH4.3.x](http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/4/) which includes Hadoop 2.0.0, Hive 0.10.0 and Pig 0.11.0
 * [Hortonworks HDP 1.x and 2.x](http://s3.amazonaws.com/public-repo-1.hortonworks.com/HDP-1.2.0/repos/centos5/HDP-1.2.0-centos5.tar.gz)
 * [Pivotal HD 1.0](http://pivotallabs.com/)
 * [MapR 2.1.x](http://package.mapr.com/releases/)

@@ -202,10 +202,10 @@
 
 =======================================================================   
 
-Serengeti 0.9
+Serengeti 1.0.0
 
 
-Serengeti 0.9 includes a number of subcomponents with
+Serengeti 1.0.0 includes a number of subcomponents with
 separate copyright notices and license terms.  The product that 
 includes this file does not necessarily use all the open source 
 subcomponents referred to below. Your use of the source
