@@ -54,6 +54,7 @@ service "restart-#{node[:hadoop][:namenode_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-metrics.properties]"), :delayed
   unless ['create', 'launch'].include?(node[:cluster_action])
     # When running 'cluster create' or 'cluster launch', new nodes are added into this cluster.
     # chef-client will only append new lines to /etc/hadoop/conf/topology.data (containing ip to rack mapping), and no existing lines are updated.

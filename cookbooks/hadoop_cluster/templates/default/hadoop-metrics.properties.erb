@@ -1,10 +1,6 @@
 
-<% unless @ganglia %>
 # Configuration of the "dfs" context for null
 dfs.class=org.apache.hadoop.metrics.spi.NullContext
-# Configuration of the "mapred" context for null
-mapred.class=org.apache.hadoop.metrics.spi.NullContext
-<% end %>
 
 # Configuration of the "dfs" context for file
 # dfs.class=org.apache.hadoop.metrics.file.FileContext
@@ -20,15 +16,19 @@ dfs.period=10
 dfs.servers=<%= @ganglia_address %>:<%= @ganglia_port %>
 <% end %>
 
+# Configuration of the "mapred" context to support MetricsServlet without emit data
+mapred.class=org.apache.hadoop.metrics.spi.NoEmitMetricsContext
+
+# Configuration of the "mapred" context for null
+# mapred.class=org.apache.hadoop.metrics.spi.NullContext
 
 # Configuration of the "mapred" context for file
 # mapred.class=org.apache.hadoop.metrics.file.FileContext
 # mapred.period=10
 # mapred.fileName=/tmp/mrmetrics.log
 
-# Configuration of the "mapred" context for ganglia
-
 <% if @ganglia %>
+# Configuration of the "mapred" context for ganglia
 # Pick one: Ganglia 3.0 (former) or Ganglia 3.1 (latter)
 # mapred.class=org.apache.hadoop.metrics.ganglia.GangliaContext
 mapred.class=org.apache.hadoop.metrics.ganglia.GangliaContext31
@@ -51,9 +51,35 @@ jvm.period=10
 jvm.servers=<%= @ganglia_address %>:<%= @ganglia_port %>
 <% end %>
 
+# Configuration of the "rpc" context for null
+rpc.class=org.apache.hadoop.metrics.spi.NullContext
+
+# Configuration of the "rpc" context for file
+#rpc.class=org.apache.hadoop.metrics.file.FileContext
+#rpc.period=10
+#rpc.fileName=/tmp/rpcmetrics.log
+
+<% if @ganglia %>
+# Configuration of the "rpc" context for ganglia
+# rpc.class=org.apache.hadoop.metrics.ganglia.GangliaContext
+rpc.class=org.apache.hadoop.metrics.ganglia.GangliaContext31
+rpc.period=10
+rpc.servers=<%= @ganglia_address %>:<%= @ganglia_port %>
+<% end %>
+
 # Configuration of the "ugi" context for null
 ugi.class=org.apache.hadoop.metrics.spi.NullContext
 
-#
-# for hue, you need to change the above following cloudera's directions:
-#   http://archive.cloudera.com/desktop/packages.html
+# Configuration of the "ugi" context for file
+#ugi.class=org.apache.hadoop.metrics.file.FileContext
+#ugi.period=10
+#ugi.fileName=/tmp/ugimetrics.log
+
+<% if @ganglia %>
+# Configuration of the "ugi" context for ganglia
+# ugi.class=org.apache.hadoop.metrics.ganglia.GangliaContext
+ugi.class=org.apache.hadoop.metrics.ganglia.GangliaContext31
+ugi.period=10
+ugi.servers=<%= @ganglia_address %>:<%= @ganglia_port %>
+<% end %>
+
