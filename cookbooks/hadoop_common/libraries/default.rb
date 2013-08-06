@@ -128,6 +128,24 @@ EOF
       file filename do
         mode "0755"
         content %Q{
+function format_disk_internal()
+{
+  kernel=`uname -r | cut -d'-' -f1`
+  first=`echo $kernel | cut -d '.' -f1`
+  second=`echo $kernel | cut -d '.' -f2`
+  third=`echo $kernel | cut -d '.' -f3`
+  num=$[ $first*10000 + $second*100 + $third ]
+
+  # we cannot use [[ "$kernel" < "2.6.28" ]] here because linux kernel 
+  # has versions like "2.6.5"
+  if [ $num -lt 20628 ];
+  then
+    mkfs -t ext3 -b 4096 $1;
+  else
+    mkfs -t ext4 -b 4096 $1;
+  fi;
+}
+
 function format_disk()
 {
   flag=1
@@ -138,7 +156,7 @@ function format_disk()
     sleep 3
   done
 
-  echo "y" | mkfs -t ext4 -b 4096 $2
+  echo "y" | format_disk_internal $2
 }
 
 echo Started on `date`
