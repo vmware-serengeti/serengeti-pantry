@@ -39,11 +39,13 @@ module HadoopCluster
   # Save Bootstrap Status to Chef::Node. It will be ran in Chef compile phase.
   def set_action(act = '', obj = '')
     act = act.gsub(/<obj>/, obj)
-    Chef::Log.info "Set Bootstrap action to '#{act}'"
     attrs = node[:provision] ? node[:provision].to_hash : Hash.new
-    attrs['action'] = act
-    node[:provision] = attrs
-    node.save
+    if attrs['action'] != act
+      Chef::Log.info "Set Bootstrap Action to '#{act}'"
+      attrs['action'] = act
+      node[:provision] = attrs
+      node.save
+    end
   end
 
   def clear_action
