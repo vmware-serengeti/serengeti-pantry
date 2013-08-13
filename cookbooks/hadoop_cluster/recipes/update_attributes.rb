@@ -108,3 +108,12 @@ end
 if namenode_ha_enabled
   node.default[:hadoop][:namenode_ha_enabled] = true
 end
+
+# hmonitor ha services
+if is_hortonworks_hmonitor_jobtracker_enabled
+  node.default[:hadoop][:hmonitor_ha_package] = "jobtracker"
+  node.default[:hadoop][:hmonitor_ha_service] = "hmonitor-jobtracker-monitor"
+else
+  node.default[:hadoop][:hmonitor_ha_package] = "namenode"
+  node.default[:hadoop][:hmonitor_ha_service] = "hmonitor-namenode-monitor"
+end

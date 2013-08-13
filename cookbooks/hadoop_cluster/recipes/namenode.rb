@@ -45,6 +45,12 @@ end
 resource_wait_for_namenode = resources(:execute => "wait_for_namenode")
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:namenode_service_name])
 
+# Install Hortonworks HMonitor vSphere HA (see http://hortonworks.com/thankyou-hdp12-hakit-vmw/?mdl=13577&ao=0&lnk=0)
+hadoop_ha_package node[:hadoop][:hmonitor_ha_package]
+# Before start/restart namenode service, we need to stop hmonitor service if it's running,
+# otherwise, hmonitor service will detect namenode is down then reset the VM.
+stop_ha_service node[:hadoop][:hmonitor_ha_service]
+
 is_namenode_running = system("service #{node[:hadoop][:namenode_service_name]} status 1>2 2>/dev/null")
 service "restart-#{node[:hadoop][:namenode_service_name]}" do
   service_name node[:hadoop][:namenode_service_name]
@@ -64,6 +70,7 @@ service "restart-#{node[:hadoop][:namenode_service_name]}" do
   end
   notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
   notifies :run, resource_wait_for_namenode, :immediately
+  notifies :start, resources("service[#{node[:hadoop][:hmonitor_ha_service]}]"), :delayed
 end if is_namenode_running
 
 service "start-#{node[:hadoop][:namenode_service_name]}" do
@@ -74,6 +81,7 @@ service "start-#{node[:hadoop][:namenode_service_name]}" do
   supports :status => true, :restart => true
 
   notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
+  notifies :start, resources("service[#{node[:hadoop][:hmonitor_ha_service]}]"), :delayed
 end
 
 # run this regardless namenode is already started before bootstrapping or started by this recipe
@@ -127,11 +135,5 @@ end
 
 # register with cluster_service_discovery
 provide_service(node[:hadoop][:namenode_service_name])
-
-# install Hortonworks HMonitor vSphere HA (see http://hortonworks.com/thankyou-hdp12-hakit-vmw/?mdl=13577&ao=0&lnk=0)
-if is_hortonworks_hmonitor_namenode_enabled
-  hadoop_ha_package "namenode"
-  enable_ha_service "hmonitor-namenode-monitor"
-end
 
 clear_bootstrap_action(true)

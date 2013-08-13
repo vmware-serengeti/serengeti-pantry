@@ -561,17 +561,14 @@ done
     end
   end
 
-  # Enable VM level Namenode/Jobtracker HA provided by Hortonworks HMonitor
-  def enable_ha_service svc
+  # Stop HMonitor Service
+  def stop_ha_service svc
     return if !is_hortonworks_hmonitor_enabled
     if node[:hadoop][:ha_enabled] then
-      set_bootstrap_action(ACTION_START_SERVICE, svc)
       service svc do
-        action [ :disable, :start ]
+        action [ :disable, :stop ]
         supports :status => true, :restart => true
-        notifies :create, resources("ruby_block[#{svc}]"), :immediately
       end
-      clear_bootstrap_action(true)
     end
   end
 
