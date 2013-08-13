@@ -73,14 +73,14 @@
   <property>
     <name>service.monitor.probe.interval</name>
     <description>Time in millis between the last probe cycle ending and the new one beginning.</description>
-    <value>11000</value>
+    <value>20000</value>
   </property>
 
   <property>
     <name>service.monitor.probe.timeout</name>
     <description>How long in milliseconds does the probe loop have to be blocked
     before that is considered a liveness failure</description>
-    <value>60000</value>
+    <value>360000</value>
   </property>
 
   <property>
@@ -89,13 +89,13 @@
       service to bootstrap and become available before it reports a failure
       to the management infrastructure
     </description>
-    <value>60000</value>
+    <value>360000</value>
   </property>
 
   <property>
     <name>service.monitor.portprobe.enabled</name>
     <description>is the probe enabled</description>
-    <value>true</value>
+    <value>false</value>
   </property>
 
   <property>
@@ -146,7 +146,7 @@
   <property>
     <name>service.monitor.webprobe.enabled</name>
     <description>is the HTTP probe enabled</description>
-    <value>true</value>
+    <value>false</value>
   </property>
 
   <property>
