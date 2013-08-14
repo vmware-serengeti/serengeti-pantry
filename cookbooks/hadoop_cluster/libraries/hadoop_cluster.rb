@@ -533,48 +533,45 @@ done
     return if !is_hortonworks_hmonitor_enabled
 
     if ['namenode', 'jobtracker'].include?(component) then
-      if node[:hadoop][:ha_enabled] then
-        suffix = is_cdh4_distro ? '-cdh4' : ''
-        pkg = "hmonitor#{suffix}-vsphere-#{component}-daemon"
-        set_bootstrap_action(ACTION_INSTALL_PACKAGE, pkg)
-        package pkg do
-          action :install
-          notifies :create, resources("ruby_block[#{pkg}]"), :immediately
-        end
-
-        # put libVMGuestAppMonitorNative.so in /usr/lib/hadoop/lib/native/, so hadoop daemons can find it.
-        make_link('/usr/lib/hadoop/lib/native/libVMGuestAppMonitorNative.so', '/usr/lib/hadoop/monitor/libVMGuestAppMonitorNative.so')
-
-        # generate configuration file for HMonitor HA service
-        file = "vm-#{component}.xml"
-        template_variables = hadoop_template_variables
-        template_variables[:jobtracker_monitor_enabled] = is_jobtracker
-        template "/usr/lib/hadoop/monitor/#{file}" do
-          owner "root"
-          mode "0644"
-          variables(template_variables)
-          source "#{file}.erb"
-        end
-
-        clear_bootstrap_action(true)
+      suffix = is_cdh4_distro ? '-cdh4' : ''
+      pkg = "hmonitor#{suffix}-vsphere-#{component}-daemon"
+      set_bootstrap_action(ACTION_INSTALL_PACKAGE, pkg)
+      package pkg do
+        action :install
+        notifies :create, resources("ruby_block[#{pkg}]"), :immediately
       end
+
+      # put libVMGuestAppMonitorNative.so in /usr/lib/hadoop/lib/native/, so hadoop daemons can find it.
+      make_link('/usr/lib/hadoop/lib/native/libVMGuestAppMonitorNative.so', '/usr/lib/hadoop/monitor/libVMGuestAppMonitorNative.so')
+
+      # generate configuration file for HMonitor HA service
+      file = "vm-#{component}.xml"
+      template_variables = hadoop_template_variables
+      template_variables[:jobtracker_monitor_enabled] = is_jobtracker
+      template "/usr/lib/hadoop/monitor/#{file}" do
+        owner "root"
+        mode "0644"
+        variables(template_variables)
+        source "#{file}.erb"
+      end
+
+      clear_bootstrap_action(true)
     end
   end
 
   # Stop HMonitor Service
   def stop_ha_service svc
     return if !is_hortonworks_hmonitor_enabled
-    if node[:hadoop][:ha_enabled] then
-      service svc do
-        action [ :disable, :stop ]
-        supports :status => true, :restart => true
-      end
+
+    service svc do
+      action [ :disable, :stop ]
+      supports :status => true, :restart => true
     end
   end
 
   # Hortonworks HMonitor vSphere HA Kit can not monitor namenode service and resourcemanager service in Hadoop HDFS2 and YARN
   def is_hortonworks_hmonitor_enabled
-    is_hadoop1_distro or is_cdh4_distro
+    node[:hadoop][:ha_enabled] and (is_hadoop1_distro or is_cdh4_distro)
   end
 
   def is_hortonworks_hmonitor_namenode_enabled
