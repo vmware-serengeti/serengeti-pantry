@@ -115,6 +115,45 @@ EOF
     # use '&' to run as background shell job and 'wait' to wait for all jobs.
     # if the background jobs fail (e.g format disk fails), 'wait' will always return 0,
     # but the resource 'mount' afterward will throw error.
+    unless (node['platform'] == 'centos' and node['platform_version'].to_f < 6.0)
+      dev2disk["/dev/sda1"] = "/dev/sda"
+      dev2disk["/dev/sdb1"] = "/dev/sdb"
+      mp2dev["/mnt/sda1"] = "/dev/sda1"
+      mp2dev["/mnt/sdb1"] = "/dev/sdb1"
+
+      find_lsi_disks = '/tmp/find-lsi-disks.sh'
+      file find_lsi_disks do
+        mode "0755"
+        content %Q{
+lsi_controller=`/sbin/lspci | grep LSI | awk '{print $1}'`
+
+cd /sys/bus/scsi/devices
+devices=`ls -l | grep $lsi_controller | awk '{print $9}'`
+
+sys_disk_channel=`echo $devices | awk '{print $1}'`
+swap_disk_channel=`echo $devices | awk '{print $2}'`
+
+sys_disk=`ls $sys_disk_channel/block`
+swap_disk=`ls $swap_disk_channel/block`
+
+echo $sys_disk
+echo $swap_disk
+        }
+        action :nothing
+      end.run_action(:create)
+
+      found_disks = `bash #{find_lsi_disks}`
+      found_disks.split(/[\r\n]+/).each do |exclude_device|
+        dev2disk.each do |key, value|
+          dev2disk.delete(key) if value =~ /#{exclude_device}/
+        end
+        mp2dev.each do |key, value|
+          mp2dev.delete(key) if value =~ /#{exclude_device}/
+        end
+      end
+    end
+
+
     log = '/tmp/serengeti-format-disks.log'
     filename = '/tmp/serengeti-format-disks.sh'
     format_disks = ''
