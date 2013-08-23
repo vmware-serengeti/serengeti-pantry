@@ -109,13 +109,11 @@ EOF
     end
   end
 
-  # format and mount local data disks
-  def mount_disks(dev2disk, mp2dev)
-    ## Format all attached disk devices in parallel
-    # use '&' to run as background shell job and 'wait' to wait for all jobs.
-    # if the background jobs fail (e.g format disk fails), 'wait' will always return 0,
-    # but the resource 'mount' afterward will throw error.
-    unless (node['platform'] == 'centos' and node['platform_version'].to_f < 6.0)
+  def fetch_data_disks_info
+    dev2disk = node[:disk][:disk_devices].clone
+    mp2dev = node[:disk][:data_disks].clone
+
+    unless (['centos', 'redhat'].include?(node['platform']) and node['platform_version'].to_f < 6.0)
       dev2disk["/dev/sda1"] = "/dev/sda"
       dev2disk["/dev/sdb1"] = "/dev/sdb"
       mp2dev["/mnt/sda1"] = "/dev/sda1"
@@ -145,15 +143,31 @@ echo $swap_disk
       found_disks = `bash #{find_lsi_disks}`
       found_disks.split(/[\r\n]+/).each do |exclude_device|
         dev2disk.each do |key, value|
-          dev2disk.delete(key) if value =~ /#{exclude_device}/
+          if value =~ /#{exclude_device}/
+            dev2disk.delete(key)
+            break
+          end
         end
         mp2dev.each do |key, value|
-          mp2dev.delete(key) if value =~ /#{exclude_device}/
+          if value =~ /#{exclude_device}/
+            mp2dev.delete(key)
+            break
+          end
         end
       end
     end
 
+    return [dev2disk, mp2dev]
+  end
 
+  # format and mount local data disks
+  def mount_disks
+    ## Format all attached disk devices in parallel
+    # use '&' to run as background shell job and 'wait' to wait for all jobs.
+    # if the background jobs fail (e.g format disk fails), 'wait' will always return 0,
+    # but the resource 'mount' afterward will throw error.
+    
+    dev2disk, mp2dev = fetch_data_disks_info
     log = '/tmp/serengeti-format-disks.log'
     filename = '/tmp/serengeti-format-disks.sh'
     format_disks = ''

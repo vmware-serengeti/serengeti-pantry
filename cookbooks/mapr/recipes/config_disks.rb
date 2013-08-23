@@ -21,10 +21,12 @@ if !node[:disk]
   return
 end
 
+dev2disk, mp2dev = fetch_data_disks_info
+
 ## format local disk for MapR
 disk_file = '/opt/mapr/conf/disks.txt'
 if !File.exists?(disk_file)
-  disks = node[:disk][:disk_devices].values.collect{ |disk| disk if File.exists?(disk) }
+  disks = dev2disk.values.collect{ |disk| disk if File.exists?(disk) }
   disk_string = disks.join(',')
   file disk_file do
     owner "mapr"
