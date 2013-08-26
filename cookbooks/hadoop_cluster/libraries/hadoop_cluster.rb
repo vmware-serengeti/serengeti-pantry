@@ -377,10 +377,11 @@ done
 
   # log dir for hadoop daemons
   def local_hadoop_log_dir
+    dev2disk, mp2dev = fetch_data_disks_info
     dir = ""
     if node[:hadoop][:use_data_disk_as_log_vol]
       if node[:nfs_mapred_dirs].nil?
-        dir = node[:disk][:data_disks].keys.last
+        dir = mp2dev.keys.last
       else
         dir = node[:nfs_mapred_dirs].last
       end
@@ -392,9 +393,10 @@ done
   end
 
   def yarn_system_log_dir
+    dev2disk, mp2dev = fetch_data_disks_info
     dir = ""
     if node[:hadoop][:use_data_disk_as_log_vol]
-      dir = node[:disk][:data_disks].keys.last
+      dir = mp2dev.keys.last
     end
     if dir.nil? or dir == ""
       dir = "/mnt/hadoop"
@@ -403,8 +405,9 @@ done
   end
 
   def local_hadoop_dirs
-    dirs = node[:disk][:data_disks].map do |mount_point, device|
-      mount_point + '/hadoop' if File.exists?(node[:disk][:disk_devices][device])
+    dev2disk, mp2dev = fetch_data_disks_info
+    dirs = mp2dev.map do |mount_point, device|
+      mount_point + '/hadoop' if File.exists?(dev2disk[device])
     end
     dirs.compact!
     dirs.unshift('/mnt/hadoop') if node[:hadoop][:use_root_as_scratch_vol]
