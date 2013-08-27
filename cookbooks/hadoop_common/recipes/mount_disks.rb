@@ -16,4 +16,5 @@
 #   limitations under the License.
 #
 
-mount_disks
+mount_swap_disk(node[:disk][:swap_disk])
+mount_data_disks(node[:disk][:disk_devices], node[:disk][:data_disks])
