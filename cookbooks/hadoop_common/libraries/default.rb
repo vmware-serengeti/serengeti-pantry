@@ -109,65 +109,30 @@ EOF
     end
   end
 
-  def fetch_data_disks_info
-    dev2disk = node[:disk][:disk_devices].clone
-    mp2dev = node[:disk][:data_disks].clone
-
-    unless (['centos', 'redhat'].include?(node['platform']) and node['platform_version'].to_f < 6.0)
-      dev2disk["/dev/sda1"] = "/dev/sda"
-      dev2disk["/dev/sdb1"] = "/dev/sdb"
-      mp2dev["/mnt/sda1"] = "/dev/sda1"
-      mp2dev["/mnt/sdb1"] = "/dev/sdb1"
-
-      find_lsi_disks = '/tmp/find-lsi-disks.sh'
-      file find_lsi_disks do
-        mode "0755"
-        content %Q{
-lsi_controller=`/sbin/lspci | grep LSI | awk '{print $1}'`
-
-cd /sys/bus/scsi/devices
-devices=`ls -l | grep $lsi_controller | awk '{print $9}'`
-
-sys_disk_channel=`echo $devices | awk '{print $1}'`
-swap_disk_channel=`echo $devices | awk '{print $2}'`
-
-sys_disk=`ls $sys_disk_channel/block`
-swap_disk=`ls $swap_disk_channel/block`
-
-echo $sys_disk
-echo $swap_disk
-        }
-        action :nothing
-      end.run_action(:create)
-
-      found_disks = `bash #{find_lsi_disks}`
-      found_disks.split(/[\r\n]+/).each do |exclude_device|
-        dev2disk.each do |key, value|
-          if value =~ /#{exclude_device}/
-            dev2disk.delete(key)
-            break
-          end
-        end
-        mp2dev.each do |key, value|
-          if value =~ /#{exclude_device}/
-            mp2dev.delete(key)
-            break
-          end
-        end
-      end
+  def mount_swap_disk(swap_disk)
+    execute "mount swap disk: #{swap_disk}" do
+      only_if { File.exists?(swap_disk) }
+      command %Q{
+if [ -b #{swap_disk} ]; then
+  swapoff -a
+  file -s #{swap_disk} | grep swap
+  if [ $? != 0 ]; then
+    mkswap #{swap_disk}
+  fi
+  swapon #{swap_disk}
+  # do not write to /etc/fstab since we do not want to auto-mount
+  # swap disk when rebooting
+fi
+      }
     end
-
-    return [dev2disk, mp2dev]
   end
 
   # format and mount local data disks
-  def mount_disks
+  def mount_data_disks(dev2disk, mp2dev)
     ## Format all attached disk devices in parallel
     # use '&' to run as background shell job and 'wait' to wait for all jobs.
     # if the background jobs fail (e.g format disk fails), 'wait' will always return 0,
     # but the resource 'mount' afterward will throw error.
-    
-    dev2disk, mp2dev = fetch_data_disks_info
     log = '/tmp/serengeti-format-disks.log'
     filename = '/tmp/serengeti-format-disks.sh'
     format_disks = ''
@@ -243,6 +208,8 @@ echo Finished on `date`
       dev_fstype = fstype_from_file_magic(dev)
       mount mount_point do
         only_if{ dev && dev_fstype }
+        # in /etc/mtab, dev is translated to /dev/sdx1
+        not_if "grep '#{mount_point}' /etc/mtab > /dev/null"
         device dev
         options 'noatime'
         fstype dev_fstype
@@ -251,8 +218,8 @@ echo Finished on `date`
       # Chef Resource mount doesn't enable automatically mount disks when OS starts up. We add it here.
       mount_device_command = "#{dev}\t\t#{mount_point}\t\t#{dev_fstype}\tdefaults\t0 0"
       execute 'add mount info into /etc/fstab if not added' do
-        only_if "grep '#{dev}' /etc/mtab  > /dev/null"
-        not_if  "grep '#{dev}' /etc/fstab > /dev/null"
+        only_if "grep '#{mount_point}' /etc/mtab  > /dev/null"
+        not_if  "grep '#{mount_point}' /etc/fstab > /dev/null"
         command %Q{
         echo "#{mount_device_command}" >> /etc/fstab
         }
