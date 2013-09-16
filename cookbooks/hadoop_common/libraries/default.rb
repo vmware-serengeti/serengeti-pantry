@@ -169,25 +169,32 @@ function format_disk()
 {
   flag=1
   while [ $flag -ne 0 ] ; do
-    echo "Running sfdisk -uM $1. Occasionally it will fail, we will re-run."
+    echo "Running sfdisk -uM $1. Occasionally it will fail due to device busy, we will re-run."
     echo ",,L" | sfdisk -uM $1
     flag=$?
     sleep 3
   done
 
-  echo "y" | format_disk_internal $2
+  flag=1
+  while [ $flag -ne 0 ] ; do
+    echo "Running mkfs $2. Occasionally it will fail due to device busy, we will re-run."
+    echo "y" | format_disk_internal $2
+    flag=$?
+    sleep 3
+  done
 }
 
 echo Started on `date`
 #{format_disks}
 wait
 echo Finished on `date`
+echo
         }
         action :nothing
       end.run_action(:create)
 
       execute "formatting data disks" do
-        command "#{filename} > #{log}"
+        command "#{filename} >> #{log} 2>&1"
         action :nothing
       end.run_action(:run)
       clear_action
