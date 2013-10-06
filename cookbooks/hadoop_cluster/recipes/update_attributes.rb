@@ -1,4 +1,4 @@
-node[:hadoop][:install_from_tarball] = is_install_from_tarball
+node.default[:hadoop][:install_from_tarball] = is_install_from_tarball
 Chef::Log.info("Current distro is " + distro_vendor + " " + distro_version)
 Chef::Log.info("Will install the packages using #{node[:hadoop][:install_from_tarball] ? 'tarball' : 'rpm'}")
 

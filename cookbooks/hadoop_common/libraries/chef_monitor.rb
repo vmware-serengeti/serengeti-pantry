@@ -43,7 +43,7 @@ module HadoopCluster
     if attrs['action'] != act
       Chef::Log.info "Set Bootstrap Action to '#{act}'"
       attrs['action'] = act
-      node[:provision] = attrs
+      node.normal[:provision] = attrs
       node.save
     end
   end

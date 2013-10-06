@@ -268,7 +268,7 @@ echo
     keyname = "rsa_pub_key_of_#{username}"
     rsa_pub_key = File.read("#{homedir}/.ssh/id_rsa.pub")
     if node[keyname] != rsa_pub_key
-      node[keyname] = rsa_pub_key
+      node.normal[keyname] = rsa_pub_key
       node.save
     end
   end
