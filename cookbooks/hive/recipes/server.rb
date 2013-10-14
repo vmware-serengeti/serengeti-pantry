@@ -13,6 +13,8 @@
 #   limitations under the License.
 #
 
+return if node[:platform] == "fedora"
+
 if node[:hadoop][:install_from_tarball]
   template '/etc/init.d/hive-server' do
     source 'hive-server.erb'

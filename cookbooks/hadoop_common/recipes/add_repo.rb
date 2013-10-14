@@ -18,9 +18,17 @@
 #   limitations under the License.
 #
 
+prefix = nil
 case node[:platform]
-when 'centos', 'redhat'
-  prefix = node[:platform] == 'centos' ? 'CentOS' : 'rhel'
+when 'centos'
+  prefix = 'CentOS'
+when 'redhat', 'oracle'
+  prefix = 'rhel'
+when 'fedora'
+  prefix = 'fedora'
+end
+
+if prefix
   if !node[:enable_standard_os_yum_repos] or !is_connected_to_internet
     directory '/etc/yum.repos.d/backup' do
       mode '0755'
@@ -47,5 +55,4 @@ when 'centos', 'redhat'
       mode '0644'
     end
   end
-
 end

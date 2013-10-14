@@ -20,6 +20,9 @@
 # limitations under the License.
 #
 
+# we haven't added postgresql packages for Fedora in Serengeti internal yum repo yet, so skip installing hive components.
+return if node[:platform] == "fedora"
+
 include_recipe "java::sun"
 
 # alias home dir
