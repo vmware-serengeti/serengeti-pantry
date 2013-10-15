@@ -1,4 +1,5 @@
 node[:hadoop][:install_from_tarball] = is_install_from_tarball
+Chef::Log.info("Current distro is " + distro_vendor + " " + distro_version)
 Chef::Log.info("Will install the packages using #{node[:hadoop][:install_from_tarball] ? 'tarball' : 'rpm'}")
 
 if is_hadoop_yarn?
@@ -74,6 +75,22 @@ elsif is_cdh4_distro
   # hadoop system services
   node.default[:hadoop][:jobtracker_service_name] = "hadoop-0.20-mapreduce-jobtracker"
   node.default[:hadoop][:tasktracker_service_name] = "hadoop-0.20-mapreduce-tasktracker"
+elsif is_intel_distro
+  node.default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
+  node.default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
+  node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop' # directory that HADOOP HDFS is installed in
+  node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce'
+  node.default[:hadoop][:service_name_prefix] = 'hadoop'
+  # hadoop packages
+  node.default[:hadoop][:packages][:hadoop][:name] = "hadoop hadoop-native"
+  node.default[:hadoop][:packages][:namenode][:name] = "hadoop-namenode"
+  node.default[:hadoop][:packages][:secondarynamenode][:name] = "hadoop-secondarynamenode"
+  node.default[:hadoop][:packages][:datanode][:name] = "hadoop-datanode"
+  node.default[:hadoop][:packages][:jobtracker][:name] = "hadoop-jobtracker"
+  node.default[:hadoop][:packages][:tasktracker][:name] = "hadoop-tasktracker"
+  # hadoop system services
+  node.default[:hadoop][:jobtracker_service_name] = "hadoop-jobtracker"
+  node.default[:hadoop][:tasktracker_service_name] = "hadoop-tasktracker"
 end
 
 # hadoop system services

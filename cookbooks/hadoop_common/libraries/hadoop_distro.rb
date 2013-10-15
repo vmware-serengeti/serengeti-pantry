@@ -61,6 +61,10 @@ module HadoopCluster
     distro_vendor.downcase == 'phd' or (is_greenplumhd_distro and (distro_version =~ /2/) == 0)
   end
 
+  def is_intel_distro
+    distro_vendor.downcase == 'intel'
+  end
+
   class Chef::Recipe ; include HadoopCluster ; end
   class Chef::Resource::Directory ; include HadoopCluster ; end
 end
