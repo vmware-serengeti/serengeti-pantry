@@ -23,8 +23,8 @@ include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 # alias home dir
 if is_pivotalhd_distro
-  node[:hbase][:home_dir] = '/usr/lib/gphd/hbase'
-  node[:hbase][:conf_dir] = '/etc/gphd/hbase/conf'
+  node.normal[:hbase][:home_dir] = '/usr/lib/gphd/hbase'
+  node.normal[:hbase][:conf_dir] = '/etc/gphd/hbase/conf'
 end
 force_link("/usr/lib/hbase", node[:hbase][:home_dir])
 

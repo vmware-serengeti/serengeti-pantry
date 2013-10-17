@@ -27,7 +27,7 @@ include_recipe "java::sun"
 
 # alias home dir
 if is_pivotalhd_distro
-  node[:hive][:home_dir] = '/usr/lib/gphd/hive'
+  node.normal[:hive][:home_dir] = '/usr/lib/gphd/hive'
 end
 force_link("/usr/lib/hive", node[:hive][:home_dir])
 

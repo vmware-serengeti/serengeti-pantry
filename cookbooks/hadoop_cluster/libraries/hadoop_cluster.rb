@@ -475,7 +475,7 @@ done
     # Ironfan can't tell whether it's a Hadoop 2.0 cluster when the cluster doesn't has nodes with hadoop_resourcemanager role.
     # e.g. a Hadoop HDFS2 + HBase cluster without YARN.
     if is_hadoop2_distro
-      node[:is_hadoop_yarn] = true
+      node.normal[:is_hadoop_yarn] = true
     end
 
     node[:is_hadoop_yarn]

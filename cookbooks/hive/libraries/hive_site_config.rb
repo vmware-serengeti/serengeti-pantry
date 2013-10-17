@@ -41,7 +41,7 @@ module HiveSiteConfiguration
       matched_version = version_reg.match(hive_file_name);
       if matched_version
         hive_version = matched_version[0]
-        node[:hive][:version] = hive_version
+        node.normal[:hive][:version] = hive_version
         node.save
       end
     else
@@ -51,7 +51,7 @@ module HiveSiteConfiguration
         matched_version = version_reg.match(hive_file_name);
         if matched_version
           hive_version = matched_version[0]
-          node[:hive][:version] = hive_version
+          node.normal[:hive][:version] = hive_version
           node.save
         end
       end
