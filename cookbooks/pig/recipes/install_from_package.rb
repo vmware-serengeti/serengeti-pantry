@@ -19,8 +19,6 @@
 # limitations under the License.
 #
 
-include_recipe "pig::default"
-
 include_recipe "hadoop_common::add_repo"
 
 #
@@ -28,8 +26,3 @@ include_recipe "hadoop_common::add_repo"
 #
 package node[:hadoop][:packages][:pig][:name]
 
-## why does this need to be here?
-#link "/usr/local/bin/pig" do
-#  to          File.join(node[:pig][:home_dir], 'bin', 'pig')
-#  action      :create
-#end
