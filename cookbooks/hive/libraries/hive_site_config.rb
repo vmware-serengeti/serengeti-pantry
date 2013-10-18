@@ -27,11 +27,11 @@ module HiveSiteConfiguration
       property_kvs["javax.jdo.option.ConnectionUserName"] = "#{node[:hive][:metastore_user]}"
       property_kvs["javax.jdo.option.ConnectionPassword"] = "#{node[:postgresql][:password][:postgres]}"
       property_kvs["hive.metastore.uris"] = ""
+      property_kvs["hive.hwi.war.file"] = "/usr/lib/hive/lib/hive-hwi.jar" if is_intel_distro # fix bug of intel distro
       output = generate_hadoop_xml_conf("#{node[:hive][:home_dir]}/conf/hive-site.xml", property_kvs)
       File.open("#{node[:hive][:home_dir]}/conf/hive-site.xml", "w") { |f| f.write(output) }
     end
   end
-
 
   def update_hive_version
     if node[:hadoop][:install_from_tarball] then
