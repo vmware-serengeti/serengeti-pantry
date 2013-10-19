@@ -31,6 +31,7 @@ service_name = node[:hadoop][:nodemanager_service_name]
 set_bootstrap_action(ACTION_START_SERVICE, service_name)
 
 is_service_running = system("service #{service_name} status 1>2 2>/dev/null")
+
 service "restart-#{service_name}" do
   service_name service_name
   supports :status => true, :restart => true

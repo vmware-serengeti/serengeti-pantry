@@ -3,12 +3,22 @@
 <!-- check for all settings at http://hadoop.apache.org/common/docs/stable/mapred-default.html -->
 <configuration>
 
+<% if node.role?('hadoop_jobtracker') %>
+<property>
+  <name>mapred.job.tracker.http.address</name>
+  <value><%= @web_ui_address %>:50030</value>
+</property>
+<% end %>
+
 <%- if node[:is_hadoop_yarn] %>
 <property>
   <name>mapreduce.framework.name</name>
   <value>yarn</value>
 </property>
-
+<property>
+  <name>mapreduce.tasktracker.dns.interface</name>
+  <value><%= @mapred_network_dev %></value>
+</property>
 <property>
   <name>mapreduce.jobtracker.address</name>
   <value><%= @resourcemanager_address %>:9001</value>
@@ -53,6 +63,12 @@
 
 <!-- communication -->
 <% if node.role?('hadoop_tasktracker') %>
+
+<property>
+  <name>mapred.task.tracker.http.address</name>
+  <value><%= @web_ui_address %>:50060</value>
+</property>
+
 <property>
   <name>mapred.tasktracker.map.tasks.maximum</name>
   <value><%= node[:hadoop][:max_map_tasks] %></value>
@@ -122,6 +138,11 @@
 
 <!-- child jobs -->
 <% if node.role?('hadoop_tasktracker') %>
+<property>
+  <name>mapred.tasktracker.dns.interface</name>
+  <value><%= @mapred_network_dev %></value>
+</property>
+
 <property>
   <name>mapred.child.java.opts</name>
   <value><%= node[:hadoop][:java_child_opts] %></value>

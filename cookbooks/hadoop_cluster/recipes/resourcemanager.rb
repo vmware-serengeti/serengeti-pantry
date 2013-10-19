@@ -60,7 +60,6 @@ end
 # Register with cluster_service_discovery
 provide_service(service_name)
 
-
 # Install HistoryServer
 hadoop_package node[:hadoop][:packages][:historyserver][:name]
 

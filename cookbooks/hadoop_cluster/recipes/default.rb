@@ -25,6 +25,7 @@ include_recipe "java"
 
 class Chef::Recipe; include HadoopCluster ; end
 
+include_recipe "hadoop_common::pre_run"
 # Setup package repository
 include_recipe "hadoop_common::add_repo"
 # Update some node attributes

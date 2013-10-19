@@ -132,7 +132,6 @@ if namenode_ha_enabled
       fi
     }
   end
-
 end
 
 if is_primary_namenode

@@ -32,10 +32,34 @@
   <value><%= @hbase_hdfs_home %></value>
   <final>true</final>
 </property>
+<% if node.role?('hbase_master') %>
+<property>
+  <name>hbase.master.info.bindAddress</name>
+  <value><%= @http_address %></value>
+</property>
+<property>
+  <name>hbase.master.dns.interface</name>
+  <value><%= @bind_interface %></value>
+</property>
+<% end %>
+<% if node.role?('hbase_regionserver') %>
+<property>
+  <name>hbase.regionserver.info.bindAddress</name>
+  <value><%= @http_address %></value>
+</property>
+<property>
+  <name>hbase.regionserver.dns.interface</name>
+  <value><%= @bind_interface %></value>
+</property>
+<% end %>
 <property>
   <name>hbase.zookeeper.quorum</name>
   <value><%= @zookeeper_quorum %></value>
   <final>true</final>
+</property>
+<property>
+  <name>hbase.zookeeper.dns.interface</name>
+  <value><%= @bind_interface %></value>
 </property>
 
 <!-- properties specified by users -->

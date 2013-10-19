@@ -19,6 +19,7 @@
 #
 
 include_recipe "java::sun"
+include_recipe "hadoop_common::pre_run"
 include_recipe "hadoop_common::mount_disks"
 
 # alias home dir
@@ -87,12 +88,24 @@ dirs.each do |dir|
 end
 
 ips = zookeepers_ip
+listen_on_ip = ip_of_hdfs_network(node)
+index = 0
+servers = ""
+if ips.size > 1
+  ips.each do |ip|
+    servers += "server.#{index}=#{ip}:#{@node[:zookeeper][:peer_port]}:#{@node[:zookeeper][:leader_port]}\n"
+    index += 1
+  end
+else
+  servers = "server=#{ip}:#{@node[:zookeeper][:peer_port]}:#{@node[:zookeeper][:leader_port]}"
+end
+
 %w[ zoo.cfg log4j.properties ].each do |file|
   template "/etc/zookeeper/#{file}" do
     owner "zookeeper"
     source "#{file}.erb"
     mode "0644"
-    variables(:servers => ips)
+    variables(:servers => servers, :listen_on_ip => listen_on_ip)
   end
 end
 

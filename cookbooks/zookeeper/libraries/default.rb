@@ -23,7 +23,7 @@ module Zookeeper
   end
 
   def zookeepers_ip
-    servers = all_provider_public_ips_for_role("zookeeper")
+    servers = all_providers_fqdn_for_role("zookeeper")
     Chef::Log.info("Zookeeper servers in cluster #{node[:cluster_name]} are: #{servers.inspect}")
     servers
   end

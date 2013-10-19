@@ -31,6 +31,7 @@ wait_for_jobtracker_service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:tasktracker_service_name])
 
 is_tasktracker_running = system("service #{node[:hadoop][:tasktracker_service_name]} status 1>2 2>/dev/null")
+
 service "restart-#{node[:hadoop][:tasktracker_service_name]}" do
   service_name node[:hadoop][:tasktracker_service_name]
   supports :status => true, :restart => true

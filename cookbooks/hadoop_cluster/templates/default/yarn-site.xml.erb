@@ -30,11 +30,13 @@
   <name>yarn.resourcemanager.admin.address</name>
   <value><%= @resourcemanager_address %>:8033</value>
 </property>
+<% if node.role?('hadoop_resourcemanager') %>
 <property>
   <description>The address of the RM web application.</description>
   <name>yarn.resourcemanager.webapp.address</name>
-  <value><%= @resourcemanager_address %>:8088</value>
+  <value><%= @web_ui_address %>:8088</value>
 </property>
+<% end %>
 <property>
   <description>The CLASSPATH for the RM application.</description>
   <name>yarn.application.classpath</name>

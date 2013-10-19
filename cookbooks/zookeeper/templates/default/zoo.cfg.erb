@@ -18,14 +18,8 @@ dataDir=/var/lib/zookeeper
 # refer to http://zookeeper.apache.org/doc/r3.3.3/zookeeperAdmin.html please
 dataLogDir=/var/log/zookeeper
 
+clientPortAddress=<%= @listen_on_ip %>
 # the port at which the clients will connect
 clientPort=<%= @node[:zookeeper][:client_port] %>
 
-<% if @servers.size > 1 -%>
-  <% @servers.each_with_index do |ip, i| %>
-server.<%= i %>=<%= ip %>:<%= @node[:zookeeper][:peer_port] %>:<%= @node[:zookeeper][:leader_port] %>
-  <% end -%>
-<% else -%>
-  <% ip = @servers.first -%>
-server=<%= ip %>:<%= @node[:zookeeper][:peer_port] %>:<%= @node[:zookeeper][:leader_port] %>
-<% end -%>
+<%= @servers %>

@@ -16,6 +16,8 @@
 #
 
 module HadoopCluster
+  require 'resolv'
+  require 'json'
 
   # Create a symlink to a directory, wiping away any existing dir that's in the way
   def force_link dest, src
@@ -27,6 +29,95 @@ module HadoopCluster
       not_if { File.exists?(dest) and File.exists?(src) and File.realpath(dest) == File.realpath(src) }
     end
     link(dest) { to src }
+  end
+
+  def device_of_mgt_network server = nil
+    return device_of_network(server, 'MGT_NETWORK')
+  end
+
+  def device_of_hdfs_network server = nil
+    return device_of_network(server, 'HDFS_NETWORK')
+  end
+
+  def device_of_mapred_network server = nil
+    return device_of_network(server, 'MAPRED_NETWORK')
+  end
+
+  def fqdn_of_mgt_network server = nil
+    return fqdn_of_ip(ip_of_mgt_network(server))
+  end
+
+  def fqdn_of_hdfs_network server = nil
+    return fqdn_of_ip(ip_of_hdfs_network(server))
+  end
+
+  def fqdn_of_mapred_network server = nil
+    return fqdn_of_ip(ip_of_mapred_network(server))
+  end
+
+  def ip_of_mgt_network server = nil
+    return ip_of_network(server, 'MGT_NETWORK')
+  end
+
+  def ip_of_hdfs_network server = nil
+    return ip_of_network(server, 'HDFS_NETWORK')
+  end
+
+  def ip_of_mapred_network server = nil
+    return ip_of_network(server, 'MAPRED_NETWORK')
+  end
+
+  def device_of_network server, traffic_type
+    server = node if server.nil?
+    device = server[:ip_configs]['MGT_NETWORK'][0][:device]
+    if !server[:ip_configs][traffic_type].nil? and !server[:ip_configs][traffic_type].empty?
+      device = server[:ip_configs][traffic_type][0][:device]
+    end
+    return device
+  end
+
+  def ip_of_network server, traffic_type
+    server = node if server.nil?
+    ip = server[:ip_configs]['MGT_NETWORK'][0][:ip_address] # by default return ip of MGT_NETWORK
+    if !server[:ip_configs][traffic_type].nil? and !server[:ip_configs][traffic_type].empty?
+      ip = server[:ip_configs][traffic_type][0][:ip_address]
+    end
+    return ip
+  end
+
+  def update_ipconfigs
+    file_name = "/etc/portgroup2eth.json"
+    return unless File.exist?(file_name)
+    port2dev = JSON.parse(File.new(file_name, "r").gets)
+    node[:ip_configs].each do |net_type, net_list|
+      index = 0
+      net_list.each do |net|
+        device = port2dev[net[:port_group_name]]
+        node.set[:ip_configs][net_type][index][:device] = device
+        node[:network][:interfaces][device][:addresses].keys.each do |ip|
+          if ip =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
+            Chef::Log.info("got portgroup: #{net[:port_group_name]}, device: #{device}, ip: #{ip}")
+            node.set[:ip_configs][net_type][index][:ip_address] = ip
+            break
+          end
+        end
+        index += 1
+      end
+    end
+    node.save
+  end
+
+  def fqdn_of_ip ip
+    # fetch fqdn from dns server, if fail, return ip address instead
+    fqdn = ip
+    begin
+      fqdn = Resolv.getname(ip)
+    rescue
+      Chef::Log.warn("Cannot resolve #{ip}")
+      raise "fqdn server is required for CDH4 distro" if is_cdh4_distro
+    end
+    Chef::Log.info("Resolve ip: #{ip} to fqdn: #{fqdn}")
+    return fqdn
   end
 
   def make_link src, target
@@ -49,6 +140,59 @@ module HadoopCluster
     else                                          'ext4'
     end
   end
+
+  def fqdn_of_role server, role = nil
+    fqdn = fqdn_of_mgt_network(server)
+    if [
+      'hadoop_namenode',
+      'hadoop_secondarynamenode',
+      'hadoop_journalnode',
+      'hadoop_datanode',
+      'hbase_master',
+      'hbase_regionserver'
+    ].compact.include?(role)
+      fqdn = fqdn_of_hdfs_network(server)
+    elsif [
+      'hadoop_tasktracer',
+      'hadoop_resourcemanager',
+      'hadoop_jobtracker',
+      'hadoop_nodemanager'
+    ].compact.include?(role)
+      fqdn = fqdn_of_mapred_network(server)
+    elsif [
+      'zookeeper'
+    ].compact.include?(role)
+      fqdn = ip_of_hdfs_network(server)
+    end
+    return fqdn
+  end
+
+#  def provide_hadoop_service service_name, service_info = {}, run_in_ruby_block = true
+#    fqdn = fqdn_of_mgt_network(node)
+#    if [
+#      (node[:hadoop][:namenode_service_name] if node[:hadoop]),
+#      (node[:hadoop][:journalnode_service_name] if node[:hadoop]),
+#      (node[:hadoop][:datanode_service_name] if node[:hadoop]),
+#      (node[:hadoop][:secondarynamenode_service_name] if node[:hadoop]),
+#      (node[:hadoop][:zkfc_service_name] if node[:hadoop]),
+#      (node[:hbase][:region_service_name] if node[:hbase]),
+#      (node[:hbase][:master_service_name] if node[:hbase])
+#    ].compact.include?(service_name)
+#      fqdn = fqdn_of_hdfs_network(node)
+#    elsif [
+#      (node[:hadoop][:tasktracker_service_name] if node[:hadoop]),
+#      (node[:hadoop][:resourcemanager_service_name] if node[:hadoop]),
+#      (node[:hadoop][:nodemanager_service_name] if node[:hadoop]),
+#      (node[:hadoop][:jobtracker_service_name] if node[:hadoop])
+#    ].compact.include?(service_name)
+#      fqdn = fqdn_of_mapred_network(node)
+#    elsif [
+#      (node[:zookeeper][:zookeeper_service_name] if node[:zookeeper])
+#    ].compact.include?(service_name)
+#      fqdn = ip_of_hdfs_network(node)
+#    end
+#    provide_service(service_name, service_info.merge({:fqdn => fqdn}), run_in_ruby_block)
+#  end
 
   # return an Array of mount points of the mounted data disks
   def disks_mount_points

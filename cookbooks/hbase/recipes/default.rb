@@ -19,6 +19,7 @@
 #
 
 include_recipe "java::sun"
+include_recipe "hadoop_common::pre_run"
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 # alias home dir
@@ -154,7 +155,9 @@ zookeeper_session_timeout = zookeeper_session_timeout.to_i / 1000 + 120 # conver
 template_variables = {
   :hbase_hdfs_home => hbase_hdfs_home,
   :zookeeper_quorum => zk_quorum,
-  :zookeeper_session_timeout => zookeeper_session_timeout
+  :zookeeper_session_timeout => zookeeper_session_timeout,
+  :http_address => fqdn_of_mgt_network(node),
+  :bind_interface => device_of_hdfs_network(node)
 }
 
 %w[ hbase-site.xml hbase-env.sh log4j.properties ].each do |file|

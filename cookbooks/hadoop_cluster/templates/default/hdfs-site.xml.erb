@@ -41,7 +41,7 @@
 
 <property>
   <name>dfs.namenode.http-address.<%= namenode_name %></name>
-  <value><%= "#{address}:#{node.default[:hadoop][:namenode_web_service_port]}" %></value>
+  <value><%= "#{@nn_addr_to_web_addr_map[address]}:#{node.default[:hadoop][:namenode_web_service_port]}" %></value>
 </property>
 <%-
       end
@@ -89,12 +89,35 @@
   end
 else
 %>
-
 <property>
   <name>dfs.http.address</name>
-  <value><%= @namenode_address %>:50070</value>
+  <value><%= @web_ui_address %>:50070</value>
 </property>
 <%- end %>
+
+<% if node.role?('hadoop_datanode') %>
+<property>
+  <name>dfs.datanode.dns.interface</name>
+  <value><%= @hdfs_network_dev %></value>
+</property>
+<property>
+  <name>dfs.datanode.address</name>
+  <value><%= @hdfs_bind_address %>:50010</value>
+</property>
+<property>
+  <name>dfs.datanode.ipc.address</name>
+  <value><%= @hdfs_bind_address %>:50020</value>
+</property>
+<!-- depracated, to be compatible with old version Hadoop -->
+<property>
+  <name>dfs.datanode.bindAddress</name>
+  <value><%= @hdfs_bind_address %></value>
+</property>
+<property>
+  <name>dfs.datanode.http.address</name>
+  <value><%= @web_ui_address %>:50075</value>
+</property>
+<% end %>
 
 <property>
   <name>dfs.permissions</name>

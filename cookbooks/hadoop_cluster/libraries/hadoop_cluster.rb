@@ -28,7 +28,18 @@ module HadoopCluster
 
   # The namenode's hostname, or the local node's numeric ip if 'localhost' is given.
   def namenode_address
-    return node[:fqdn] if is_namenode or is_journalnode
+    if is_namenode or is_journalnode
+      fqdn = fqdn_of_hdfs_network(node)
+      # set hostname and update chef server
+      unless fqdn == `hostname`.chomp()
+        `hostname #{fqdn}`
+      end
+      if node[:provision][:fqdn].nil? or node[:provision][:fqdn] != fqdn
+        node.set[:provision][:fqdn] = fqdn
+        node.save
+      end
+      return fqdn
+    end
     # if the user has specified the namenode ip, use it.
     namenode_ip_conf || provider_fqdn_for_role("hadoop_namenode")
   end
@@ -56,7 +67,7 @@ module HadoopCluster
   end
 
   def journalnodes_quorum
-    servers = all_provider_public_ips_for_role("hadoop_journalnode")
+    servers = all_providers_fqdn_for_role("hadoop_journalnode")
     servers.collect { |ip| "#{ip}:#{node[:hadoop][:journalnode_service_port]}" }.join(";")
   end
 
@@ -84,8 +95,20 @@ module HadoopCluster
     facet_names = namenode_facet_names
     @namenode_facet_addresses = facet_names.map do | name |
       servers = all_nodes({"role" => "hadoop_namenode", "facet_name" => name})
-      {name => servers.map{ |server| ip_of(server) }}
+      {name => servers.map{ |server| ip_of_hdfs_network(server) }}
     end
+  end
+
+  def nn_addr_to_web_addr_map
+    facet_names = namenode_facet_names
+    nn_addr_to_web_addr_map = {}
+    facet_names.each do | name |
+      servers = all_nodes({"role" => "hadoop_namenode", "facet_name" => name})
+      servers.each do |server|
+        nn_addr_to_web_addr_map[ip_of_hdfs_network(server)] = ip_of_mgt_network(server)
+      end
+    end
+    return nn_addr_to_web_addr_map
   end
 
   # The cluster HDFS Namenode HA or federation is enabled if more than 1 node has hadoop_namenode role
@@ -127,14 +150,14 @@ module HadoopCluster
 
   # The jobtracker's hostname, or the local node's numeric ip if 'localhost' is given.
   def jobtracker_address
-    return node[:fqdn] if is_jobtracker
+    return fqdn_of_mapred_network(node) if is_jobtracker
     ip = jobtracker_ip_conf
     if !ip
       jobtracker = jobtracker_node
       if jobtracker
         if is_namenode or is_secondarynamenode or is_journalnode
           # namenode and secondarynamenode don't require the jobtracker service is running
-          ip = jobtracker[:fqdn]
+          ip = fqdn_of_mapred_network(jobtracker)
         else
           ip = provider_fqdn_for_role("hadoop_jobtracker")
         end
@@ -161,14 +184,14 @@ module HadoopCluster
   # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
   # The resourcemanager in hadoop-0.23 is vary similar to the jobtracker in hadoop-0.20.
   def resourcemanager_address
-    return node[:fqdn] if is_resourcemanager
+    return fqdn_of_mapred_network(node) if is_resourcemanager
     ip = resourcemanager_ip_conf
     if !ip
-      node = resourcemanager_node
+      resmanager = resourcemanager_node
       if node
         if is_namenode or is_secondarynamenode or is_journalnode
           # namenode and secondarynamenode don't require the resourcemanager service is running
-          ip = node[:fqdn]
+          ip = fqdn_of_mapred_network(resmanager)
         else
           ip = provider_fqdn_for_role("hadoop_resourcemanager")
         end
@@ -212,7 +235,11 @@ module HadoopCluster
       :fs_checkpoint_dirs     => formalize_dirs(fs_checkpoint_dirs),
       :local_hadoop_dirs      => formalize_dirs(local_hadoop_dirs),
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
-      :all_cluster_volumes    => all_cluster_volumes
+      :all_cluster_volumes    => all_cluster_volumes,
+      :web_ui_address         => fqdn_of_mapred_network(node),
+      :hdfs_bind_address      => fqdn_of_hdfs_network(node),
+      :hdfs_network_dev       => device_of_hdfs_network(node),
+      :mapred_network_dev     => device_of_mapred_network(node)
     }
     if is_hadoop_yarn?
       vars[:resourcemanager_address] = resourcemanager_address
@@ -225,6 +252,7 @@ module HadoopCluster
     if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
       vars[:nameservices] = namenode_facet_names
       vars[:namenode_facets] = namenode_facet_addresses
+      vars[:nn_addr_to_web_addr_map] = nn_addr_to_web_addr_map
     end
 
     if is_journalnode

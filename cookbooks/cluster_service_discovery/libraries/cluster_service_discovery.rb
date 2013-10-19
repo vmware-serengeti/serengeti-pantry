@@ -165,7 +165,7 @@ module ClusterServiceDiscovery
     Chef::Log.info("Registering to provide service '#{service_name}' with extra info: #{service_info.inspect}")
     timestamp = ClusterServiceDiscovery.timestamp
     node.set[:provides_service][service_name] = {
-      :timestamp  => timestamp,
+      :timestamp  => timestamp
     }.merge(service_info)
     node.save
 
@@ -222,13 +222,13 @@ module ClusterServiceDiscovery
   # The local-only ip address for the most recent provider for service_name
   def provider_fqdn service_name, wait = true
     server = provider_for_service(service_name, wait) or return
-    fqdn_of(server)
+    fqdn_of_service(server, service_name)
   end
 
   # The local-only ip address for the most recent provider for role_name
   def provider_fqdn_for_role role_name, wait = true
     server = provider_for_role(role_name, wait) or return
-    fqdn_of(server)
+    fqdn_of_role(server, role_name)
   end
 
   def provider_ip_for_role role_name, wait = true
@@ -268,6 +268,11 @@ module ClusterServiceDiscovery
     servers.map{ |server| ip_of(server) }
   end
 
+  def all_providers_fqdn_for_role role_name
+    servers = all_providers_for_role(role_name)
+    servers.map{ |server| fqdn_of_role(server, role_name)}
+  end
+
   # given server, get address
 
   # The local-only ip address for the given server
@@ -276,8 +281,13 @@ module ClusterServiceDiscovery
   end
 
   # The local-only ip address for the given server
-  def fqdn_of server
-    server[:fqdn]
+  def fqdn_of_service server, service_name = nil
+    # if cannot fetch fqdn, return the mgt ip's fqdn
+    begin
+      return server[:provides_service][service_name][:fqdn]
+    rescue
+      return fqdn_of_mgt_network(server)
+    end
   end
 
   # The globally-accessable ip address for the given server
@@ -285,9 +295,9 @@ module ClusterServiceDiscovery
     server[:cloud][:public_ips].first  rescue server[:ipaddress]
   end
 
-  # The ip address for the given server
+  # The ip address for the given server & traffic_type
   def ip_of server
-    server[:provision][:ip_address] rescue server[:ipaddress]
+    ip_of_mgt_network(server)
   end
 
   # All nodes count have given conditions
