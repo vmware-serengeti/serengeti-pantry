@@ -86,18 +86,13 @@ dirs.each do |dir|
   end
 end
 
-zk_servers = search(:node, "cluster_name:#{node[:cluster_name]} AND role:zookeeper")
-zk_servers.sort! { |a, b| a.name <=> b.name }
-Chef::Log.info("Zookeeper servers in cluster are: #{zk_servers.inspect}")
-quorum = zk_servers.collect { |n| "#{n[:provision][:ip_address]}:#{node[:zookeeper][:client_port]}" }
-myid = zk_servers.collect { |n| n[:provision][:ip_address] }.index(node[:provision][:ip_address])
-
+ips = zookeepers_ip
 %w[ zoo.cfg log4j.properties ].each do |file|
   template "/etc/zookeeper/#{file}" do
     owner "zookeeper"
     source "#{file}.erb"
     mode "0644"
-    variables(:servers => zk_servers)
+    variables(:servers => ips)
   end
 end
 
@@ -112,7 +107,7 @@ template "/var/lib/zookeeper/myid" do
   source "myid.erb"
   owner "zookeeper"
   group "zookeeper"
-  variables(:myid => myid)
+  variables(:myid => node[:facet_index])
 end
 
 template "#{node[:zookeeper][:home_dir]}/bin/zkEnv.sh" do
@@ -168,6 +163,6 @@ service "start-#{node[:zookeeper][:zookeeper_service_name]}" do
 end
 
 # Register with cluster_service_discovery
-provide_service(node[:zookeeper][:zookeeper_service_name], { :quorum => quorum, :id => myid })
+provide_service(node[:zookeeper][:zookeeper_service_name])
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

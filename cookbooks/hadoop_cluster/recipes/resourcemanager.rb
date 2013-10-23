@@ -70,4 +70,4 @@ service "#{node[:hadoop][:historyserver_service_name]}" do
   supports :status => true, :restart => true
 end
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

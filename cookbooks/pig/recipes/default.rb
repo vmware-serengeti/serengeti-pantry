@@ -32,4 +32,4 @@ if node[:hadoop][:install_from_tarball] then
 else
   include_recipe "pig::install_from_package"
 end
-clear_bootstrap_action(true)
+clear_bootstrap_action

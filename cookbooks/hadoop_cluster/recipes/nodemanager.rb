@@ -24,8 +24,9 @@ include_recipe "hadoop_cluster"
 # Install
 hadoop_package node[:hadoop][:packages][:nodemanager][:name]
 
-service_name = node[:hadoop][:nodemanager_service_name]
+wait_for_resourcemanager_service
 
+service_name = node[:hadoop][:nodemanager_service_name]
 ## Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, service_name)
 
@@ -57,4 +58,4 @@ end
 # Register with cluster_service_discovery
 provide_service(service_name)
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

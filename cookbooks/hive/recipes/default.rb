@@ -83,5 +83,5 @@ include_recipe "hive::postgresql_metastore"
 #update hive-site.xml configuration items
 update_hive_config
 
-clear_bootstrap_action(true)
+clear_bootstrap_action
 

@@ -42,7 +42,7 @@ mysql_packages.each do |mysql_pack|
     action :install
   end
 end
-clear_bootstrap_action(true)
+clear_bootstrap_action
 
 if platform?(%w{ redhat centos fedora suse scientific amazon })
   package 'ruby-mysql'

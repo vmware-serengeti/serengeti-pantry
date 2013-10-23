@@ -66,4 +66,4 @@ jps | grep -q CLDB
   end
 end
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

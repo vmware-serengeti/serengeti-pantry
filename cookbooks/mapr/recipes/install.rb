@@ -42,4 +42,4 @@ role2pkg.each do |role_name, pkg_name|
     end
   end
 end
-clear_bootstrap_action(true)
+clear_bootstrap_action

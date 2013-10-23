@@ -39,5 +39,5 @@ if !File.exists?(disk_file)
     user "root"
     code "/opt/mapr/server/disksetup -F -M #{disk_file}"
   end
-  clear_bootstrap_action(true)
+  clear_bootstrap_action
 end

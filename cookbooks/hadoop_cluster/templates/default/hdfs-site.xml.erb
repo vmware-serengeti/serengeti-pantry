@@ -50,7 +50,7 @@
 
 <property>
   <name>dfs.namenode.shared.edits.dir.<%= name %></name>
-<value>qjournal://<%- @journalnodes_address.each_with_index do |address, index| %><%= @journalnodes_address.length - index > 1 ? "#{address}:#{node[:hadoop][:journalnode_service_port]};" : "#{address}:#{node[:hadoop][:journalnode_service_port]}/#{name}" %><%- end %></value>
+<value>qjournal://<%= "#{@journalnodes_address}/#{name}" %></value>
 </property>
 <%-
       end

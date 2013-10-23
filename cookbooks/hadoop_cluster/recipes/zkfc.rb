@@ -52,4 +52,4 @@ end
 # register with cluster_service_discovery
 provide_service(node[:hadoop][:zkfc_service_name])
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

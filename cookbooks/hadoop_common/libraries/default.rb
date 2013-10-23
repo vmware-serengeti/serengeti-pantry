@@ -57,8 +57,13 @@ module HadoopCluster
 
   # run the given code block in a Chef Ruby Block
   # see http://wiki.opscode.com/display/chef/Resources#Resources-RubyBlock
-  def run_in_ruby_block(name, &code)
+  def run_in_ruby_block(name, in_chef_ruby_block = true, &code)
     return unless name and code
+
+    if !in_chef_ruby_block
+      return code.call
+    end
+
     ruby_block name.to_s do
       block do
         code.call

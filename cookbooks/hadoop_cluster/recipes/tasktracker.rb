@@ -25,6 +25,8 @@ include_recipe "hadoop_cluster"
 # Install
 hadoop_package node[:hadoop][:packages][:tasktracker][:name]
 
+wait_for_jobtracker_service
+
 ## Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:tasktracker_service_name])
 
@@ -54,4 +56,4 @@ end
 # Register with cluster_service_discovery
 provide_service(node[:hadoop][:tasktracker_service_name])
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

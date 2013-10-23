@@ -19,7 +19,7 @@
 
 <property>
   <name>ha.zookeeper.quorum</name>
-  <value><%- @zookeepers_address.each_with_index do |address, index| %><%= @zookeepers_address.length - index > 1 ? "#{address}:#{node[:hadoop][:zookeeper_service_port]}," : "#{address}:#{node[:hadoop][:zookeeper_service_port]}" %><%- end %></value>
+  <value><%= @zookeepers_address %></value>
 </property>
   <%- end %>
 <%- else %>

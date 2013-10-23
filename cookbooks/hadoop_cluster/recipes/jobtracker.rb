@@ -28,6 +28,10 @@ hadoop_package node[:hadoop][:packages][:jobtracker][:name]
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
+# when starting Jobtracker daemon, it requires at least 1 datanode to replicate jobtracker.info,
+# so wait until HDFS is ready.
+include_recipe "hadoop_cluster::wait_for_hdfs"
+
 ## Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:jobtracker_service_name])
 
@@ -72,4 +76,4 @@ end
 # Register with cluster_service_discovery
 provide_service(node[:hadoop][:jobtracker_service_name])
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

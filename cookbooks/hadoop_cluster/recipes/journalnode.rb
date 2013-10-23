@@ -31,6 +31,8 @@ end
 
 make_link("/var/lib/journalnode", edits_dir)
 
+wait_for_zookeepers_service
+
 # Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:journalnode_service_name])
 
@@ -54,4 +56,4 @@ end
 # Register with cluster_service_discovery
 provide_service(node[:hadoop][:journalnode_service_name])
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

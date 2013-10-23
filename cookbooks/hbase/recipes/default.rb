@@ -144,9 +144,7 @@ end
 namespace = matched_namespace || default_namespace
 hbase_hdfs_home = get_root_dir(namespace)
 
-zk_service_name = node[:hbase][:zookeeper_service_name]
-zk_service_provider = provider_for_service(zk_service_name)
-zk_quorum = zk_service_provider[:provides_service][zk_service_name][:quorum]
+zk_quorum = zookeepers_quorum
 
 # get zookeeper_session_timeout to be used in hbase-daemon.sh
 zookeeper_session_timeout = node['cluster_configuration']['hbase']['hbase-site.xml']['zookeeper.session.timeout'] rescue nil
@@ -155,7 +153,7 @@ zookeeper_session_timeout = zookeeper_session_timeout.to_i / 1000 + 120 # conver
 
 template_variables = {
   :hbase_hdfs_home => hbase_hdfs_home,
-  :zookeeper_quorum => zk_quorum.join(","),
+  :zookeeper_quorum => zk_quorum,
   :zookeeper_session_timeout => zookeeper_session_timeout
 }
 
@@ -177,4 +175,6 @@ end
   end
 end
 
-clear_bootstrap_action(true)
+wait_for_zookeepers_service
+
+clear_bootstrap_action

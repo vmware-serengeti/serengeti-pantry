@@ -22,10 +22,10 @@ dataLogDir=/var/log/zookeeper
 clientPort=<%= @node[:zookeeper][:client_port] %>
 
 <% if @servers.size > 1 -%>
-  <% @servers.each_with_index do |server, i| %>
-server.<%= i %>=<%= server[:provision][:ip_address] %>:<%= @node[:zookeeper][:peer_port] %>:<%= @node[:zookeeper][:leader_port] %>
+  <% @servers.each_with_index do |ip, i| %>
+server.<%= i %>=<%= ip %>:<%= @node[:zookeeper][:peer_port] %>:<%= @node[:zookeeper][:leader_port] %>
   <% end -%>
 <% else -%>
-  <% server = @servers.first -%>
-server=<%= server[:provision][:ip_address] %>:<%= @node[:zookeeper][:peer_port] %>:<%= @node[:zookeeper][:leader_port] %>
+  <% ip = @servers.first -%>
+server=<%= ip %>:<%= @node[:zookeeper][:peer_port] %>:<%= @node[:zookeeper][:leader_port] %>
 <% end -%>

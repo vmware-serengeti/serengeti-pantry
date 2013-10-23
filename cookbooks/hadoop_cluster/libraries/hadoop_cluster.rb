@@ -15,6 +15,12 @@
 
 module HadoopCluster
 
+  ## Service Dependencies in Hadoop/HBase Cluster ##
+  # datanode depends on namenode; tasktracker depends on jobtracker; jobtracker depends on HDFS;
+  # namenode depends on journalnodes in Namenode HA Cluster; journalnode depends on zookeeper nodes;
+  # hbase master depends on zookeepers and HDFS; hbase regionserver depends on hbase master; etc.
+  # So we need to call wait_for_xxx_service before starting yyy service if yyy depends on xxx.
+
   # whether the node itself has namenode role
   def is_namenode
     node.role?("hadoop_namenode")
@@ -24,7 +30,13 @@ module HadoopCluster
   def namenode_address
     return node[:fqdn] if is_namenode or is_journalnode
     # if the user has specified the namenode ip, use it.
-    namenode_ip_conf || provider_fqdn(node[:hadoop][:namenode_service_name], !is_namenode)
+    namenode_ip_conf || provider_fqdn_for_role("hadoop_namenode")
+  end
+
+  def wait_for_namenode_service(in_ruby_block = true)
+    run_in_ruby_block __method__, in_ruby_block do
+      provider_fqdn(node[:hadoop][:namenode_service_name], !is_namenode)
+    end
   end
 
   def namenode_port
@@ -37,37 +49,25 @@ module HadoopCluster
     node.role?("hadoop_journalnode")
   end
 
-  # whether the node itself had zookeeper role
-  def is_zookeeper
-    node.role?("zookeeper")
-  end
-
   # whether the node itself facet_index equal 0
   def is_primary_namenode
     node[:facet_index] == 0
   end
 
-  def journalnodes_address
-    if is_journalnode
-      all_provider_public_ips_for_role("hadoop_journalnode")
-    else
-      set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:journalnode_service_name])
-      journalnode_count = all_nodes_count({"role" => "hadoop_journalnode"})
-      ret = all_provider_public_ips(node[:hadoop][:journalnode_service_name], true, journalnode_count)
-      clear_action
-      ret
-    end
+  def journalnodes_quorum
+    servers = all_provider_public_ips_for_role("hadoop_journalnode")
+    servers.collect { |ip| "#{ip}:#{node[:hadoop][:journalnode_service_port]}" }.join(";")
   end
 
-  def zookeepers_address
-    if is_zookeeper
-      all_provider_public_ips_for_role("zookeeper")
-    else
-      set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:zookeeper_service_name])
-      zookeeper_count = all_nodes_count({"role" => "zookeeper"})
-      ret = all_provider_public_ips(node[:hadoop][:zookeeper_service_name], true, zookeeper_count)
+  def wait_for_journalnodes_service(in_ruby_block = true)
+    return if !node[:hadoop][:namenode_ha_enabled]
+    return if is_journalnode
+
+    run_in_ruby_block __method__, in_ruby_block do
+      set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:journalnode_service_name])
+      journalnode_count = all_nodes_count({"role" => "hadoop_journalnode"})
+      all_provider_public_ips(node[:hadoop][:journalnode_service_name], true, journalnode_count)
       clear_action
-      ret
     end
   end
 
@@ -138,7 +138,7 @@ module HadoopCluster
           # namenode and secondarynamenode don't require the jobtracker service is running
           ip = jobtracker[:fqdn]
         else
-          ip = provider_fqdn(node[:hadoop][:jobtracker_service_name])
+          ip = provider_fqdn_for_role("hadoop_jobtracker")
         end
       else
         # return empty string if the cluster doesn't have a jobtracker (e.g. an HBase cluster)
@@ -146,6 +146,12 @@ module HadoopCluster
       end
     end
     ip
+  end
+
+  def wait_for_jobtracker_service(in_ruby_block = true)
+    run_in_ruby_block __method__, in_ruby_block do
+      provider_fqdn(node[:hadoop][:jobtracker_service_name], !is_jobtracker)
+    end
   end
 
   def jobtracker_port
@@ -165,7 +171,7 @@ module HadoopCluster
           # namenode and secondarynamenode don't require the resourcemanager service is running
           ip = node[:fqdn]
         else
-          ip = provider_fqdn(node[:hadoop][:resourcemanager_service_name])
+          ip = provider_fqdn_for_role("hadoop_resourcemanager")
         end
       else
         # return empty string if the cluster doesn't have a resourcemanager (e.g. an HBase cluster)
@@ -173,6 +179,12 @@ module HadoopCluster
       end
     end
     ip
+  end
+
+  def wait_for_resourcemanager_service(in_ruby_block = true)
+    run_in_ruby_block __method__, in_ruby_block do
+      provider_fqdn(node[:hadoop][:resourcemanager_service_name], !is_resourcemanager)
+    end
   end
 
   # whether the node itself has resourcemanager role
@@ -220,8 +232,8 @@ module HadoopCluster
     end
 
     if node[:hadoop][:namenode_ha_enabled]
-      vars[:zookeepers_address] = zookeepers_address
-      vars[:journalnodes_address] = journalnodes_address
+      vars[:zookeepers_address] = zookeepers_quorum
+      vars[:journalnodes_address] = journalnodes_quorum
     end
 
     vars
@@ -332,7 +344,7 @@ EOF
         end
       end
     end
-    clear_bootstrap_action(true)
+    clear_bootstrap_action
 
     #FIXME this is a bug in Pivotal HD 1.0 alpha
     if is_pivotalhd_distro
@@ -556,7 +568,7 @@ done
         source "#{file}.erb"
       end
 
-      clear_bootstrap_action(true)
+      clear_bootstrap_action
     end
   end
 

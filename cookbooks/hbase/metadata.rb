@@ -9,6 +9,7 @@ depends          "java"
 depends          "install_from"
 depends          "cluster_service_discovery"
 depends          "hadoop_cluster"
+depends          "zookeeper"
 
 recipe "hbase::default", "Install hbase package"
 recipe "hbase::master", "Install hbase HMaster"

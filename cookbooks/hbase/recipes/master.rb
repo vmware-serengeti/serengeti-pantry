@@ -42,8 +42,6 @@ end
 # when starting HBase Master daemon, it requires at least 1 datanode to replicate hbase.version,
 # so wait until HDFS is ready.
 include_recipe "hadoop_cluster::wait_for_hdfs"
-wait_for_hdfs = resources(:ruby_block => "wait_for_hdfs")
-run_in_ruby_block(wait_for_hdfs.name) { wait_for_hdfs.run_action(:create) }
 
 ## Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:master_service_name])
@@ -71,4 +69,4 @@ end
 # Register with cluster_service_discovery
 provide_service(node[:hbase][:master_service_name])
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

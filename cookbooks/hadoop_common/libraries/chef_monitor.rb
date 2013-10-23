@@ -32,8 +32,8 @@ module HadoopCluster
     end
   end
 
-  def clear_bootstrap_action(run = false)
-    set_bootstrap_action(ACTION_NONE, OBJECT_NONE, run)
+  def clear_bootstrap_action
+    set_bootstrap_action(ACTION_NONE, OBJECT_NONE, true)
   end
 
   # Save Bootstrap Status to Chef::Node. It will be ran in Chef compile phase.

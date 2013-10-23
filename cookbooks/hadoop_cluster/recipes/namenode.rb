@@ -21,7 +21,6 @@
 #
 
 include_recipe "hadoop_cluster"
-include_recipe "hadoop_cluster::wait_for_hdfs"
 
 # Install
 hadoop_package node[:hadoop][:packages][:namenode][:name]
@@ -34,6 +33,11 @@ hadoop_dir = hadoop_home_dir
 hdfs_dir = hadoop_hdfs_dir
 force_link("#{hdfs_dir}/libexec", "#{hadoop_dir}/libexec") if hdfs_dir
 
+if node[:hadoop][:namenode_ha_enabled]
+  # Formatting namenode in a Namenode HA cluster depends on JournalNodes service
+  wait_for_journalnodes_service
+end
+
 # Format namenode
 if is_primary_namenode
   include_recipe "hadoop_cluster::bootstrap_format_namenode"
@@ -42,7 +46,6 @@ else
 end
 
 ## Launch NameNode service
-resource_wait_for_namenode = resources(:execute => "wait_for_namenode")
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:namenode_service_name])
 
 if is_hortonworks_hmonitor_namenode_enabled
@@ -71,7 +74,6 @@ service "restart-#{node[:hadoop][:namenode_service_name]}" do
     subscribes :restart, resources("template[/etc/hadoop/conf/topology.data]"), :delayed
   end
   notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
-  notifies :run, resource_wait_for_namenode, :immediately
   if is_hortonworks_hmonitor_namenode_enabled
     notifies :start, resources("service[#{node[:hadoop][:hmonitor_ha_service]}]"), :delayed
   end
@@ -91,7 +93,7 @@ service "start-#{node[:hadoop][:namenode_service_name]}" do
 end
 
 # run this regardless namenode is already started before bootstrapping or started by this recipe
-run_in_ruby_block(resource_wait_for_namenode.name) { resource_wait_for_namenode.run_action(:run) }
+include_recipe "hadoop_cluster::wait_on_hdfs_safemode"
 
 if namenode_ha_enabled
   # Register to provide primary namenode formatted
@@ -142,4 +144,4 @@ end
 # register with cluster_service_discovery
 provide_service(node[:hadoop][:namenode_service_name])
 
-clear_bootstrap_action(true)
+clear_bootstrap_action

@@ -17,34 +17,14 @@
 # limitations under the License.
 #
 
-execute "wait_for_namenode" do
-  action :nothing
-  command %Q{
-    i=0
-    while [ $i -le #{node[:hadoop][:namenode_wait_for_safemode_timeout]} ]
-    do
-      sleep 5
-      if `hadoop dfsadmin -safemode get | grep -q OFF` ; then
-        echo "namenode safemode is off"
-        exit
-      fi
-      (( i+=5 ))
-      echo "Wait until namenode leaves safemode. Already wait for $i seconds."
-    done
-    echo "Namenode stucks in safemode. Will explictlly tell it leave safemode."
-    hadoop dfsadmin -safemode leave
-  }
+run_in_ruby_block "wait_for_hdfs" do
+  Chef::Log.info('Wait until the datanodes daemon are started.')
+  all_providers_for_service(node[:hadoop][:datanode_service_name])
+  Chef::Log.info('The datanodes daemon are started. Wait until namenode adds the datanodes and is able to place replica.')
 end
 
-ruby_block "wait_for_hdfs" do
-  action :nothing
-  block do
-    Chef::Log.info('wait until the datanodes daemon are started.')
-    all_providers_for_service(node[:hadoop][:datanode_service_name])
-    Chef::Log.info('the datanodes daemon are started and contacted with namenode daemon.')
-    Chef::Log.info('wait until namenode adds the datanodes and are able to place replica.')
-    sleep(60)
-    resources(:execute => "wait_for_namenode").run_action(:run)
-    Chef::Log.info('HDFS is ready to place replica now.')
-  end
+include_recipe "hadoop_cluster::wait_on_hdfs_safemode"
+
+run_in_ruby_block "hdfs_is_ready" do
+  Chef::Log.info('HDFS is ready to place replica now.')
 end

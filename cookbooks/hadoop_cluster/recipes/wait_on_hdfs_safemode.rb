@@ -26,9 +26,21 @@
 # run_list order.
 #
 
-execute 'wait until the HDFS is out of safemode' do
-  only_if "service #{node[:hadoop][:namenode_service_name]} status"
-  user 'hdfs'
-  command %Q{hadoop dfsadmin -safemode wait}
+execute "wait_for_namenode" do
+  command %Q{
+    i=0
+    while [ $i -le #{node[:hadoop][:namenode_wait_for_safemode_timeout]} ]
+    do
+      sleep 5
+      if `hadoop dfsadmin -safemode get | grep -q OFF` ; then
+        echo "namenode safemode is off"
+        exit
+      fi
+      (( i+=5 ))
+      echo "Wait until namenode leaves safemode. Already wait for $i seconds."
+    done
+    echo "Namenode stucks in safemode. Will explictlly tell it leave safemode."
+    hadoop dfsadmin -safemode leave
+  }
 end
 
