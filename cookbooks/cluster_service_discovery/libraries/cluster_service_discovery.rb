@@ -66,7 +66,7 @@ module ClusterServiceDiscovery
   end
 
   # Find all nodes that have indicated they provide the given role.
-  #
+  # The param num means at least find #{num} nodes.
   def all_providers_for_role role_name, wait = true, num = 1
     condition = "cluster_name:#{node[:cluster_name]} AND role:#{role_name}"
     all_providers(role_name, condition, wait, num, false) do
@@ -88,6 +88,7 @@ module ClusterServiceDiscovery
   end
 
   # Find all nodes that have indicated they provide the given type.
+  # The param num means at least find #{num} nodes.
   def get_all_providers name, condition, wait, num, run_in_ruby_block, &block
     start_time = Time.now
     while true
@@ -131,6 +132,20 @@ module ClusterServiceDiscovery
     providers_for(name, conditions, wait, num, run_in_ruby_block)
   end
 
+  # Wait for the service to be started.
+  # The service provider might be one or more. The param num means wait for at least #{num} providers.
+  # This will not run in a ruby block by default.
+  def wait_for_service(service_name, num = 1, run_in_ruby_block = false)
+    set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, service_name)
+    condition = "cluster_name:#{node[:cluster_name]} AND provides_service:#{service_name}"
+    all_providers(service_name, condition, true, num, run_in_ruby_block) do
+      # Use Chef Partial Search to speed up the query, since we don't need the node object here.
+      # See doc http://docs.opscode.com/essentials_search.html#partial-search
+      partial_search(:node, "#{condition}", :keys => { 'name' => ['name'] })
+    end
+    clear_action
+  end
+
   # Get the nodes which match the given condition. This will not run in a ruby block by default.
   def providers_for name, conditions = {}, wait = true, num = 1, run_in_ruby_block = false
     condition = generate_condition(conditions)
@@ -142,11 +157,6 @@ module ClusterServiceDiscovery
   # Return the node which matches the given condition.
   def provider_for name, conditions = {}, wait = true
     providers_for(name, conditions, wait).last
-  end
-
-  # Wait for the service to be started or provided. This will not run in a ruby block.
-  def wait_for_service(service_name)
-    provider_for_service(service_name)
   end
 
   # Register to provide the given service.

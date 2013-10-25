@@ -19,7 +19,7 @@
 
 run_in_ruby_block "wait_for_hdfs" do
   Chef::Log.info('Wait until the datanodes daemon are started.')
-  all_providers_for_service(node[:hadoop][:datanode_service_name])
+  wait_for_service(node[:hadoop][:datanode_service_name])
   Chef::Log.info('The datanodes daemon are started. Wait until namenode adds the datanodes and is able to place replica.')
 end
 

@@ -34,8 +34,9 @@ module HadoopCluster
   end
 
   def wait_for_namenode_service(in_ruby_block = true)
+    return if is_namenode or is_journalnode or namenode_ip_conf
     run_in_ruby_block __method__, in_ruby_block do
-      provider_fqdn(node[:hadoop][:namenode_service_name], !is_namenode)
+      wait_for_service(node[:hadoop][:namenode_service_name])
     end
   end
 
@@ -64,27 +65,24 @@ module HadoopCluster
     return if is_journalnode
 
     run_in_ruby_block __method__, in_ruby_block do
-      set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:journalnode_service_name])
       journalnode_count = all_nodes_count({"role" => "hadoop_journalnode"})
-      all_provider_public_ips(node[:hadoop][:journalnode_service_name], true, journalnode_count)
-      clear_action
+      wait_for_service(node[:hadoop][:journalnode_service_name], journalnode_count)
     end
   end
 
   # All facet names which have hadoop_namenode role
   def namenode_facet_names
+    # the facet names will not change during bootstrap, so call Chef Search API only once.
+    return @namenode_facet_names if @namenode_facet_names
     servers = all_nodes({"role" => "hadoop_namenode"})
-    if !is_journalnode and !is_namenode
-      set_action(HadoopCluster::ACTION_WAIT_FOR_SERVICE, node[:hadoop][:namenode_service_name])
-      wait_for(node[:hadoop][:namenode_service_name], {"provides_service" => node[:hadoop][:namenode_service_name]}, true, servers.count, false)
-      clear_action
-    end
-    servers.map{ |server| facet_name_of_server(server) }.uniq.sort
+    @namenode_facet_names = servers.map{ |server| facet_name_of_server(server) }.uniq.sort
   end
 
   def namenode_facet_addresses
+    # the facet names and IP will not change during bootstrap, so call Chef Search API only once.
+    return @namenode_facet_addresses if @namenode_facet_addresses
     facet_names = namenode_facet_names
-    facet_names.map do | name |
+    @namenode_facet_addresses = facet_names.map do | name |
       servers = all_nodes({"role" => "hadoop_namenode", "facet_name" => name})
       {name => servers.map{ |server| ip_of(server) }}
     end
@@ -149,8 +147,9 @@ module HadoopCluster
   end
 
   def wait_for_jobtracker_service(in_ruby_block = true)
+    return if is_jobtracker or is_journalnode or jobtracker_ip_conf
     run_in_ruby_block __method__, in_ruby_block do
-      provider_fqdn(node[:hadoop][:jobtracker_service_name], !is_jobtracker)
+      wait_for_service(node[:hadoop][:jobtracker_service_name])
     end
   end
 
@@ -182,8 +181,9 @@ module HadoopCluster
   end
 
   def wait_for_resourcemanager_service(in_ruby_block = true)
+    return if is_resourcemanager or is_journalnode or resourcemanager_ip_conf
     run_in_ruby_block __method__, in_ruby_block do
-      provider_fqdn(node[:hadoop][:resourcemanager_service_name], !is_resourcemanager)
+      wait_for_service(node[:hadoop][:resourcemanager_service_name])
     end
   end
 
