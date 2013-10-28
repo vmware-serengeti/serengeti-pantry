@@ -188,7 +188,7 @@ module HadoopCluster
     ip = resourcemanager_ip_conf
     if !ip
       resmanager = resourcemanager_node
-      if node
+      if resmanager
         if is_namenode or is_secondarynamenode or is_journalnode
           # namenode and secondarynamenode don't require the resourcemanager service is running
           ip = fqdn_of_mapred_network(resmanager)
@@ -196,7 +196,7 @@ module HadoopCluster
           ip = provider_fqdn_for_role("hadoop_resourcemanager")
         end
       else
-        # return empty string if the cluster doesn't have a resourcemanager (e.g. an HBase cluster)
+        # return empty string if the cluster doesn't have a resourcemanager (e.g. an Hadoop 2.x HBase cluster without YARN)
         ip = ""
       end
     end

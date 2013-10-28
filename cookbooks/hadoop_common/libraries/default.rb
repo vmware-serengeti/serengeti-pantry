@@ -107,16 +107,16 @@ module HadoopCluster
     node.save
   end
 
+  # fetch fqdn from dns server, if fail, return ip address instead
   def fqdn_of_ip ip
-    # fetch fqdn from dns server, if fail, return ip address instead
+    Chef::Log.info("Trying to resolve IP #{ip} to FQDN ...")
     fqdn = ip
     begin
       fqdn = Resolv.getname(ip)
     rescue
-      Chef::Log.warn("Cannot resolve #{ip}")
-      raise "fqdn server is required for CDH4 distro" if is_cdh4_distro
+      Chef::Log.warn("Cannot resolve IP #{ip} to FQDN.")
     end
-    Chef::Log.info("Resolve ip: #{ip} to fqdn: #{fqdn}")
+    Chef::Log.info("Resolved IP #{ip} to FQDN #{fqdn}")
     return fqdn
   end
 
