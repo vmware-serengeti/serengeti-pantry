@@ -17,3 +17,5 @@
 #
 
 update_ipconfigs()
+
+set_hostname(fqdn_of_mgt_network(node))

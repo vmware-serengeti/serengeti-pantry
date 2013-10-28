@@ -107,6 +107,11 @@ module HadoopCluster
     node.save
   end
 
+  def set_hostname hostname
+    `hostname #{hostname}`
+    Chef::Log.info("Set hostname to: #{hostname}")
+  end
+
   # fetch fqdn from dns server, if fail, return ip address instead
   def fqdn_of_ip ip
     Chef::Log.info("Trying to resolve IP #{ip} to FQDN ...")
