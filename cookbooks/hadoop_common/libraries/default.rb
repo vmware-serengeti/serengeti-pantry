@@ -96,7 +96,7 @@ module HadoopCluster
         node.set[:ip_configs][net_type][index][:device] = device
         node[:network][:interfaces][device][:addresses].keys.each do |ip|
           if ip =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
-            Chef::Log.info("got portgroup: #{net[:port_group_name]}, device: #{device}, ip: #{ip}")
+            Chef::Log.debug("got portgroup: #{net[:port_group_name]}, device: #{device}, ip: #{ip}")
             node.set[:ip_configs][net_type][index][:ip_address] = ip
             break
           end
@@ -109,17 +109,16 @@ module HadoopCluster
 
   def set_hostname hostname
     `hostname #{hostname}`
-    Chef::Log.info("Set hostname to: #{hostname}")
+    Chef::Log.info("hostname is set to #{hostname}")
   end
 
   # fetch fqdn from dns server, if fail, return ip address instead
   def fqdn_of_ip ip
-    Chef::Log.info("Trying to resolve IP #{ip} to FQDN ...")
     fqdn = ip
     begin
       fqdn = Resolv.getname(ip)
     rescue
-      Chef::Log.warn("Cannot resolve IP #{ip} to FQDN.")
+      Chef::Log.warn("Unable to resolve IP #{ip} to FQDN.")
     end
     Chef::Log.info("Resolved IP #{ip} to FQDN #{fqdn}")
     return fqdn

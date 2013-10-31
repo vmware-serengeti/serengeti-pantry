@@ -16,6 +16,19 @@
 #   limitations under the License.
 #
 
+### When there are multi NICs on the node ###
+
+# update IP attributes
 update_ipconfigs()
 
-set_hostname(fqdn_of_mgt_network(node))
+# set node[:fqdn] to FQDN of the network which Chef Workstation is in.
+fqdn = fqdn_of_mgt_network(node)
+if node[:fqdn] != fqdn
+  node.set[:fqdn] = fqdn
+  node.save
+end
+
+# set OS hostname
+set_hostname(fqdn)
+
+### End of multi NICs ###
