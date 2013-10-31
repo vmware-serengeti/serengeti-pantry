@@ -55,7 +55,7 @@ end
 
 execute "generate random password" do
   not_if {File.exist?("/etc/.set-joe-password")}
-  only_if {File.exist?("/usr/sbin/serengeti-password")}
+  only_if {File.exist?("/etc/chef/.release_build.lock")}
   command %Q{
     /usr/sbin/serengeti-password -a
 
