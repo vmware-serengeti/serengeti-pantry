@@ -44,15 +44,15 @@ module HadoopCluster
   end
 
   def fqdn_of_mgt_network server = nil
-    return fqdn_of_ip(ip_of_mgt_network(server))
+    return fqdn_of_network(server, 'MGT_NETWORK')
   end
 
   def fqdn_of_hdfs_network server = nil
-    return fqdn_of_ip(ip_of_hdfs_network(server))
+    return fqdn_of_network(server, 'HDFS_NETWORK')
   end
 
   def fqdn_of_mapred_network server = nil
-    return fqdn_of_ip(ip_of_mapred_network(server))
+    return fqdn_of_network(server, 'MAPRED_NETWORK')
   end
 
   def ip_of_mgt_network server = nil
@@ -65,6 +65,15 @@ module HadoopCluster
 
   def ip_of_mapred_network server = nil
     return ip_of_network(server, 'MAPRED_NETWORK')
+  end
+
+  def fqdn_of_network server, traffic_type
+    server = node if server.nil?
+    fqdn = server[:ip_configs]['MGT_NETWORK'][0][:fqdn]
+    if !server[:ip_configs][traffic_type].nil? and !server[:ip_configs][traffic_type].empty?
+      fqdn = server[:ip_configs][traffic_type][0][:fqdn]
+    end
+    return fqdn
   end
 
   def device_of_network server, traffic_type
@@ -98,6 +107,7 @@ module HadoopCluster
           if ip =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
             Chef::Log.debug("got portgroup: #{net[:port_group_name]}, device: #{device}, ip: #{ip}")
             node.set[:ip_configs][net_type][index][:ip_address] = ip
+            node.set[:ip_configs][net_type][index][:fqdn] = fqdn_of_ip(ip)
             break
           end
         end

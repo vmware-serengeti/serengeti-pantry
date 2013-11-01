@@ -28,7 +28,13 @@ if node[:fqdn] != fqdn
   node.save
 end
 
-# set OS hostname
+# VHM get TaskTracker's name by fetch hostname from VC for decommission,
+# so we need to make sure hostname is consistent with the one TaskTracker
+# using. For JobTracker/ResourceManager, set to mgt_fqdn since VHM need
+# to ssh login to it.
+if node.role?("hadoop_jobtracker") or node.role?("hadoop_resourcemanager")
+  fqdn = fqdn_of_mgt_network(node)
+end
 set_hostname(fqdn)
 
 ### End of multi NICs ###

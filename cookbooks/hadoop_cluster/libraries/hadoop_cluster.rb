@@ -30,10 +30,6 @@ module HadoopCluster
   def namenode_address
     if is_namenode or is_journalnode
       fqdn = fqdn_of_hdfs_network(node)
-      # set hostname and update chef server
-      unless fqdn == `hostname`.chomp()
-        `hostname #{fqdn}`
-      end
       if node[:provision][:fqdn].nil? or node[:provision][:fqdn] != fqdn
         node.set[:provision][:fqdn] = fqdn
         node.save
