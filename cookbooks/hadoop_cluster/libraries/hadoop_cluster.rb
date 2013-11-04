@@ -232,7 +232,7 @@ module HadoopCluster
       :local_hadoop_dirs      => formalize_dirs(local_hadoop_dirs),
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
       :all_cluster_volumes    => all_cluster_volumes,
-      :web_ui_address         => fqdn_of_mapred_network(node),
+      :web_ui_address         => fqdn_of_mgt_network(node),
       :hdfs_bind_address      => fqdn_of_hdfs_network(node),
       :hdfs_network_dev       => device_of_hdfs_network(node),
       :mapred_network_dev     => device_of_mapred_network(node)
