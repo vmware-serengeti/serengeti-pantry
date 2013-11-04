@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+# skip when connecting to external HDFS
+return if all_nodes_count({"role" => "hadoop_datanode"}) == 0
+
 run_in_ruby_block "wait_for_hdfs" do
   Chef::Log.info('Wait until the datanodes daemon are started.')
   wait_for_service(node[:hadoop][:datanode_service_name])
