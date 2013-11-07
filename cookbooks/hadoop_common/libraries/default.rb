@@ -476,4 +476,13 @@ echo
   def is_rhel5
     ["redhat", "centos", "oracle"].include?(node['platform']) and (node['platform_version'] =~ /5/) == 0
   end
+
+  def package_installed?(name)
+    name = name.to_s.split[0]
+    if name.empty?
+      return false
+    else
+      File.exist?("/usr/lib/#{name}") or system("rpm -q #{name}")
+    end
+  end
 end

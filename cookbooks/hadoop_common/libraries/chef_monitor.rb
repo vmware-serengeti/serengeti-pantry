@@ -23,6 +23,7 @@ module HadoopCluster
 
   # Save Bootstrap Status to Chef::Node. It will be ran in Chef converge phase.
   def set_bootstrap_action(act = '', obj = '', run = false)
+    return if ACTION_INSTALL_PACKAGE == act and package_installed?(obj)
     obj = OBJECT_NONE if obj.to_s.empty?
     ruby_block "#{obj}" do
       block do
@@ -38,6 +39,13 @@ module HadoopCluster
 
   # Save Bootstrap Status to Chef::Node. It will be ran in Chef compile phase.
   def set_action(act = '', obj = '')
+    act ||= ''
+    obj ||= ''
+
+    # if the package is already installed, no need to set action.
+    # obj can be "package_a package_b ..."
+    return if ACTION_INSTALL_PACKAGE == act and package_installed?(obj)
+
     act = act.gsub(/<obj>/, obj)
     attrs = node[:provision] ? node[:provision].to_hash : Hash.new
     if attrs['action'] != act

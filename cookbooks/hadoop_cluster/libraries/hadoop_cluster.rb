@@ -271,7 +271,7 @@ module HadoopCluster
           return
         end
 
-        set_action(ACTION_INSTALL_PACKAGE, component)
+        set_bootstrap_action(ACTION_INSTALL_PACKAGE, package_name, true)
         execute "install #{tarball_pkgname} from tarball if not installed" do
           not_if do already_installed end
 
@@ -321,13 +321,7 @@ EOF
             chmod 777 /usr/bin/hadoop
             test -d #{hadoop_home}
           }
-
-          # Install the hadoop package at Chef compile phase instead of converge phase,
-          # so other nodes depends on namenode (or hbase master) service can download and install the package first,
-          # and then wait for namenode service to be ready. This can reduce the cluster creation time remarkably.
-          action :nothing
-        end.run_action(:run)
-        clear_action
+        end
       end
 
       if ['namenode', 'datanode', 'jobtracker', 'tasktracker', 'secondarynamenode'].include?(component) then
@@ -339,10 +333,10 @@ EOF
             mode  "0755"
             variables( {:hadoop_version => hadoop_major_version} )
             source "#{service_file}.erb"
-            action :nothing
-          end.run_action(:create)
+          end
         end
       end
+
       return
     end
 
@@ -355,7 +349,6 @@ EOF
         end
       end
     end
-    clear_bootstrap_action
 
     #FIXME this is a bug in Pivotal HD 1.0 alpha
     if is_pivotalhd_distro
@@ -559,10 +552,9 @@ done
     if ['namenode', 'jobtracker'].include?(component) then
       suffix = is_cdh4_distro ? '-cdh4' : ''
       pkg = "hmonitor#{suffix}-vsphere-#{component}-daemon"
-      set_bootstrap_action(ACTION_INSTALL_PACKAGE, pkg)
+      set_bootstrap_action(ACTION_INSTALL_PACKAGE, pkg, true)
       package pkg do
         action :install
-        notifies :create, resources("ruby_block[#{pkg}]"), :immediately
       end
 
       # put libVMGuestAppMonitorNative.so in /usr/lib/hadoop/lib/native/, so hadoop daemons can find it.

@@ -41,6 +41,7 @@ user "zookeeper" do
 end
 
 # Install Zookeeper
+set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'zookeeper', true)
 if is_install_from_tarball
   include_recipe "zookeeper::install_from_tarball"
 else
@@ -50,9 +51,6 @@ end
 link "/etc/zookeeper" do
   to node[:zookeeper][:home_dir] + "/conf"
 end
-
-# Launch service
-set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'zookeeper')
 
 # link Zookeeper data dir and log dir to the mounted data disk to get larger disk space
 # assumes we have at least two data disks
