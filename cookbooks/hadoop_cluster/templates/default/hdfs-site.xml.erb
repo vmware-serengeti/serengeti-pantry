@@ -41,7 +41,7 @@
 
 <property>
   <name>dfs.namenode.http-address.<%= namenode_name %></name>
-  <value><%= "#{@nn_addr_to_web_addr_map[address]}:#{node.default[:hadoop][:namenode_web_service_port]}" %></value>
+  <value><%= "#{address}:#{node.default[:hadoop][:namenode_web_service_port]}" %></value>
 </property>
 <%-
       end
@@ -91,7 +91,7 @@ else
 %>
 <property>
   <name>dfs.http.address</name>
-  <value><%= @web_ui_address %>:50070</value>
+  <value><%= @hdfs_bind_address %>:50070</value>
 </property>
 <%- end %>
 
@@ -115,7 +115,7 @@ else
 </property>
 <property>
   <name>dfs.datanode.http.address</name>
-  <value><%= @web_ui_address %>:50075</value>
+  <value><%= @hdfs_bind_address %>:50075</value>
 </property>
 <% end %>
 

@@ -95,18 +95,6 @@ module HadoopCluster
     end
   end
 
-  def nn_addr_to_web_addr_map
-    facet_names = namenode_facet_names
-    nn_addr_to_web_addr_map = {}
-    facet_names.each do | name |
-      servers = all_nodes({"role" => "hadoop_namenode", "facet_name" => name})
-      servers.each do |server|
-        nn_addr_to_web_addr_map[ip_of_hdfs_network(server)] = ip_of_mgt_network(server)
-      end
-    end
-    return nn_addr_to_web_addr_map
-  end
-
   # The cluster HDFS Namenode HA or federation is enabled if more than 1 node has hadoop_namenode role
   def cluster_has_hdfs_ha_or_federation
     servers = all_nodes({"role" => "hadoop_namenode"})
@@ -232,7 +220,7 @@ module HadoopCluster
       :local_hadoop_dirs      => formalize_dirs(local_hadoop_dirs),
       :persistent_hadoop_dirs => formalize_dirs(persistent_hadoop_dirs),
       :all_cluster_volumes    => all_cluster_volumes,
-      :web_ui_address         => fqdn_of_mgt_network(node),
+      :mapred_bind_address    => fqdn_of_mapred_network(node),
       :hdfs_bind_address      => fqdn_of_hdfs_network(node),
       :hdfs_network_dev       => device_of_hdfs_network(node),
       :mapred_network_dev     => device_of_mapred_network(node)
@@ -248,7 +236,6 @@ module HadoopCluster
     if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
       vars[:nameservices] = namenode_facet_names
       vars[:namenode_facets] = namenode_facet_addresses
-      vars[:nn_addr_to_web_addr_map] = nn_addr_to_web_addr_map
     end
 
     if is_journalnode

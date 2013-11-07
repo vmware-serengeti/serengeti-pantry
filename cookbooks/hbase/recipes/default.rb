@@ -156,7 +156,7 @@ template_variables = {
   :hbase_hdfs_home => hbase_hdfs_home,
   :zookeeper_quorum => zk_quorum,
   :zookeeper_session_timeout => zookeeper_session_timeout,
-  :http_address => fqdn_of_mgt_network(node),
+  :http_address => fqdn_of_hdfs_network(node),
   :bind_interface => device_of_hdfs_network(node)
 }
 
