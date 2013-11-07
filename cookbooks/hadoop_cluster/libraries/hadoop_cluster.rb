@@ -280,7 +280,7 @@ module HadoopCluster
             if [ ! -f /usr/local/src/#{tarball_filename} ]; then
               echo 'downloading tarball #{tarball_filename}'
               cd /usr/local/src/
-              wget --tries=3 #{tarball_url} --no-check-certificate
+              wget --tries=3 #{tarball_url} --ca-certificate=#{node[:ssl_ca_file_serengeti_httpd]}
 
               if [ $? -ne 0 ]; then
                 echo 'Downloading tarball #{tarball_url} failed.'
