@@ -14,7 +14,7 @@
 #
 
 module HadoopCluster
-  OBJECT_NONE = 'noname'
+  OBJECT_NONE = 'set_action'
   ACTION_NONE = ''
   ACTION_INSTALL_PACKAGE = 'Installing package <obj>'
   ACTION_START_SERVICE = 'Starting service <obj>'

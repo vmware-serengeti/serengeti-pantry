@@ -22,7 +22,7 @@ default[:hadoop][:package_version]   = 'current' # hadoop package version
 default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
 default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
 
-default[:hadoop][:service_stop_time] = 6 # waiting time for the hadoop service process to stop completely.
+default[:hadoop][:service_stop_time] = 5 # waiting time for the hadoop service process to stop completely.
 
 default[:hadoop][:namenode_wait_for_safemode_timeout] = 180 # 3 minutes
 
