@@ -32,8 +32,8 @@ end
 # so we need to make sure hostname is consistent with the one TaskTracker
 # using. For JobTracker/ResourceManager, set to mgt_fqdn since VHM need
 # to ssh login to it.
-if node.role?("hadoop_jobtracker") or node.role?("hadoop_resourcemanager")
-  fqdn = fqdn_of_mgt_network(node)
+if node.role?("hadoop_tasktracker") and node.role?("hadoop_nodemanager")
+  fqdn = fqdn_of_mapred_network(node)
 end
 set_hostname(fqdn)
 

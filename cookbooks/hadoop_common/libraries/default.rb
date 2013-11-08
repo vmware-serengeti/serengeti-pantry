@@ -69,27 +69,37 @@ module HadoopCluster
 
   def fqdn_of_network server, traffic_type
     server = node if server.nil?
-    fqdn = server[:ip_configs]['MGT_NETWORK'][0][:fqdn]
+    fqdn = nil
     if !server[:ip_configs][traffic_type].nil? and !server[:ip_configs][traffic_type].empty?
-      fqdn = server[:ip_configs][traffic_type][0][:fqdn]
+      fqdn = server[:ip_configs][traffic_type][0]['fqdn']
+      if fqdn.to_s.empty?
+        # if remote server's fqdn is not yet updated, try to fetch 
+        # by querying dns directly
+        fqdn = fqdn_of_ip(ip_of_network(server, traffic_type))
+      end
+    else
+      # if node[:ip_configs] does not contain given "traffic_type"
+      fqdn = fqdn_of_network(server, 'MGT_NETWORK')
     end
     return fqdn
   end
 
   def device_of_network server, traffic_type
     server = node if server.nil?
-    device = server[:ip_configs]['MGT_NETWORK'][0][:device]
+    device = server[:ip_configs]['MGT_NETWORK'][0]['device']
     if !server[:ip_configs][traffic_type].nil? and !server[:ip_configs][traffic_type].empty?
-      device = server[:ip_configs][traffic_type][0][:device]
+      # currently this function is only called from localhost, no need to check NPE
+      # since this attribute is set in pre_run
+      device = server[:ip_configs][traffic_type][0]['device']
     end
     return device
   end
 
   def ip_of_network server, traffic_type
     server = node if server.nil?
-    ip = server[:ip_configs]['MGT_NETWORK'][0][:ip_address] # by default return ip of MGT_NETWORK
+    ip = server[:ip_configs]['MGT_NETWORK'][0]['ip_address'] # by default return ip of MGT_NETWORK
     if !server[:ip_configs][traffic_type].nil? and !server[:ip_configs][traffic_type].empty?
-      ip = server[:ip_configs][traffic_type][0][:ip_address]
+      ip = server[:ip_configs][traffic_type][0]['ip_address']
     end
     return ip
   end
@@ -98,22 +108,24 @@ module HadoopCluster
     file_name = "/etc/portgroup2eth.json"
     return unless File.exist?(file_name)
     port2dev = JSON.parse(File.new(file_name, "r").gets)
-    node[:ip_configs].each do |net_type, net_list|
+    ip_configs = JSON.parse(node[:ip_configs].to_json)
+    ip_configs.each do |net_type, net_list|
       index = 0
       net_list.each do |net|
-        device = port2dev[net[:port_group_name]]
-        node.set[:ip_configs][net_type][index][:device] = device
+        device = port2dev[net['port_group_name']]
+        ip_configs[net_type][index]['device'] = device
         node[:network][:interfaces][device][:addresses].keys.each do |ip|
           if ip =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
-            Chef::Log.debug("got portgroup: #{net[:port_group_name]}, device: #{device}, ip: #{ip}")
-            node.set[:ip_configs][net_type][index][:ip_address] = ip
-            node.set[:ip_configs][net_type][index][:fqdn] = fqdn_of_ip(ip)
+            Chef::Log.debug("got portgroup: #{net['port_group_name']}, device: #{device}, ip: #{ip}")
+            ip_configs[net_type][index]['ip_address'] = ip
+            ip_configs[net_type][index]['fqdn'] = fqdn_of_ip(ip)
             break
           end
         end
         index += 1
       end
     end
+    node.set[:ip_configs] = ip_configs
     node.save
   end
 
@@ -127,10 +139,10 @@ module HadoopCluster
     fqdn = ip
     begin
       fqdn = Resolv.getname(ip)
+      Chef::Log.info("Resolved IP #{ip} to FQDN #{fqdn}")
     rescue
       Chef::Log.warn("Unable to resolve IP #{ip} to FQDN.")
     end
-    Chef::Log.info("Resolved IP #{ip} to FQDN #{fqdn}")
     return fqdn
   end
 
