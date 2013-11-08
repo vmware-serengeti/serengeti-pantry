@@ -74,9 +74,6 @@ service "restart-#{node[:hadoop][:namenode_service_name]}" do
     subscribes :restart, resources("template[/etc/hadoop/conf/topology.data]"), :delayed
   end
   notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
-  if is_hortonworks_hmonitor_namenode_enabled
-    notifies :start, resources("service[#{node[:hadoop][:hmonitor_ha_service]}]"), :delayed
-  end
 end if is_namenode_running
 
 service "start-#{node[:hadoop][:namenode_service_name]}" do
@@ -87,9 +84,6 @@ service "start-#{node[:hadoop][:namenode_service_name]}" do
   supports :status => true, :restart => true
 
   notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
-  if is_hortonworks_hmonitor_namenode_enabled
-    notifies :start, resources("service[#{node[:hadoop][:hmonitor_ha_service]}]"), :delayed
-  end
 end
 
 # run this regardless namenode is already started before bootstrapping or started by this recipe
@@ -138,6 +132,11 @@ if is_primary_namenode
   # initialize hdfs dirs after namenode is formatted and started,
   # and before jobtracker/resourcemanager is started.
   include_recipe "hadoop_cluster::bootstrap_hdfs_dirs"
+end
+
+# Start hmonitor ha service at the end of bootstrapping
+if is_hortonworks_hmonitor_namenode_enabled
+  start_ha_service node[:hadoop][:hmonitor_ha_service], true
 end
 
 # register with cluster_service_discovery

@@ -57,9 +57,6 @@ service "restart-#{node[:hadoop][:jobtracker_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/capacity-scheduler.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-queue-acls.xml]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately
-  if is_hortonworks_hmonitor_jobtracker_enabled
-    notifies :start, resources("service[#{node[:hadoop][:hmonitor_ha_service]}]"), :delayed
-  end
 end if is_jobtracker_running
 
 service "start-#{node[:hadoop][:jobtracker_service_name]}" do
@@ -68,9 +65,11 @@ service "start-#{node[:hadoop][:jobtracker_service_name]}" do
   supports :status => true, :restart => true
 
   notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately
-  if is_hortonworks_hmonitor_jobtracker_enabled
-    notifies :start, resources("service[#{node[:hadoop][:hmonitor_ha_service]}]"), :delayed
-  end
+end
+
+# Start hmonitor ha service at the end of bootstrapping
+if is_hortonworks_hmonitor_jobtracker_enabled
+  start_ha_service node[:hadoop][:hmonitor_ha_service], true
 end
 
 # Register with cluster_service_discovery

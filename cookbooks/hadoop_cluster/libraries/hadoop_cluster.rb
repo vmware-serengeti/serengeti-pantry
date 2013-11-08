@@ -585,6 +585,22 @@ done
     end
   end
 
+  def start_ha_service svc, delayed = false
+    return if !is_hortonworks_hmonitor_enabled
+
+    if delayed
+      execute 'delay-starting-hmonitor-service' do
+        command 'echo'
+        notifies :start, resources("service[#{svc}]"), :delayed
+      end
+    else
+      service svc do
+        action [ :start ]
+        supports :status => true, :restart => true
+      end
+    end
+  end
+
   # Hortonworks HMonitor vSphere HA Kit can not monitor namenode service and resourcemanager service in Hadoop HDFS2 and YARN
   def is_hortonworks_hmonitor_enabled
     node[:hadoop][:ha_enabled] and (is_hadoop1_distro or is_cdh4_distro)
