@@ -157,7 +157,8 @@ template_variables = {
   :zookeeper_quorum => zk_quorum,
   :zookeeper_session_timeout => zookeeper_session_timeout,
   :http_address => fqdn_of_hdfs_network(node),
-  :bind_interface => device_of_hdfs_network(node)
+  :bind_interface => device_of_hdfs_network(node),
+  :is_version_1_0_0_0 => is_version_1_0_0_0?
 }
 
 %w[ hbase-site.xml hbase-env.sh log4j.properties ].each do |file|

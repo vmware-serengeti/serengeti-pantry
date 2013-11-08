@@ -15,10 +15,12 @@
   <name>mapreduce.framework.name</name>
   <value>yarn</value>
 </property>
+<% if !@is_version_1_0_0_0 %>
 <property>
   <name>mapreduce.tasktracker.dns.interface</name>
   <value><%= @mapred_network_dev %></value>
 </property>
+<% end %>
 <property>
   <name>mapreduce.jobtracker.address</name>
   <value><%= @resourcemanager_address %>:9001</value>
@@ -138,10 +140,12 @@
 
 <!-- child jobs -->
 <% if node.role?('hadoop_tasktracker') %>
+<% if !@is_version_1_0_0_0 %>
 <property>
   <name>mapred.tasktracker.dns.interface</name>
   <value><%= @mapred_network_dev %></value>
 </property>
+<% end %>
 
 <property>
   <name>mapred.child.java.opts</name>
