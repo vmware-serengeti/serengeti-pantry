@@ -27,7 +27,7 @@ include_recipe "hadoop_cluster::hadoop_conf_xml" unless is_namenode or is_jobtra
 force_link("/usr/lib/hadoop", hadoop_home_dir)
 
 # Make hadoop logs live on /mnt/hadoop or user defined log dir
-hadoop_log_dir = hadoop_log_dir_conf || local_hadoop_log_dir
+hadoop_log_dir = real_hadoop_log_dir
 make_hadoop_dir(hadoop_log_dir, 'hdfs', '0775')
 force_link("/var/log/hadoop", hadoop_log_dir )
 force_link("/var/log/hadoop-yarn", yarn_system_log_dir ) if is_hadoop_yarn?

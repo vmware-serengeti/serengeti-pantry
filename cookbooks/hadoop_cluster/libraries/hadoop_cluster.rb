@@ -392,6 +392,10 @@ done
   end
 
   # log dir for hadoop daemons
+  def real_hadoop_log_dir
+    hadoop_log_dir_conf || local_hadoop_log_dir
+  end
+
   def local_hadoop_log_dir
     dir = ""
     if node[:hadoop][:use_data_disk_as_log_vol]
