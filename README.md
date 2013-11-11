@@ -1,6 +1,6 @@
 # VMware Serengeti Cookbooks and Roles
 
-This repository contains all the cookbooks and roles used in VMware Serengeti Project.
+This repository contains all the cookbooks and roles used in [VMware Serengeti Project](http://projectserengeti.org/).
 
 All cookbooks and roles are created/modified by VMware Serengeti Project based on cookbooks and roles open sourced by [Infochimps](https://github.com/infochimps-labs/ironfan-pantry).
 
@@ -9,13 +9,13 @@ To understand the basic concept of Cookbooks and Roles (defined by Chef), please
 ## Main Changes in VMware Serengeti Cookbooks
 
 * Generate user defined hadooop configuration (in cluster/facet roles) in hadoop conf files 
-* Add support for deploying a Hadoop cluster using various Hadoop Distributions (e.g. Apache Hadoop 1.x, GreenPlum HD 1.x, Pivotal HD 1.x, Cloudera CDH3 and CDH4(MRv1 and YARN), Hortonworks, MapR etc.).
-* The cookbooks are targeted for deploying a Hadoop 0.20 or 1.x cluster with support for HDFS, MapReduce, HBase, Pig and Hive.
+* Add support for deploying a Hadoop cluster using various Hadoop Distributions (e.g. Apache Hadoop 1.x, GreenPlum HD 1.x, Pivotal HD 1.x, Cloudera CDH3 and CDH4(MRv1 and YARN), Hortonworks, MapR, Intel Hadoop 2.5, etc.).
+* The cookbooks are targeted for deploying a Hadoop 1.x and 2.x cluster with support for HDFS, MapReduce, Yarn, HBase, Pig and Hive.
 * The cookbooks run well on a VM or server with CentOS 5.6+ or CentOS 6.2+ installed. RHEL 5.6+ and 6.2+ should also work but not tested.
 
 Note:
 * Hadoop 2.x (i.e. HDFS2 and YARN) is supported via CDH4 and Pivotal HD 1.x.
-* To deploy CDH4/MapR/PivotalHD cluster, you need to specify the yum server which contains CDH4/MapR/PivotalHD rpm packages. This is different from deploy Apache Hadoop, Hortonworks and GreenPlum HD cluster.
+* To deploy CDH4/MapR/PivotalHD/Intel cluster, you need to specify the yum server which contains CDH4/MapR/PivotalHD/Intel rpm packages. This is different from deploy Apache Hadoop, Hortonworks and GreenPlum HD cluster.
 
 ## Roles
 
@@ -110,6 +110,7 @@ We have tested that VMware Serengeti Cookbooks can be used to successfully deplo
 * [Hortonworks HDP 1.x and 2.x](http://s3.amazonaws.com/public-repo-1.hortonworks.com/HDP-1.2.0/repos/centos5/HDP-1.2.0-centos5.tar.gz)
 * [Pivotal HD 1.0](http://pivotallabs.com/)
 * [MapR 2.1.x](http://package.mapr.com/releases/)
+* [Intel Hadoop 2.5](http://www.intel.cn/content/www/cn/zh/big-data/intel-distribution-of-hadoop.html)
 
 Other Hadoop 0.20 or 1.x series distributions should also work well but not tested.
 Please let us know if other Hadoop/Pig/Hive combination works in your environment.

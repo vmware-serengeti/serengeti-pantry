@@ -1,3 +1,16 @@
+# 1.1.0 (2013-11-11)
+
+New features:
+* Upgrade to Chef Client 11
+* Enable SSL certificate validation between Chef Server and Chef nodes
+* Add support for Intel Hadoop
+* Add support for Fedora and Oracle Linux
+* Add Support for Multi Network on Hadoop Nodes
+
+Enhancement:
+* Use Chef 11 Partial Search API to reduce memory consumption and response time when doing cluster service discovery
+* Other bug fix
+
 # 1.0.0 (2013-8-2)
 
 Enhancement:
