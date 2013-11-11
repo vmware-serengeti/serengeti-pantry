@@ -223,8 +223,7 @@ module HadoopCluster
       :mapred_bind_address    => fqdn_of_mapred_network(node),
       :hdfs_bind_address      => fqdn_of_hdfs_network(node),
       :hdfs_network_dev       => device_of_hdfs_network(node),
-      :mapred_network_dev     => device_of_mapred_network(node),
-      :is_version_1_0_0_0     => is_version_1_0_0_0?
+      :mapred_network_dev     => device_of_mapred_network(node)
     }
     if is_hadoop_yarn?
       vars[:resourcemanager_address] = resourcemanager_address

@@ -96,12 +96,10 @@ else
 <%- end %>
 
 <% if node.role?('hadoop_datanode') %>
-<% if !@is_version_1_0_0_0 %>
 <property>
   <name>dfs.datanode.dns.interface</name>
   <value><%= @hdfs_network_dev %></value>
 </property>
-<% end %>
 <property>
   <name>dfs.datanode.address</name>
   <value><%= @hdfs_bind_address %>:50010</value>

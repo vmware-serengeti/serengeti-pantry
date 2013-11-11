@@ -17,8 +17,6 @@
 #
 
 ### When there are multi NICs on the node ###
-node.default[:serengeti][:version] = serengeti_version
-Chef::Log.info("serengeti version: #{node[:serengeti][:version]}")
 
 # update IP attributes
 update_ipconfigs()

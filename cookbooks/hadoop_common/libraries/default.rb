@@ -105,44 +105,27 @@ module HadoopCluster
   end
 
   def update_ipconfigs
-    # if this node is cloned from 1.0.0 template
-    # in chef client 10, JSON.parse(node[:ip_configs].to_json) will probably fail
-    if is_version_1_0_0_0?
-      node[:network][:interfaces].keys.each do |device|
-        next unless device =~ /eth/
+    file_name = "/etc/portgroup2eth.json"
+    return unless File.exist?(file_name)
+    port2dev = JSON.parse(File.new(file_name, "r").gets)
+    ip_configs = JSON.parse(node[:ip_configs].to_json)
+    ip_configs.each do |net_type, net_list|
+      index = 0
+      net_list.each do |net|
+        device = port2dev[net['port_group_name']]
+        ip_configs[net_type][index]['device'] = device
         node[:network][:interfaces][device][:addresses].keys.each do |ip|
           if ip =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
-            node[:ip_configs]['MGT_NETWORK'][0]['ip_address'] = ip
-            node[:ip_configs]['MGT_NETWORK'][0]['fqdn'] = fqdn_of_ip(ip)
-            node[:ip_configs]['MGT_NETWORK'][0]['device'] = device
+            Chef::Log.debug("got portgroup: #{net['port_group_name']}, device: #{device}, ip: #{ip}")
+            ip_configs[net_type][index]['ip_address'] = ip
+            ip_configs[net_type][index]['fqdn'] = fqdn_of_ip(ip)
             break
           end
         end
+        index += 1
       end
-    else
-      # node is cloned from 1.1.0 tempalte or newer
-      ip_configs = JSON.parse(node[:ip_configs].to_json)
-      file_name = "/etc/portgroup2eth.json"
-      return unless File.exist?(file_name)
-      port2dev = JSON.parse(File.new(file_name, "r").gets)
-      ip_configs.each do |net_type, net_list|
-        index = 0
-        net_list.each do |net|
-          device = port2dev[net['port_group_name']]
-          ip_configs[net_type][index]['device'] = device
-          node[:network][:interfaces][device][:addresses].keys.each do |ip|
-            if ip =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
-              Chef::Log.debug("got portgroup: #{net['port_group_name']}, device: #{device}, ip: #{ip}")
-              ip_configs[net_type][index]['ip_address'] = ip
-              ip_configs[net_type][index]['fqdn'] = fqdn_of_ip(ip)
-              break
-            end
-          end
-          index += 1
-        end
-      end
-      node.set[:ip_configs] = ip_configs
     end
+    node.set[:ip_configs] = ip_configs
     node.save
   end
 
