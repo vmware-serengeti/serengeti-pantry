@@ -49,6 +49,7 @@
 module ClusterServiceDiscovery
   WAIT_TIMEOUT = 1800 # seconds
   SLEEP_TIME = 5
+  ABORT_DETECT_INTERVAL = 2 # detect abort signal every 2 * SLEEP_TIME seconds
 
   # Find all nodes that have indicated they provide the given service,
   # in descending order of when they registered.
@@ -91,15 +92,12 @@ module ClusterServiceDiscovery
   # The param num means at least find #{num} nodes.
   def get_all_providers name, condition, wait, num, run_in_ruby_block, &block
     start_time = Time.now
+    count = 0
     while true
       servers = yield
       if !wait or (servers and servers.size >= num)
         Chef::Log.info("search(:node, '#{condition}') returns #{servers.count} nodes.")
-        if run_in_ruby_block
-          break
-        else
-          return servers
-        end
+        return servers
       else
         wait_time = Time.now - start_time
         if wait_time > WAIT_TIMEOUT
@@ -108,6 +106,9 @@ module ClusterServiceDiscovery
         end
         Chef::Log.info("search(:node, '#{condition}') returns nothing, already wait #{wait_time} seconds.")
         sleep SLEEP_TIME
+
+        count += 1
+        check_abort_signal if (count % ABORT_DETECT_INTERVAL) == 0
       end
     end
   end
@@ -318,6 +319,15 @@ module ClusterServiceDiscovery
       condition += " AND #{key}:#{value}"
     end
     condition
+  end
+
+  def check_abort_signal
+    Chef::Log.debug("Checking whether abort signal is set to true by Ironfan")
+    item = data_bag_item(node[:cluster_name], node[:cluster_name]) rescue item = {}
+    Chef::Log.debug("abort signal is #{item['abort']}")
+    if item['abort']
+      raise "The abort signal is detected. Some key nodes failed to bootstrap, so abort bootstrapping node #{node.name}."
+    end
   end
 
   # A compact timestamp, to record when services are registered
