@@ -130,8 +130,16 @@ module HadoopCluster
   end
 
   def set_hostname hostname
-    `hostname #{hostname}`
-    Chef::Log.info("hostname is set to #{hostname}")
+    system <<EOF
+        hostname #{hostname}
+        CONF=/etc/sysconfig/network
+        if `grep -q HOSTNAME $CONF` ; then
+          sed -i s/^HOSTNAME=.*/HOSTNAME=#{hostname}/ $CONF
+        else
+          echo "HOSTNAME=#{hostname}" >> $CONF
+        fi
+EOF
+    Chef::Log.info("Hostname is set to #{hostname}")
   end
 
   # fetch fqdn from dns server, if fail, return ip address instead
