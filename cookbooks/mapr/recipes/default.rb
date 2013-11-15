@@ -13,5 +13,6 @@
 #   limitations under the License.
 #
 
-include_recipe 'mapr::prereqs'
+include_recipe 'hadoop_common::pre_run'
 
+include_recipe 'mapr::prereqs'
