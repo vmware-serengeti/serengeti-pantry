@@ -13,6 +13,8 @@
 #   limitations under the License.
 #
 
+# Update ip info, set up hostname
+include_recipe 'hadoop_common::pre_run'
 # Set up required repos for RHEL/CentOS
 include_recipe "hadoop_common::add_repo"
 
