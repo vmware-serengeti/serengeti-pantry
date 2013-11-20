@@ -139,17 +139,19 @@ module HadoopCluster
           echo "HOSTNAME=#{hostname}" >> $CONF
         fi
 EOF
-    Chef::Log.info("Hostname is set to #{hostname}")
+    Chef::Log.info("hostname is set to #{hostname}")
   end
 
   # fetch fqdn from dns server, if fail, return ip address instead
   def fqdn_of_ip ip
+    Chef::Log.debug("Trying to resolve IP #{ip} to FQDN")
     fqdn = ip
     begin
-      fqdn = Resolv.getname(ip)
+      # set DNS resolution timeout to 6 seconds, otherwise it will take about 80s then throws exception when DNS server is not reachable
+      fqdn = Timeout.timeout(6) { Resolv.getname(ip) }
       Chef::Log.info("Resolved IP #{ip} to FQDN #{fqdn}")
-    rescue
-      Chef::Log.warn("Unable to resolve IP #{ip} to FQDN.")
+    rescue StandardError => e
+      Chef::Log.warn("Unable to resolve IP #{ip} to FQDN due to #{e}")
     end
     return fqdn
   end
