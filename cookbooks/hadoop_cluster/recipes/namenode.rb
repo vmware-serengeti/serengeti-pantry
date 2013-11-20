@@ -56,7 +56,7 @@ if is_hortonworks_hmonitor_namenode_enabled
   stop_ha_service node[:hadoop][:hmonitor_ha_service]
 end
 
-is_namenode_running = system("service #{node[:hadoop][:namenode_service_name]} status 1>2 2>/dev/null")
+is_namenode_running = system("service #{node[:hadoop][:namenode_service_name]} status >/dev/null 2>&1")
 service "restart-#{node[:hadoop][:namenode_service_name]}" do
   service_name node[:hadoop][:namenode_service_name]
   supports :status => true, :restart => true

@@ -29,7 +29,7 @@ end
 # Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:zkfc_service_name])
 
-is_zkfc_running = system("service #{node[:hadoop][:zkfc_service_name]} status 1>2 2>/dev/null")
+is_zkfc_running = system("service #{node[:hadoop][:zkfc_service_name]} status >/dev/null 2>&1")
 service "restart-#{node[:hadoop][:zkfc_service_name]}" do
   service_name node[:hadoop][:zkfc_service_name]
   supports :status => true, :restart => true

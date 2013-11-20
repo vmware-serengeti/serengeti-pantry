@@ -30,7 +30,7 @@ service_name = node[:hadoop][:nodemanager_service_name]
 ## Launch Service
 set_bootstrap_action(ACTION_START_SERVICE, service_name)
 
-is_service_running = system("service #{service_name} status 1>2 2>/dev/null")
+is_service_running = system("service #{service_name} status >/dev/null 2>&1")
 
 service "restart-#{service_name}" do
   service_name service_name

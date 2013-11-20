@@ -262,7 +262,7 @@ EOF
     execute 'try to access google homepage' do
       command %Q{
         rm -f #{tmpfile}
-        wget --tries=1 --timeout=3 http://www.google.com/ -O /tmp/google-homepage 1>2 2>/dev/null && touch #{tmpfile}
+        wget --tries=1 --timeout=3 http://www.google.com/ -O /tmp/google-homepage >/dev/null 2>&1 && touch #{tmpfile}
         rm -f /tmp/google-homepage
       }
       timeout 30

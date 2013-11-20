@@ -43,7 +43,7 @@ if is_hortonworks_hmonitor_jobtracker_enabled
   stop_ha_service node[:hadoop][:hmonitor_ha_service]
 end
 
-is_jobtracker_running = system("service #{node[:hadoop][:jobtracker_service_name]} status 1>2 2>/dev/null")
+is_jobtracker_running = system("service #{node[:hadoop][:jobtracker_service_name]} status >/dev/null 2>&1")
 service "restart-#{node[:hadoop][:jobtracker_service_name]}" do
   service_name node[:hadoop][:jobtracker_service_name]
   supports :status => true, :restart => true

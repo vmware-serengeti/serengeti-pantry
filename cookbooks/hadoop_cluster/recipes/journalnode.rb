@@ -36,7 +36,7 @@ wait_for_zookeepers_service
 # Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hadoop][:journalnode_service_name])
 
-is_journalnode_running = system("service #{node[:hadoop][:journalnode_service_name]} status 1>2 2>/dev/null")
+is_journalnode_running = system("service #{node[:hadoop][:journalnode_service_name]} status >/dev/null 2>&1")
 service "restart-#{node[:hadoop][:journalnode_service_name]}" do
   service_name node[:hadoop][:journalnode_service_name]
   supports :status => true, :restart => true
