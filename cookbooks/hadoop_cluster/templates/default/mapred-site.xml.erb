@@ -6,7 +6,7 @@
 <% if node.role?('hadoop_jobtracker') %>
 <property>
   <name>mapred.job.tracker.http.address</name>
-  <value><%= @mapred_bind_address %>:50030</value>
+  <value>0.0.0.0:50030</value>
 </property>
 <% end %>
 
