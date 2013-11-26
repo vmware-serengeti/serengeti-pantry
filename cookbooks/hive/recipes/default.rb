@@ -25,9 +25,10 @@ return if node[:platform] == "fedora"
 
 include_recipe "java::sun"
 
-# alias home dir
+# alias hive home dir
 if is_pivotalhd_distro
   node.normal[:hive][:home_dir] = '/usr/lib/gphd/hive'
+  node.normal[:hive][:conf_dir] = '/etc/gphd/hive/conf'
 end
 force_link("/usr/lib/hive", node[:hive][:home_dir])
 
@@ -75,6 +76,9 @@ if node[:hadoop][:install_from_tarball] then
 else
   include_recipe "hive::install_from_package"
 end
+
+# alias hive conf dir
+make_link("/usr/lib/hive/conf", node[:hive][:conf_dir])
 
 update_hive_version
 

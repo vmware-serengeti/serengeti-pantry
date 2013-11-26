@@ -2,6 +2,7 @@ default[:hive][:home_dir]           = '/usr/lib/hive'
 default[:hive][:version]            = "0.8.1"
 default[:hive][:log_dir]            = "/var/log/hive"
 default[:hive][:pid_dir]            = "/var/run/hive"
+default[:hive][:conf_dir]           = "/usr/lib/hive/conf"
 default[:hive][:user]               = "hive"
 default[:hive][:group]              = "hive"
 default[:groups][:hive][:gid]       = 503
