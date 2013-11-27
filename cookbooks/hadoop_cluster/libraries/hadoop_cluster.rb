@@ -90,7 +90,7 @@ module HadoopCluster
     return @namenode_facet_addresses if @namenode_facet_addresses
     facet_names = namenode_facet_names
     @namenode_facet_addresses = facet_names.map do | name |
-      servers = all_nodes({"role" => "hadoop_namenode", "facet_name" => name})
+      servers = all_nodes({"role" => "hadoop_namenode", "facet_name" => name}).uniq.sort
       {name => servers.map{ |server| ip_of_hdfs_network(server) }}
     end
   end
