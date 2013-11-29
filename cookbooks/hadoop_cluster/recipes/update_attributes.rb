@@ -64,7 +64,7 @@ elsif is_cdh4_distro
   node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-0.20-mapreduce'
   node.default[:hadoop][:service_name_prefix] = 'hadoop-hdfs'
   # hadoop packages
-  node.default[:hadoop][:packages][:hadoop][:name] = "hadoop"
+  node.default[:hadoop][:packages][:hadoop][:name] = "hadoop hadoop-hdfs hadoop-0.20-mapreduce"
   node.default[:hadoop][:packages][:namenode][:name] = "hadoop-hdfs-namenode"
   node.default[:hadoop][:packages][:secondarynamenode][:name] = "hadoop-hdfs-secondarynamenode"
   node.default[:hadoop][:packages][:datanode][:name] = "hadoop-hdfs-datanode"
