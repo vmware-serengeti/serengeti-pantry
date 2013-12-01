@@ -40,6 +40,11 @@ template '/etc/default/mesos-slave' do
   notifies :run, 'bash[restart-mesos-slave]', :delayed
 end
 
+pairs = {
+  :logging_level => node['mesos']['common']['logging_level']
+}
+generate_mesos_param_files('slave', pairs)
+
 if node['mesos']['zookeeper_server_list'].count > 0
   zk_server_list = node['mesos']['zookeeper_server_list']
   zk_port = node['mesos']['zookeeper_port']
@@ -70,15 +75,15 @@ unless zk_server_list.count == 0 && zk_port.empty? && zk_path.empty?
   end
 end
 
-template '/usr/local/etc/mesos/mesos-slave-env.sh.template' do
-  source 'mesos-slave-env.sh.template.erb'
+template '/usr/local/etc/mesos/mesos-slave-env.sh' do
+  source 'mesos-slave-env.sh.erb'
   variables(
     zookeeper_server_list: zk_server_list,
     zookeeper_port: zk_port,
     zookeeper_path: zk_path,
-    logs_dir: node['mesos']['common']['logs_dir'],
+    logs_dir: node['mesos']['common']['logs'],
     work_dir: node['mesos']['slave']['work_dir'],
-    isolation_type: node['mesos']['isolation_type'],
+    isolation: node['mesos']['isolation'],
   )
   notifies :run, 'bash[restart-mesos-slave]', :delayed
 end

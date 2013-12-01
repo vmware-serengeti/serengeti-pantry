@@ -35,6 +35,12 @@ template '/etc/default/mesos-master' do
   notifies :run, 'bash[restart-mesos-master]', :delayed
 end
 
+pairs = {
+  :quorum => 1,
+  :logging_level => node['mesos']['common']['logging_level']
+}
+generate_mesos_param_files('master', pairs)
+
 if node['mesos']['zookeeper_server_list'].count > 0
   zk_server_list = node['mesos']['zookeeper_server_list']
   zk_port = node['mesos']['zookeeper_port']

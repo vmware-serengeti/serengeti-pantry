@@ -23,11 +23,7 @@ return unless node.role?('mesos_docker')
 set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'docker-io', true)
 
 # install docker
-execute 'install epel yum repo' do
-  not_if 'rpm -q epel-release'
-  command 'rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'
-end
-
+package 'epel-release'
 package 'docker-io'
 
 bash 'config docker containerizer for mesos' do
@@ -36,7 +32,6 @@ bash 'config docker containerizer for mesos' do
   code <<-EOH
     chkconfig docker on
 
-    
     # FIXME: Docker seems to pretty consistently crash on first init.  We can work around
     # that by starting it, poking it to make it die, then restarting it again...
     service docker start

@@ -14,35 +14,42 @@
 #
 
 default['mesos']['version']                       = '0.20.1'
+# attributes under default['mesos']['common'] are written in /etc/default/mesos
 default['mesos']['common']['port']                = 5050
-default['mesos']['common']['logs_dir']            = '/var/log/mesos'
+default['mesos']['common']['logs']                = '/var/log/mesos'
 default['mesos']['common']['logging_level']       = 'ERROR'
 default['mesos']['common']['ulimit']              = '-n 16384'
+# attributes under default['mesos']['master'] are written in /etc/default/mesos-master
 default['mesos']['master']['cluster']             = node[:cluster_name]
 default['mesos']['master']['zk']                  = '`cat /etc/mesos/zk`'
+# attributes under default['mesos']['slave']  are written in /etc/default/mesos-slave
 default['mesos']['slave']['work_dir']             = '/tmp/mesos'
 default['mesos']['slave']['isolation']            = 'process'
 default['mesos']['slave']['master']               = '`cat /etc/mesos/zk`'
+default['mesos']['slave']['checkpoint']           = 'true'
+default['mesos']['slave']['strict']               = 'false'
+default['mesos']['slave']['recover']              = 'reconnect'
 default['mesos']['zookeeper_port']                = 2181
 default['mesos']['zookeeper_path']                = node[:cluster_name]
 default['mesos']['zookeeper_exhibitor_discovery'] = false
 default['mesos']['zookeeper_exhibitor_url']       = nil
 default['mesos']['set_ec2_hostname']              = true
-# attributes under default['mesos']['slave'] are written to /etc/mesos-slave/$key = $value
-default['mesos']['slave']['checkpoint']           = 'true'
-default['mesos']['slave']['strict']               = 'false'
-default['mesos']['slave']['recover']              = 'reconnect'
 
-default['mesos']['python_site_dir'] = '/usr/local/lib/python2.7/dist-packages'
+python_site_dir = '/usr/local/lib/python2.7/dist-packages'
 case node['platform']
 when 'rhel', 'centos', 'fedora', 'oracle'
-  default['java']['jdk_version'] = '7'
-  default['mesos']['python_egg'] = "http://downloads.mesosphere.io/master/#{node['platform']}/6/mesos-#{node['mesos']['version']}-py2.6.egg"
-  default['mesos']['python_site_dir'] = '/usr/lib/python2.6/site-packages'
+  python_site_dir = '/usr/lib/python2.6/site-packages'
+  mesos_python_egg = "http://downloads.mesosphere.io/master/#{node['platform']}/6/mesos-#{node['mesos']['version']}-py2.6.egg"
 when 'ubuntu'
-  default['mesos']['python_egg'] = "http://downloads.mesosphere.io/master/ubuntu/13.04/mesos-#{node['mesos']['version']}-py2.7-linux-x86_64.egg"
+  mesos_python_egg = "http://downloads.mesosphere.io/master/ubuntu/13.04/mesos-#{node['mesos']['version']}-py2.7-linux-x86_64.egg"
 when 'debian'
-  default['mesos']['python_egg'] = "http://downloads.mesosphere.io/master/debian/7/mesos-#{node['mesos']['version']}-py2.7-linux-x86_64.egg"
+  mesos_python_egg = "http://downloads.mesosphere.io/master/debian/7/mesos-#{node['mesos']['version']}-py2.7-linux-x86_64.egg"
 else
-  default['mesos']['python_egg'] = "http://downloads.mesosphere.io/master/ubuntu/13.04/mesos-#{node['mesos']['version']}-py2.7-linux-x86_64.egg"
+  mesos_python_egg = "http://downloads.mesosphere.io/master/ubuntu/13.04/mesos-#{node['mesos']['version']}-py2.7-linux-x86_64.egg"
 end
+
+conf = node['cluster_configuration']['mesos'] || {} rescue conf = {}
+default['mesos']['python_site_dir'] = conf['python_site_dir'] || python_site_dir
+default['mesos']['python_egg'] = conf['python_egg'] || mesos_python_egg
+
+
