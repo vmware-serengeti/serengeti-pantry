@@ -27,6 +27,9 @@ hadoop_package node[:hadoop][:packages][:resourcemanager][:name]
 # Regenerate Hadoop xml conf files with new Hadoop server address
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
+# Wait until HDFS is ready, because YARN depends on HDFS
+include_recipe "hadoop_cluster::wait_for_hdfs"
+
 service_name = node[:hadoop][:resourcemanager_service_name]
 
 ## Launch service
