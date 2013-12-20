@@ -106,11 +106,10 @@ if node[:hadoop][:cluster_has_hdfs_ha_or_federation]
   # map valid namespace name to all all its addresses and facet
   namenode_facet_addresses.each do |facet_addresses|
     facet_addresses.each do |facet, addresses|
-      addresses_copy = addresses.dup
-      if addresses_copy.length == 1
-        valid_namespaces_map["#{addresses_copy[0]}:#{nn_port}"] = addresses_copy << facet
+      if addresses.length == 1
+        valid_namespaces_map["#{addresses[0]}:#{nn_port}"] = addresses << facet
       else
-        valid_namespaces_map[facet] = addresses_copy << facet
+        valid_namespaces_map[facet] = addresses << facet
       end
     end
   end
