@@ -23,16 +23,16 @@ if node[:hadoop][:install_from_tarball]
     mode '0755'
   end
 else
-  package 'hive-server'
+  package node[:hadoop][:packages][:hive_server][:name]
 end
 
-service "hive-server" do
+service "#{node[:hadoop][:hive_service_name]}" do
   supports :status => true, :restart => true, :reload => true
   action [:enable, :start]
 end
 
 #FIXME this is a bug in Pivotal HD 1.0 alpha and CDH4.1.2+
 execute 'start hive server due to hive service status always returns 0' do
-  only_if "service hive-server status | grep 'not running'"
-  command 'service hive-server start'
+  only_if "service #{node[:hadoop][:hive_service_name]} status | grep 'not running'"
+  command "service #{node[:hadoop][:hive_service_name]} start"
 end

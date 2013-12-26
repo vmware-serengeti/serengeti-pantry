@@ -24,6 +24,7 @@
 return if node[:platform] == "fedora"
 
 include_recipe "java::sun"
+include_recipe "hadoop_cluster::update_attributes"
 
 # alias hive home dir
 if is_pivotalhd_distro

@@ -8,46 +8,99 @@ else
   Chef::Log.info('Will deploy a Hadoop MRv1 cluster because YARN roles are not specified.')
 end
 
-node.default[:hadoop][:service_name_prefix] = 'hadoop-0.20'
+def set_bigtop_hadoop1_attributes
+  node.default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
+  node.default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
+  node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop' # directory that HADOOP HDFS is installed in
+  node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce'
+  # hadoop packages
+  node.default[:hadoop][:packages][:hadoop][:name] = "hadoop hadoop-native"
+  node.default[:hadoop][:packages][:namenode][:name] = "hadoop-namenode"
+  node.default[:hadoop][:packages][:secondarynamenode][:name] = "hadoop-secondarynamenode"
+  node.default[:hadoop][:packages][:datanode][:name] = "hadoop-datanode"
+  node.default[:hadoop][:packages][:jobtracker][:name] = "hadoop-jobtracker"
+  node.default[:hadoop][:packages][:tasktracker][:name] = "hadoop-tasktracker"
+  # hadoop system services
+  node.default[:hadoop][:namenode_service_name] = "hadoop-namenode"
+  node.default[:hadoop][:secondarynamenode_service_name] = "hadoop-secondarynamenode"
+  node.default[:hadoop][:datanode_service_name] = "hadoop-datanode"
+  node.default[:hadoop][:jobtracker_service_name] = "hadoop-jobtracker"
+  node.default[:hadoop][:tasktracker_service_name] = "hadoop-tasktracker"
+end
+
+def default_attributes_for_yarn
+  node.default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
+  node.default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
+  node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop-hdfs' # directory that HADOOP HDFS is installed in
+  node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce' # directory that HADOOP MAPREDUCE is installed in
+  node.default[:hadoop][:yarn_home_dir] = '/usr/lib/hadoop-yarn' # directory that HADOOP YARN is installed in
+end
+
+def default_properties_for_hadoop_2_0
+  node.default[:hadoop][:resource_calculator] = "org.apache.hadoop.yarn.server.resourcemanager.resource.DefaultResourceCalculator"
+  node.default[:hadoop][:aux_services] = "mapreduce.shuffle"
+end
+
+def default_properties_for_hadoop_2_2
+  node.default[:hadoop][:resource_calculator] = "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+  node.default[:hadoop][:aux_services] = "mapreduce_shuffle"
+end
+
+# Zookeeper Service
+node.default[:hadoop][:zookeeper_service_name] = 'zookeeper-server'
+node.default[:hadoop][:zookeeper_service_port] = '2181'
 
 if node[:hadoop][:install_from_tarball]
-  ## For Apache Hadoop 1.0, CDH3, GPHD 1.x, Hortonworks HDP 1.0
-  node.default[:hadoop][:service_name_prefix] = 'hadoop-0.20'
+  # For Apache Hadoop 1.0, CDH3, GPHD 1.x, Hortonworks HDP 1.0
   node.default[:hadoop][:packages][:hadoop][:name] = "hadoop"
   node.default[:hadoop][:packages][:namenode][:name] = "hadoop-namenode"
   node.default[:hadoop][:packages][:secondarynamenode][:name] = "hadoop-secondarynamenode"
   node.default[:hadoop][:packages][:datanode][:name] = "hadoop-datanode"
   node.default[:hadoop][:packages][:jobtracker][:name] = "hadoop-jobtracker"
   node.default[:hadoop][:packages][:tasktracker][:name] = "hadoop-tasktracker"
+  # hadoop system services
+  node.default[:hadoop][:namenode_service_name] = "hadoop-0.20-namenode"
+  node.default[:hadoop][:secondarynamenode_service_name] = "hadoop-0.20-secondarynamenode"
+  node.default[:hadoop][:datanode_service_name] = "hadoop-0.20-datanode"
   node.default[:hadoop][:jobtracker_service_name] = "hadoop-0.20-jobtracker"
   node.default[:hadoop][:tasktracker_service_name] = "hadoop-0.20-tasktracker"
 elsif is_hadoop_yarn?
-  ## For Hadoop MRv2 (including CDH4 MRv2, Pivotal HD 1.0)
-  node.default[:hadoop][:service_name_prefix] = 'hadoop-hdfs'
+  # For Hadoop MRv2 (including CDH4 MRv2, Pivotal HD 1.0)
   node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce' # CDH4 MRv1 and MRv2 has different HADOOP_MAPRED_HOME
+  # hadoop system services
+  node.default[:hadoop][:namenode_service_name] = "hadoop-hdfs-namenode"
+  node.default[:hadoop][:secondarynamenode_service_name] = "hadoop-hdfs-secondarynamenode"
+  node.default[:hadoop][:datanode_service_name] = "hadoop-hdfs-datanode"
+
+  default_properties_for_hadoop_2_0
 
   case
-  when is_cdh4_distro
-    node.default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
-    node.default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
-    node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop-hdfs' # directory that HADOOP HDFS is installed in
-    node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce' # directory that HADOOP MAPREDUCE is installed in
-    node.default[:hadoop][:yarn_home_dir] = '/usr/lib/hadoop-yarn' # directory that HADOOP YARN is installed in
   when is_pivotalhd_distro
     node.default[:hadoop][:hadoop_conf_dir] = '/etc/gphd/hadoop/conf'
     node.default[:hadoop][:hadoop_home_dir] = '/usr/lib/gphd/hadoop'
     node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/gphd/hadoop-hdfs'
     node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/gphd/hadoop-mapreduce'
     node.default[:hadoop][:yarn_home_dir] = '/usr/lib/gphd/hadoop-yarn'
+  when is_hdp2_distro
+    default_attributes_for_yarn
+    default_properties_for_hadoop_2_2
+  when is_cdh4_distro, is_bigtop_hadoop2_distro
+    default_attributes_for_yarn
+  else
+    default_attributes_for_yarn
   end
 
   node.default[:hadoop][:packages][:namenode][:name] = "hadoop-hdfs-namenode"
   node.default[:hadoop][:packages][:secondarynamenode][:name] = "hadoop-hdfs-secondarynamenode"
   node.default[:hadoop][:packages][:datanode][:name] = "hadoop-hdfs-datanode"
-  node.default[:hadoop][:packages][:journalnode][:name] = "hadoop-hdfs-journalnode"
+  if is_hdp2_distro
+    node.default[:hadoop][:packages][:journalnode][:name] = "hadoop-hdfs"
+  else
+    node.default[:hadoop][:packages][:journalnode][:name] = "hadoop-hdfs-journalnode"
+  end
   node.default[:hadoop][:packages][:zkfc][:name] = "hadoop-hdfs-zkfc"
 
-  #FIXME package hadoop-hdfs and hadoop-mapreduce are not installed automatically but they contains some common jar files. This is a bug of CDH4.1.2.
+  # FIXME package hadoop-hdfs and hadoop-mapreduce are not installed automatically but they contains some common jar files. This is a bug of CDH4.1.2.
   node.default[:hadoop][:packages][:hadoop][:name] = "hadoop hadoop-hdfs hadoop-mapreduce"
   node.default[:hadoop][:packages][:resourcemanager][:name] = "hadoop-yarn-resourcemanager"
   node.default[:hadoop][:packages][:historyserver][:name] = "hadoop-mapreduce-historyserver"
@@ -57,12 +110,11 @@ elsif is_hadoop_yarn?
   node.default[:hadoop][:historyserver_service_name] = "hadoop-mapreduce-historyserver"
   node.default[:hadoop][:nodemanager_service_name] = "hadoop-yarn-nodemanager"
 elsif is_cdh4_distro
-  ## For CDH4 MRv1
+  # For CDH4 MRv1 and bigtop for hadoop2
   node.default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
   node.default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
   node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop-hdfs' # directory that HADOOP HDFS is installed in
   node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-0.20-mapreduce'
-  node.default[:hadoop][:service_name_prefix] = 'hadoop-hdfs'
   # hadoop packages
   node.default[:hadoop][:packages][:hadoop][:name] = "hadoop hadoop-hdfs hadoop-0.20-mapreduce"
   node.default[:hadoop][:packages][:namenode][:name] = "hadoop-hdfs-namenode"
@@ -73,30 +125,18 @@ elsif is_cdh4_distro
   node.default[:hadoop][:packages][:journalnode][:name] = "hadoop-hdfs-journalnode"
   node.default[:hadoop][:packages][:zkfc][:name] = "hadoop-hdfs-zkfc"
   # hadoop system services
+  node.default[:hadoop][:namenode_service_name] = "hadoop-hdfs-namenode"
+  node.default[:hadoop][:secondarynamenode_service_name] = "hadoop-hdfs-secondarynamenode"
+  node.default[:hadoop][:datanode_service_name] = "hadoop-hdfs-datanode"
   node.default[:hadoop][:jobtracker_service_name] = "hadoop-0.20-mapreduce-jobtracker"
   node.default[:hadoop][:tasktracker_service_name] = "hadoop-0.20-mapreduce-tasktracker"
-elsif is_intel_distro
-  node.default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
-  node.default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
-  node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop' # directory that HADOOP HDFS is installed in
-  node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce'
-  node.default[:hadoop][:service_name_prefix] = 'hadoop'
-  # hadoop packages
-  node.default[:hadoop][:packages][:hadoop][:name] = "hadoop hadoop-native"
-  node.default[:hadoop][:packages][:namenode][:name] = "hadoop-namenode"
-  node.default[:hadoop][:packages][:secondarynamenode][:name] = "hadoop-secondarynamenode"
-  node.default[:hadoop][:packages][:datanode][:name] = "hadoop-datanode"
-  node.default[:hadoop][:packages][:jobtracker][:name] = "hadoop-jobtracker"
-  node.default[:hadoop][:packages][:tasktracker][:name] = "hadoop-tasktracker"
-  # hadoop system services
-  node.default[:hadoop][:jobtracker_service_name] = "hadoop-jobtracker"
-  node.default[:hadoop][:tasktracker_service_name] = "hadoop-tasktracker"
+elsif is_hdp1_distro or is_bigtop_hadoop1_distro or is_intel_distro
+  set_bigtop_hadoop1_attributes
+else
+  set_bigtop_hadoop1_attributes
 end
 
 # hadoop system services
-node.default[:hadoop][:namenode_service_name] = "#{node[:hadoop][:service_name_prefix]}-namenode"
-node.default[:hadoop][:secondarynamenode_service_name] = "#{node[:hadoop][:service_name_prefix]}-secondarynamenode"
-node.default[:hadoop][:datanode_service_name] = "#{node[:hadoop][:service_name_prefix]}-datanode"
 node.default[:hadoop][:namenode_service_port] = is_hadoop_yarn? ? 9000 : 8020
 node.default[:hadoop][:jobtracker_service_port] = is_hadoop_yarn? ? 9001 : 8021
 node.default[:hadoop][:namenode_web_service_port] = 50070

@@ -21,12 +21,17 @@
 include_recipe "java::sun"
 include_recipe "hadoop_common::pre_run"
 include_recipe "hadoop_common::mount_disks"
+include_recipe "hadoop_cluster::update_attributes"
 
 # alias home dir
 if is_pivotalhd_distro
   node.normal[:zookeeper][:home_dir] = '/usr/lib/gphd/zookeeper'
 end
 force_link("/usr/lib/zookeeper", node[:zookeeper][:home_dir])
+
+group "hadoop" do
+  action [:create]
+end
 
 group "zookeeper" do
   action [:create]

@@ -12,3 +12,4 @@ default[:groups][:hive][:gid]       = 503
 
 default[:hadoop][:packages][:hive][:name] = "hive"
 default[:hadoop][:packages][:hive_server][:name] = "hive-server"
+default[:hadoop][:hive_service_name] = 'hive-server'
