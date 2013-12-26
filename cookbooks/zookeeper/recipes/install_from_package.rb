@@ -14,6 +14,7 @@
 #
 
 include_recipe "hadoop_common::add_repo"
+include_recipe "hadoop_cluster::update_attributes"
 
 #
 # Install package

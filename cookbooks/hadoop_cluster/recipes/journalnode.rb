@@ -18,6 +18,19 @@ include_recipe "hadoop_cluster"
 # Install
 hadoop_package node[:hadoop][:packages][:journalnode][:name]
 
+# Add journalnode service script file because Hortonworks 2.0.x does not provide journalnode rpm.
+if is_hdp2_distro
+  template "/etc/default/hadoop-hdfs-journalnode" do
+    source "hadoop-hdfs-journalnode-env.erb"
+    mode "0644"
+  end
+
+  template "/etc/init.d/hadoop-hdfs-journalnode" do
+    source "hadoop-hdfs-journalnode.erb"
+    mode "0755"
+  end
+end
+
 include_recipe "hadoop_cluster::hadoop_conf_xml"
 
 # Create journalnode edits dir

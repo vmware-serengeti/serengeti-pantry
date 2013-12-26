@@ -3,7 +3,7 @@
 <configuration>
 <property>
   <name>yarn.nodemanager.aux-services</name>
-  <value>mapreduce.shuffle</value>
+  <value><%= node[:hadoop][:aux_services] %></value>
 </property>
 <property>
   <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>

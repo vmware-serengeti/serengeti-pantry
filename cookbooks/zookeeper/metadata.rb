@@ -11,6 +11,7 @@ depends          "java"
 depends          "install_from"
 depends          "cluster_service_discovery"
 depends          "hadoop_common"
+depends          "hadoop_cluster"
 
 recipe "zookeeper::default", "Install/Configures zookeeper"
 

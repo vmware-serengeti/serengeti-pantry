@@ -37,7 +37,7 @@ module HadoopCluster
   # is a hadoop 2.0+ distro? Hadoop 2.0 contains HDFS2 and YARN
   # cdh4 contains both Hadoop 1.0 (MRv1) and Hadoop 2.0
   def is_hadoop2_distro
-    is_pivotalhd_distro
+    is_pivotalhd_distro || is_hdp2_distro || is_bigtop_hadoop2_distro
   end
 
   # is a hadoop 1.x or 0.20 distro?
@@ -50,7 +50,7 @@ module HadoopCluster
   end
 
   def is_cdh4_distro
-    distro_vendor.downcase == 'cdh' and (distro_version =~ /4/) == 0
+    distro_vendor.downcase == 'cdh' and distro_version.to_f >= 4
   end
 
   def is_greenplumhd_distro
@@ -63,6 +63,22 @@ module HadoopCluster
 
   def is_intel_distro
     distro_vendor.downcase == 'intel'
+  end
+
+  def is_hdp1_distro
+    distro_vendor.downcase == 'hdp' and distro_version.to_f < 2
+  end
+
+  def is_hdp2_distro
+    distro_vendor.downcase == 'hdp' and distro_version.to_f >= 2
+  end
+
+  def is_bigtop_hadoop1_distro
+    distro_vendor.downcase == 'bigtop' and distro_version.to_f < 0.4
+  end
+
+  def is_bigtop_hadoop2_distro
+    distro_vendor.downcase == 'bigtop' and distro_version.to_f >= 0.4
   end
 
   class Chef::Recipe ; include HadoopCluster ; end
