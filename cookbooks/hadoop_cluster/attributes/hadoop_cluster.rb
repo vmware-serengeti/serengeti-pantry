@@ -60,9 +60,6 @@ default[:hadoop][:use_root_as_persistent_vol] = false
 
 default[:hadoop][:use_data_disk_as_log_vol] = true
 
-# hadoop client setting
-default[:hadoop][:client][:admin][:username] = 'joe'
-
 # Extra directories for the Namenode metadata to persist to, for example an
 # off-cluster NFS path (only necessary to use if you have a physical cluster)
 set[:hadoop][:extra_nn_metadata_path] = nil
