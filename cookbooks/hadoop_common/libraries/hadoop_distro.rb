@@ -81,6 +81,13 @@ module HadoopCluster
     distro_vendor.downcase == 'bigtop' and distro_version.to_f >= 0.4
   end
 
+  # Return hadoop version as string.
+  # Use hadoop_version.to_f to get the major.minor version as float.
+  # Use hadoop_version.to_i to get the major version as int.
+  def hadoop_version
+    `hadoop version | head -1 | awk '{print $2}'` rescue "1.0.0"
+  end
+
   class Chef::Recipe ; include HadoopCluster ; end
   class Chef::Resource::Directory ; include HadoopCluster ; end
 end

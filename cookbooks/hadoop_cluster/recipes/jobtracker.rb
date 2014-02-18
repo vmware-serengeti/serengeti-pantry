@@ -52,8 +52,9 @@ service "restart-#{node[:hadoop][:jobtracker_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
-  subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-metrics.properties]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-metrics2.properties]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/capacity-scheduler.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-queue-acls.xml]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hadoop][:jobtracker_service_name]}]"), :immediately

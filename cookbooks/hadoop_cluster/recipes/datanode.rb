@@ -39,6 +39,8 @@ service "restart-#{node[:hadoop][:datanode_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/core-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hdfs-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-env.sh]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-metrics.properties]"), :delayed
+  subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-metrics2.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hadoop][:datanode_service_name]}]"), :immediately
 end if is_datanode_running

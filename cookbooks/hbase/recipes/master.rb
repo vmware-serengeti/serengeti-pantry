@@ -54,6 +54,7 @@ service "restart-#{node[:hbase][:master_service_name]}" do
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-site.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-env.sh]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/hbase-env-master.sh]"), :delayed
+  subscribes :restart, resources("template[/etc/hbase/conf/hadoop-metrics.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hbase/conf/log4j.properties]"), :delayed
   notifies :create, resources("ruby_block[#{node[:hbase][:master_service_name]}]"), :immediately
 end if is_master_running

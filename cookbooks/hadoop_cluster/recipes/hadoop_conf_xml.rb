@@ -48,7 +48,8 @@ end
 template_variables = hadoop_template_variables
 
 files = %w[core-site.xml hdfs-site.xml mapred-site.xml hadoop-env.sh
-           log4j.properties fair-scheduler.xml capacity-scheduler.xml mapred-queue-acls.xml hadoop-metrics.properties raw_settings.yaml
+           log4j.properties hadoop-metrics.properties hadoop-metrics2.properties
+           fair-scheduler.xml capacity-scheduler.xml mapred-queue-acls.xml raw_settings.yaml
            topology.data topology.sh]
 files += %w[yarn-site.xml yarn-env.sh] if is_hadoop_yarn?
 files.each do |conf_file|

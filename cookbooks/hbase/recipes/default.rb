@@ -161,7 +161,7 @@ template_variables = {
   :bind_interface => device_of_hdfs_network(node)
 }
 
-%w[ hbase-site.xml hbase-env.sh log4j.properties ].each do |file|
+%w[ hbase-site.xml hbase-env.sh log4j.properties hadoop-metrics.properties ].each do |file|
   template "#{hbase_conf_dir}/#{file}" do
     owner "hbase"
     mode file.end_with?('.sh') ? "0755" : "0644"

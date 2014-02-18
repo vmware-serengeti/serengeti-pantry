@@ -1,6 +1,6 @@
 
 # Configuration of the "dfs" context for null
-dfs.class=org.apache.hadoop.metrics.spi.NullContext
+# dfs.class=org.apache.hadoop.metrics.spi.NullContext
 
 # Configuration of the "dfs" context for file
 # dfs.class=org.apache.hadoop.metrics.file.FileContext
@@ -17,7 +17,7 @@ dfs.servers=<%= @ganglia_address %>:<%= @ganglia_port %>
 <% end %>
 
 # Configuration of the "mapred" context to support MetricsServlet without emit data
-mapred.class=org.apache.hadoop.metrics.spi.NoEmitMetricsContext
+# mapred.class=org.apache.hadoop.metrics.spi.NoEmitMetricsContext
 
 # Configuration of the "mapred" context for null
 # mapred.class=org.apache.hadoop.metrics.spi.NullContext
@@ -52,6 +52,7 @@ jvm.servers=<%= @ganglia_address %>:<%= @ganglia_port %>
 <% end %>
 
 # Configuration of the "rpc" context for null
+#
 rpc.class=org.apache.hadoop.metrics.spi.NullContext
 
 # Configuration of the "rpc" context for file
@@ -68,7 +69,7 @@ rpc.servers=<%= @ganglia_address %>:<%= @ganglia_port %>
 <% end %>
 
 # Configuration of the "ugi" context for null
-ugi.class=org.apache.hadoop.metrics.spi.NullContext
+# ugi.class=org.apache.hadoop.metrics.spi.NullContext
 
 # Configuration of the "ugi" context for file
 #ugi.class=org.apache.hadoop.metrics.file.FileContext
@@ -83,3 +84,20 @@ ugi.period=10
 ugi.servers=<%= @ganglia_address %>:<%= @ganglia_port %>
 <% end %>
 
+<%- conf = node['cluster_configuration']['hadoop']['hadoop-metrics.properties'].dup || {} rescue conf = {} %>
+<%-
+# set default values
+conf["dfs.class"] ||= "org.apache.hadoop.metrics.spi.NullContext"
+conf["dfs.period"] ||= "10"
+conf["mapred.class"] ||= "org.apache.hadoop.metrics.spi.NoEmitMetricsContext"
+conf["mapred.period"] ||= "10"
+conf["jvm.class"] ||= "org.apache.hadoop.metrics.spi.NullContext"
+conf["jvm.period"] ||= "10"
+conf["rpc.class"] ||= "org.apache.hadoop.metrics.spi.NullContext"
+conf["rpc.period"] ||= "10"
+conf["ugi.class"] ||= "org.apache.hadoop.metrics.spi.NullContext"
+conf["ugi.period"] ||= "10"
+%>
+<%- conf.map do |key, value| %>
+<%= key %>=<%= value %>
+<%- end %>
