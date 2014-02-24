@@ -47,10 +47,10 @@ module HadoopCluster
     return if ACTION_INSTALL_PACKAGE == act and package_installed?(obj)
 
     act = act.gsub(/<obj>/, obj)
-    attrs = node[:provision] ? node[:provision].to_hash : Hash.new
-    if attrs['action'] != act
+    attrs = node[:provision] ? node[:provision].dup : Mash.new
+    if attrs[:action] != act
       Chef::Log.info "Set Bootstrap Action to '#{act}'"
-      attrs['action'] = act
+      attrs[:action] = act
       node.normal[:provision] = attrs
       node.save
     end
@@ -58,6 +58,20 @@ module HadoopCluster
 
   def clear_action
     set_action('', '')
+  end
+
+  def set_error_msg(msg = '')
+    attrs = node[:provision] ? node[:provision].dup : Mash.new
+    if attrs[:error_msg] != msg
+      Chef::Log.debug "Set Bootstrap Error Msg to '#{msg}'"
+      attrs[:error_msg] = msg
+      node.normal[:provision] = attrs
+      node.save
+    end
+  end
+
+  def clear_error_msg
+    set_error_msg('')
   end
 
   class Chef::Recipe ; include HadoopCluster ; end

@@ -272,7 +272,7 @@ module HadoopCluster
         end
 
         set_bootstrap_action(ACTION_INSTALL_PACKAGE, package_name, true)
-        execute "install #{tarball_pkgname} from tarball if not installed" do
+        execute "install #{tarball_pkgname} from tarball" do
           not_if do already_installed end
 
           Chef::Log.info "start installing package #{tarball_pkgname} from tarball"

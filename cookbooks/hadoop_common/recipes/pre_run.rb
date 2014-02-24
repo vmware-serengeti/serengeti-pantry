@@ -16,6 +16,10 @@
 #   limitations under the License.
 #
 
+# add chef error reporting handler
+include_recipe 'hadoop_common::add_chef_handler'
+
+
 ### When there are multi NICs on the node ###
 
 # update IP attributes
@@ -38,3 +42,4 @@ end
 set_hostname(fqdn)
 
 ### End of multi NICs ###
+
