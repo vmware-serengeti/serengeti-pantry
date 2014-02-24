@@ -280,16 +280,22 @@ EOF
     connected
   end
 
+  # some software uses '#export JAVA_HOME' (e.g. MapR 3.1).
+  # some software only requires 'export JAVA_HOME' at the end of the file.
   def set_java_home(file)
     execute "Set JAVA_HOME in #{file}" do
       only_if { File.exists?(file) }
       not_if "grep '^export JAVA_HOME' #{file}"
       command %Q{
+sed -i 's|^#export JAVA_HOME.*|. /etc/profile; . /etc/environment; \\nexport JAVA_HOME|' #{file}
+
 cat <<EOF >> #{file}
+
 # detect JAVA_HOME
 . /etc/profile
 . /etc/environment
 export JAVA_HOME
+
 EOF
       }
     end
