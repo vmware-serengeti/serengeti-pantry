@@ -32,18 +32,12 @@ def default_attributes_for_yarn
   node.default[:hadoop][:hadoop_conf_dir] = '/etc/hadoop/conf'
   node.default[:hadoop][:hadoop_home_dir] = '/usr/lib/hadoop' # directory that HADOOP is installed in
   node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop-hdfs' # directory that HADOOP HDFS is installed in
-  node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce' # directory that HADOOP MAPREDUCE is installed in
+  node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce' # directory that HADOOP MAPREDUCE is installed in. CDH4 MRv1 and MRv2 has different HADOOP_MAPRED_HOME
   node.default[:hadoop][:yarn_home_dir] = '/usr/lib/hadoop-yarn' # directory that HADOOP YARN is installed in
-end
 
-def default_properties_for_hadoop_2_0
+  # YARN default settings
   node.default[:hadoop][:resource_calculator] = "org.apache.hadoop.yarn.server.resourcemanager.resource.DefaultResourceCalculator"
   node.default[:hadoop][:aux_services] = "mapreduce.shuffle"
-end
-
-def default_properties_for_hadoop_2_2
-  node.default[:hadoop][:resource_calculator] = "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
-  node.default[:hadoop][:aux_services] = "mapreduce_shuffle"
 end
 
 # Zookeeper Service
@@ -65,14 +59,7 @@ if node[:hadoop][:install_from_tarball]
   node.default[:hadoop][:jobtracker_service_name] = "hadoop-0.20-jobtracker"
   node.default[:hadoop][:tasktracker_service_name] = "hadoop-0.20-tasktracker"
 elsif is_hadoop_yarn?
-  # For Hadoop MRv2 (including CDH4 MRv2, Pivotal HD 1.0)
-  node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce' # CDH4 MRv1 and MRv2 has different HADOOP_MAPRED_HOME
-  # hadoop system services
-  node.default[:hadoop][:namenode_service_name] = "hadoop-hdfs-namenode"
-  node.default[:hadoop][:secondarynamenode_service_name] = "hadoop-hdfs-secondarynamenode"
-  node.default[:hadoop][:datanode_service_name] = "hadoop-hdfs-datanode"
-
-  default_properties_for_hadoop_2_0
+  default_attributes_for_yarn
 
   case
   when is_pivotalhd_distro
@@ -81,13 +68,6 @@ elsif is_hadoop_yarn?
     node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/gphd/hadoop-hdfs'
     node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/gphd/hadoop-mapreduce'
     node.default[:hadoop][:yarn_home_dir] = '/usr/lib/gphd/hadoop-yarn'
-  when is_hdp2_distro
-    default_attributes_for_yarn
-    default_properties_for_hadoop_2_2
-  when is_cdh4_distro, is_bigtop_hadoop2_distro
-    default_attributes_for_yarn
-  else
-    default_attributes_for_yarn
   end
 
   node.default[:hadoop][:packages][:namenode][:name] = "hadoop-hdfs-namenode"
@@ -106,6 +86,10 @@ elsif is_hadoop_yarn?
   node.default[:hadoop][:packages][:historyserver][:name] = "hadoop-mapreduce-historyserver"
   node.default[:hadoop][:packages][:nodemanager][:name] = "hadoop-yarn-nodemanager"
 
+  # hadoop system services
+  node.default[:hadoop][:namenode_service_name] = "hadoop-hdfs-namenode"
+  node.default[:hadoop][:secondarynamenode_service_name] = "hadoop-hdfs-secondarynamenode"
+  node.default[:hadoop][:datanode_service_name] = "hadoop-hdfs-datanode"
   node.default[:hadoop][:resourcemanager_service_name] = "hadoop-yarn-resourcemanager"
   node.default[:hadoop][:historyserver_service_name] = "hadoop-mapreduce-historyserver"
   node.default[:hadoop][:nodemanager_service_name] = "hadoop-yarn-nodemanager"

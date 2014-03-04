@@ -79,6 +79,15 @@ module HadoopCluster
     conf = node['cluster_configuration'] || {} rescue conf = {}
     conf.dup
   end
+
+  # check the hadoop version after the hadoop package is installed and set attributes for hadoop 2.2
+  def set_properties_for_hadoop_2_2
+    if hadoop_version.to_f >= 2.2
+      node.default[:hadoop][:resource_calculator] = "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+      node.default[:hadoop][:aux_services] = "mapreduce_shuffle"
+    end
+  end
+
 end
 
 class Chef::Recipe ; include HadoopCluster ; end

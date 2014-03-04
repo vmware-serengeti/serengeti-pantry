@@ -1,2 +1,3 @@
 <%- conf = node['cluster_configuration']['hadoop']['fair-scheduler.xml'] || {} rescue conf = {} %>
-<%= conf['text'].to_s %>
+<%- value = conf['text'].to_s %>
+<%= value.empty? ? '<allocations></allocations>' : value %>
