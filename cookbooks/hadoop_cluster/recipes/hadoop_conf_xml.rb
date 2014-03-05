@@ -24,7 +24,9 @@ class Chef::Recipe; include HadoopCluster ; end
 # Generate Hadoop xml configuration files in $HADDOP_HOME/conf/
 #
 
-set_properties_for_hadoop_2_2
+run_in_ruby_block 'set_properties_for_hadoop_2_2' do
+  set_properties_for_hadoop_2_2
+end
 
 # create it in case it's not created, e.g. when this recipe is included by hbase recipes
 # which only need the hadoop conf files rather than hadoop packages and conf files)
