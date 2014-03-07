@@ -50,10 +50,11 @@ execute "initialize postgresql db for hive" do
  }
 end
 
-schema_file_path = "#{node[:hive][:home_dir]}/src/metastore/scripts/upgrade/postgres/hive-schema-0.7.0.postgres.sql"
+schema_file_path_ver070 = "#{node[:hive][:home_dir]}/src/metastore/scripts/upgrade/postgres/hive-schema-0.7.0.postgres.sql"
 execute "fix hive server sql bug for postgresql metastore on GreenPlum HD" do
-  only_if "grep -q 'bit(1)' #{schema_file_path} 2>/dev/null"
-  command %Q{sudo sed -i 's|bit(1)|boolean|' #{schema_file_path}}
+  only_if { File.exists?(schema_file_path_ver070) }
+  only_if "grep -q 'bit(1)' #{schema_file_path_ver070} 2>/dev/null"
+  command %Q{sudo sed -i 's|bit(1)|boolean|' #{schema_file_path_ver070}}
 end
 
 # Hive 0.9.0 binary package doesn't contain the postgres sql file
@@ -79,12 +80,17 @@ execute "Import hive metastore schema" do
   user "hive"
   cwd "#{node[:hive][:home_dir]}"
   command %Q{
-    if [ -f #{schema_file_path_ver0100} ]; then
+    # the expected postgres sql file for hive
+    schema_file_path=#{node[:hive][:home_dir]}/scripts/metastore/upgrade/postgres/hive-schema-`cat #{node[:hive][:home_dir]}/version`.postgres.sql
+
+    if [ -f $schema_file_path ]; then
+      schema_file=$schema_file_path
+    elif [ -f #{schema_file_path_ver0100} ]; then
       schema_file=#{schema_file_path_ver0100}
     elif [ -f #{schema_file_path_ver090} ]; then
       schema_file=#{schema_file_path_ver090}
-    elif [ -f #{schema_file_path} ]; then
-      schema_file=#{schema_file_path}
+    elif [ -f #{schema_file_path_ver070} ]; then
+      schema_file=#{schema_file_path_ver070}
     else
       echo "WARNING: Can't find sql file to create Hive metastore tables. Will let Hive create them automatcially."
       exit 0

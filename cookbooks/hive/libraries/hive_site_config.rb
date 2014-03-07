@@ -34,6 +34,9 @@ module HiveSiteConfiguration
   end
 
   def update_hive_version
+    hive_version_file = "#{node[:hive][:home_dir]}/version"
+    return if File.exist?(hive_version_file)
+
     if node[:hadoop][:install_from_tarball] then
       tarball_url = current_distro['hive']
       hive_file_name = tarball_url[tarball_url.rindex("/")+1..-1]
@@ -44,6 +47,7 @@ module HiveSiteConfiguration
         node.normal[:hive][:version] = hive_version
         node.save
       end
+      save_hive_version_to_file(hive_version_file)
     else
       run_in_ruby_block('update_hive_version') do
         hive_file_name = `rpm -q hive`
@@ -54,9 +58,18 @@ module HiveSiteConfiguration
           node.normal[:hive][:version] = hive_version
           node.save
         end
-      end
+        save_hive_version_to_file(hive_version_file)
+      end 
     end
   end
+
+  protected
+
+  # save the version to a file
+  def save_hive_version_to_file(file)
+    system("echo #{node[:hive][:version]} > #{file}")
+  end
+
 end
 
 class Chef::Recipe
