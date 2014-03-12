@@ -37,6 +37,7 @@ include_recipe "hadoop_cluster::update_attributes"
 
 group 'hdfs' do gid 302 ; action [:create] ; end
 user 'hdfs' do
+  not_if     'getent passwd hdfs'
   comment    'Hadoop HDFS User'
   uid        302
   group      'hdfs'
@@ -49,6 +50,7 @@ end
 
 group 'mapred' do gid 303 ; action [:create] ; end
 user 'mapred' do
+  not_if     'getent passwd mapred'
   comment    'Hadoop Mapred Runner'
   uid        303
   group      'mapred'
@@ -61,6 +63,7 @@ end
 
 group 'yarn' do gid 304 ; action [:create] ; end
 user 'yarn' do
+  not_if     'getent passwd yarn'
   comment    'Hadoop Yarn User'
   uid        304
   group      'yarn'
@@ -79,6 +82,7 @@ group 'hadoop' do
 end
 
 user 'webuser' do
+  not_if     'getent passwd webuser'
   comment    'Hadoop Web Server User'
   uid        305
   group      'hadoop'
