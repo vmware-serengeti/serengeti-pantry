@@ -4,12 +4,12 @@ module HadoopCluster
     BOOTSTRAP_ERRORS = {
       :COMMON_FAILURE => {
         :code => 'ERROR_BOOTSTARP_FAILURE',
-        :msg => "Failed to bootstrap node %s :\n%s\n\nPlease ssh to this node and check log file /var/chef/cache/chef-stacktrace.out.\n" +
+        :msg => "Failed to bootstrap node %s :\n%s\nPlease ssh to this node and check log file /var/chef/cache/chef-stacktrace.out.\n" +
           "You can also run 'sudo chef-client' on the node to get error details."
       },
       :PACKAGE_FAILURE => {
         :code => 'ERROR_INSTALL_PACKAGE',
-        :msg => "Failed to install package %s on node %s. Please ssh to this node and run 'sudo yum install %s' to find out why it failed."
+        :msg => "Failed to install package %s on node %s. Please ssh to this node and run 'sudo yum install %s -y' to find out why it failed."
       },
       :SERVICE_FAILURE => {
         :code => 'ERROR_SERVICE_FAILURE',
