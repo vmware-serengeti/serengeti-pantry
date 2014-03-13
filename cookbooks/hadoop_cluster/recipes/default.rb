@@ -110,3 +110,9 @@ generate_ssh_rsa_keypair('root', '/root')
 
 hadoop_package node[:hadoop][:packages][:hadoop][:name]
 check_hadoop_daemon_sh
+
+# include other basic hadoop recipes
+include_recipe 'hadoop_cluster::volumes_conf'
+include_recipe 'hadoop_cluster::cluster_conf'
+include_recipe 'hadoop_cluster::hadoop_dir_perms'
+include_recipe 'hadoop_cluster::dedicated_server_tuning'

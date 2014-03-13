@@ -21,6 +21,8 @@
 #
 
 include_recipe "hadoop_cluster"
+install_datanode_if_has_datanode_role
+install_jobtracker_if_has_jobtracker_role
 
 # Install
 hadoop_package node[:hadoop][:packages][:tasktracker][:name]

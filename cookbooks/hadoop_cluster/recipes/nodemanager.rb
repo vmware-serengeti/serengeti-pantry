@@ -20,6 +20,8 @@
 #
 
 include_recipe "hadoop_cluster"
+install_datanode_if_has_datanode_role
+install_resourcemanager_if_has_resourcemanager_role
 
 # Install
 hadoop_package node[:hadoop][:packages][:nodemanager][:name]

@@ -19,6 +19,8 @@
 #
 
 include_recipe "hadoop_cluster"
+install_datanode_if_has_datanode_role
+include_recipe "hbase::master" if node.role?("hbase_master")
 include_recipe "hbase"
 
 hbase_conf_dir = "/etc/hbase/conf"

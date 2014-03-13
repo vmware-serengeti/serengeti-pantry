@@ -19,6 +19,7 @@
 #
 
 include_recipe "hadoop_cluster" # install the hadoop binary which will be used to wait for hdfs in case HBase is installed without Hadoop
+install_namenode_if_has_namenode_role
 include_recipe "hbase"
 
 hbase_conf_dir = "/etc/hbase/conf"

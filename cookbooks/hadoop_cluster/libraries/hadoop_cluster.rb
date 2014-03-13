@@ -77,6 +77,22 @@ module HadoopCluster
     end
   end
 
+  def install_datanode_if_has_datanode_role
+    include_recipe "hadoop_cluster::datanode" if node.role?("hadoop_datanode")
+  end
+
+  def install_namenode_if_has_namenode_role
+    include_recipe "hadoop_cluster::namenode" if node.role?("hadoop_namenode")
+  end
+
+  def install_jobtracker_if_has_jobtracker_role
+    include_recipe "hadoop_cluster::jobtracker" if node.role?("hadoop_jobtracker")
+  end
+
+  def install_resourcemanager_if_has_resourcemanager_role
+    include_recipe "hadoop_cluster::resourcemanager" if node.role?("hadoop_resourcemanager")
+  end
+
   # All facet names which have hadoop_namenode role
   def namenode_facet_names
     # the facet names will not change during bootstrap, so call Chef Search API only once.
