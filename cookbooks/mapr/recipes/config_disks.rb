@@ -38,6 +38,8 @@ if !File.exists?(disk_file)
   bash "format disks for MapR" do
     user "root"
     code "/opt/mapr/server/disksetup -F -M #{disk_file}"
+    retries 10
+    retry_delay 3
   end
   clear_bootstrap_action
 end
