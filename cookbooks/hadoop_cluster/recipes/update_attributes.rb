@@ -114,7 +114,7 @@ elsif is_cdh4_distro
   node.default[:hadoop][:datanode_service_name] = "hadoop-hdfs-datanode"
   node.default[:hadoop][:jobtracker_service_name] = "hadoop-0.20-mapreduce-jobtracker"
   node.default[:hadoop][:tasktracker_service_name] = "hadoop-0.20-mapreduce-tasktracker"
-elsif is_hdp1_distro or is_bigtop_hadoop1_distro or is_intel_distro
+elsif is_hdp1_distro or is_bigtop_hadoop1_distro or is_intel_hadoop1_distro
   set_bigtop_hadoop1_attributes
 else
   set_bigtop_hadoop1_attributes
