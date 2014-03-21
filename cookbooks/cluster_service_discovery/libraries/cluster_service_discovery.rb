@@ -229,7 +229,7 @@ module ClusterServiceDiscovery
   # The local-only ip address for the most recent provider for role_name
   def provider_fqdn_for_role role_name, wait = true
     server = provider_for_role(role_name, wait) or return
-    fqdn_of_role(server, role_name)
+    fqdn_of_server(server, role_name)
   end
 
   def provider_ip_for_role role_name, wait = true
@@ -271,7 +271,7 @@ module ClusterServiceDiscovery
 
   def all_providers_fqdn_for_role role_name
     servers = all_providers_for_role(role_name)
-    servers.map{ |server| fqdn_of_role(server, role_name)}
+    servers.map{ |server| fqdn_of_server(server, role_name)}
   end
 
   # given server, get address

@@ -177,7 +177,8 @@ EOF
     end
   end
 
-  def fqdn_of_role server, role = nil
+  # FQDN of the server (i.e the chef node) which has the specified role
+  def fqdn_of_server server, role = nil
     fqdn = fqdn_of_mgt_network(server)
     if [
       'hadoop_namenode',
@@ -477,6 +478,18 @@ echo
     conditions.merge!(key => "*")
     nodes = providers_for(key, conditions, true, nodes_num)
     nodes.map { |node| node[key] }
+  end
+
+  # Setup keyless ssh for the user from the node which has the role to this node
+  def setup_keyless_ssh_for_user_on_role(username, role)
+    keys = rsa_pub_keys_of_user(username, role)
+    file "/home/#{username}/.ssh/authorized_keys" do
+      owner username
+      group username
+      mode  '0640'
+      content keys.join("\n")
+      action :nothing
+    end.run_action(:create)
   end
 
   def grant_sudo_to_user(username)
