@@ -31,6 +31,13 @@ class Chef
             when 'Chef::Exceptions::Package'
               pkg_name = msg.slice(msg.index('[') + 1 ... msg.index(']'))
               err_msg = BOOTSTRAP_ERRORS[:PACKAGE_FAILURE][:msg] % [pkg_name, node_name, pkg_name]
+            when 'Chef::Exceptions::Exec'
+              if msg.start_with?('package[')
+                pkg_name = msg.slice(msg.index('[') + 1 ... msg.index(']'))
+                err_msg = BOOTSTRAP_ERRORS[:PACKAGE_REPO_FAILURE][:msg] % [pkg_name, node_name, pkg_name]
+              else
+                err_msg = BOOTSTRAP_ERRORS[:COMMON_FAILURE][:msg] % [node_name, exception.to_s]
+              end
             when 'Mixlib::ShellOut::ShellCommandFailed'
               if msg.start_with?('service[')
                 # service operation failed
