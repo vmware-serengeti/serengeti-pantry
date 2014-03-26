@@ -204,33 +204,6 @@ EOF
     return fqdn
   end
 
-#  def provide_hadoop_service service_name, service_info = {}, run_in_ruby_block = true
-#    fqdn = fqdn_of_mgt_network(node)
-#    if [
-#      (node[:hadoop][:namenode_service_name] if node[:hadoop]),
-#      (node[:hadoop][:journalnode_service_name] if node[:hadoop]),
-#      (node[:hadoop][:datanode_service_name] if node[:hadoop]),
-#      (node[:hadoop][:secondarynamenode_service_name] if node[:hadoop]),
-#      (node[:hadoop][:zkfc_service_name] if node[:hadoop]),
-#      (node[:hbase][:region_service_name] if node[:hbase]),
-#      (node[:hbase][:master_service_name] if node[:hbase])
-#    ].compact.include?(service_name)
-#      fqdn = fqdn_of_hdfs_network(node)
-#    elsif [
-#      (node[:hadoop][:tasktracker_service_name] if node[:hadoop]),
-#      (node[:hadoop][:resourcemanager_service_name] if node[:hadoop]),
-#      (node[:hadoop][:nodemanager_service_name] if node[:hadoop]),
-#      (node[:hadoop][:jobtracker_service_name] if node[:hadoop])
-#    ].compact.include?(service_name)
-#      fqdn = fqdn_of_mapred_network(node)
-#    elsif [
-#      (node[:zookeeper][:zookeeper_service_name] if node[:zookeeper])
-#    ].compact.include?(service_name)
-#      fqdn = ip_of_hdfs_network(node)
-#    end
-#    provide_service(service_name, service_info.merge({:fqdn => fqdn}), run_in_ruby_block)
-#  end
-
   # return an Array of mount points of the mounted data disks
   def disks_mount_points
     node[:disk][:data_disks].keys
@@ -302,127 +275,13 @@ EOF
     end
   end
 
-  def mount_swap_disk(swap_disk)
-    execute "mount swap disk: #{swap_disk}" do
-      only_if { File.exists?(swap_disk) }
-      command %Q{
-if [ -b #{swap_disk} ]; then
-  swapoff -a
-  file -s #{swap_disk} | grep swap
-  if [ $? != 0 ]; then
-    mkswap #{swap_disk}
-  fi
-  swapon #{swap_disk}
-  # do not write to /etc/fstab since we do not want to auto-mount
-  # swap disk when rebooting
-fi
-      }
-    end
-  end
-
-  # format and mount local data disks
-  def mount_data_disks(dev2disk, mp2dev)
-    ## Format all attached disk devices in parallel
-    # use '&' to run as background shell job and 'wait' to wait for all jobs.
-    # if the background jobs fail (e.g format disk fails), 'wait' will always return 0,
-    # but the resource 'mount' afterward will throw error.
-    log = '/tmp/serengeti-format-disks.log'
-    filename = '/tmp/serengeti-format-disks.sh'
-    format_disks = ''
-    dev2disk.each do |dev, disk|
-      next if !File.exist?(disk) or File.exist?(dev) # disk not exists or already formatted
-      format_disks << "format_disk #{disk} #{dev} & \n"
-    end
-
-    if !format_disks.empty?
-      set_action(ACTION_FORMAT_DISK, 'format_disk')
-      file filename do
-        mode "0755"
-        content %Q{
-function format_disk_internal()
-{
-  kernel=`uname -r | cut -d'-' -f1`
-  first=`echo $kernel | cut -d '.' -f1`
-  second=`echo $kernel | cut -d '.' -f2`
-  third=`echo $kernel | cut -d '.' -f3`
-  num=$[ $first*10000 + $second*100 + $third ]
-
-  # we cannot use [[ "$kernel" < "2.6.28" ]] here because linux kernel 
-  # has versions like "2.6.5"
-  if [ $num -lt 20628 ];
-  then
-    mkfs -t ext3 -b 4096 $1;
-  else
-    mkfs -t ext4 -b 4096 $1;
-  fi;
-}
-
-function format_disk()
-{
-  flag=1
-  while [ $flag -ne 0 ] ; do
-    echo "Running sfdisk -uM $1. Occasionally it will fail due to device busy, we will re-run."
-    echo ",,L" | sfdisk -uM $1
-    flag=$?
-    sleep 3
-  done
-
-  flag=1
-  while [ $flag -ne 0 ] ; do
-    echo "Running mkfs $2. Occasionally it will fail due to device busy, we will re-run."
-    echo "y" | format_disk_internal $2
-    flag=$?
-    sleep 3
-  done
-}
-
-echo Started on `date`
-#{format_disks}
-wait
-echo Finished on `date`
-echo
-        }
-        action :nothing
-      end.run_action(:create)
-
-      execute "formatting data disks" do
-        command "#{filename} >> #{log} 2>&1"
-        action :nothing
-      end.run_action(:run)
-      clear_action
-    end
-
-    ## Mount data disk, make hadoop dirs on them
-    mp2dev.each do |mount_point, dev|
-      next unless File.exists?(node[:disk][:disk_devices][dev])
-
-      Chef::Log.info "mounting data disk #{dev} at #{mount_point}" unless File.exists?(mount_point)
-      directory mount_point do
-        only_if{ File.exists?(dev) }
-        owner     'root'
-        group     'root'
-        mode      '0755'
-        action    :create
-      end
-
-      dev_fstype = fstype_from_file_magic(dev)
-      mount mount_point do
-        only_if{ dev && dev_fstype }
-        # in /etc/mtab, dev is translated to /dev/sdx1
-        not_if "grep '#{mount_point}' /etc/mtab > /dev/null"
-        device dev
-        options 'noatime'
-        fstype dev_fstype
-      end
-
-      # Chef Resource mount doesn't enable automatically mount disks when OS starts up. We add it here.
-      mount_device_command = "#{dev}\t\t#{mount_point}\t\t#{dev_fstype}\tdefaults\t0 0"
-      execute 'add mount info into /etc/fstab if not added' do
-        only_if "grep '#{mount_point}' /etc/mtab  > /dev/null"
-        not_if  "grep '#{mount_point}' /etc/fstab > /dev/null"
-        command %Q{
-        echo "#{mount_device_command}" >> /etc/fstab
-        }
+  def wait_for_disks_ready
+    set_action(ACTION_FORMAT_DISK, 'format_disk')
+    while true
+      if `/usr/sbin/vmware-rpctool 'info-get guestinfo.disk.format.status'`.strip == "Disks Ready"
+        break
+      else
+        sleep 1
       end
     end
   end

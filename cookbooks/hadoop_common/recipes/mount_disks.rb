@@ -15,6 +15,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
+#
 
-mount_swap_disk(node[:disk][:swap_disk])
-mount_data_disks(node[:disk][:disk_devices], node[:disk][:data_disks])
+wait_for_disks_ready

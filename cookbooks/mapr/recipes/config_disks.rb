@@ -21,8 +21,6 @@ if !node[:disk]
   return
 end
 
-mount_swap_disk(node[:disk][:swap_disk])
-
 ## format local disk for MapR
 disk_file = '/opt/mapr/conf/disks.txt'
 if !File.exists?(disk_file)
