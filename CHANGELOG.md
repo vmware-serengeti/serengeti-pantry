@@ -1,3 +1,14 @@
+# 2.0.0 (2014-4-1)
+
+New features:
+* Add support for deploying Hortonworks and Apache Bigtop distro via yum
+* Add support for deploying Intel 3.x and other Bigtop based Hadop 2.x distro
+* Add Chef Error Reporting Handler to save chef-client exception to Chef Nodes
+
+Enhancement:
+* Make some check on the role order due to role depencendies
+* Other bug fix
+
 # 1.1.0 (2013-11-11)
 
 New features:

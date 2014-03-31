@@ -103,16 +103,16 @@ user guide to find out how to use it.
 #### Tested Hadoop Distributions
 We have tested that VMware Serengeti Cookbooks can be used to successfully deploy a Hadoop cluster with the following Hadoop distributions:
 
-* [Apache Hadoop 1.x and 1.2](http://newverhost.com/pub/hadoop/common/hadoop-1.2.0/), [Apache Pig 0.9.2](http://www.us.apache.org/dist/pig/pig-0.9.2/), [Apache Hive 0.8.1](http://www.us.apache.org/dist/hive/hive-0.8.1/), [Apache HBase 0.94.0](http://www.us.apache.org/dist/hbase/), and [Apache Zookeeper 3.4.3](http://www.us.apache.org/dist/zookeeper/zookeeper-3.4.3/)
+* [Apache Hadoop 1.2](http://newverhost.com/pub/hadoop/common/hadoop-1.2.0/), [Apache Pig 0.9.2](http://www.us.apache.org/dist/pig/pig-0.9.2/), [Apache Hive 0.8.1](http://www.us.apache.org/dist/hive/hive-0.8.1/), [Apache HBase 0.94.0](http://www.us.apache.org/dist/hbase/), and [Apache Zookeeper 3.4.3](http://www.us.apache.org/dist/zookeeper/zookeeper-3.4.3/)
 * [GreenPlum HD 1.x](http://www.greenplum.com/products/greenplum-hd) which includes Hadoop 1.0.0, Hive 0.7.1 and Pig 0.9.1
-* [Cloudera CDH3u6](http://archive.cloudera.com/cdh/3/hadoop-0.20.2-cdh3u3/) which includes Hadoop 0.20.2, Hive 0.7.1 and Pig 0.8.1
-* [Cloudera CDH4.1.x, CDH4.2.x and CDH4.3.x](http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/4/) which includes Hadoop 2.0.0, Hive 0.10.0 and Pig 0.11.0
-* [Hortonworks HDP 1.x and 2.x](http://s3.amazonaws.com/public-repo-1.hortonworks.com/HDP-1.2.0/repos/centos5/HDP-1.2.0-centos5.tar.gz)
-* [Pivotal HD 1.0](http://pivotallabs.com/)
-* [MapR 2.1.x](http://package.mapr.com/releases/)
-* [Intel Hadoop 2.5](http://www.intel.cn/content/www/cn/zh/big-data/intel-distribution-of-hadoop.html)
+* [Cloudera CDH4 to CDH5](http://archive.cloudera.com/cdh4/redhat/6/x86_64/cdh/) which includes Hadoop 1.x/2.x, Hive and Pig
+* [Hortonworks HDP 1.x and 2.x](http://hortonworks.com/products/hdp/)
+* [Pivotal HD 1.x and 2.0](http://www.gopivotal.com/big-data/pivotal-hd)
+* [MapR 2.1.x and 3.1](http://package.mapr.com/releases/)
+* [Intel Hadoop 2.x and 3.0](http://www.intel.cn/content/www/cn/zh/big-data/intel-distribution-of-hadoop.html)
+* [Bigtop 0.7.0](http://bigtop.apache.org/)
 
-Other Hadoop 0.20 or 1.x series distributions should also work well but not tested.
+Other Hadoop 0.20, 1.x and 2.x series distributions should also work well but not tested.
 Please let us know if other Hadoop/Pig/Hive combination works in your environment.
 
 ### Support for User Specified Hadoop Configuration
