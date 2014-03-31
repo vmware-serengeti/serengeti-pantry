@@ -16,6 +16,11 @@
 #   limitations under the License.
 #
 
+# Set Chef Logger format
+Chef::Log.formatter = proc do |severity, datetime, progname, msg|
+  "[#{datetime.strftime('%Y-%m-%dT%H:%M:%S.%L%z')}] #{severity}: #{msg}\n"
+end
+
 # add chef error reporting handler
 include_recipe 'hadoop_common::add_chef_handler'
 

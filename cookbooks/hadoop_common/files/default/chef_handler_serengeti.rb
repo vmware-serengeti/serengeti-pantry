@@ -57,7 +57,7 @@ class Chef
               err_msg = BOOTSTRAP_ERRORS[:COMMON_FAILURE][:msg] % [node_name, exception.to_s]
           end
           Chef::Log.fatal err_msg
-          set_error_msg(err_msg)
+          set_error_msg("[#{Time.now.strftime('%Y-%m-%dT%H:%M:%S.%L%z')}] #{err_msg}")
         end
       end
 
