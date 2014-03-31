@@ -40,18 +40,33 @@ if is_mapr_cldb
   params = mysql_connection_params
   configure_metrics_db_conn = %Q{ /opt/mapr/bin/maprcli config save -values "{'jm_db.url': '#{params[:host]}:#{params[:port]}', 'jm_db.user': '#{params[:user]}', 'jm_db.passwd': '#{params[:pwd]}', 'jm_db.schema': '#{params[:schema]}', 'jm_configured': '1'}" }
 
-  execute 'after-mapr-cldb-starts' do
+  execute 'intialize mapr after CLDB is started' do
     command %Q{
-# Wait 60 seconds for the warden to start the CLDB service.
-sleep 60
+# Wait for the mapr-warden to start the CLDB service.
+# See http://doc.mapr.com/display/MapR/Bringing+Up+the+Cluster#BringingUptheCluster-InitializationSequence
+timeout=180
+sleep_time=3
+while ! maprcli node cldbmaster >/dev/null 2>&1
+do
+  timeout=$((timeout - sleep_time));
+  echo "Waiting for CLDB service to start. $timeout seconds left."
+  if [ $timeout == 0 ]; then
+    echo "ERROR: Unable to start CLDB service."
+    exit 1
+  fi
+  sleep $sleep_time
+done
 
-# If there are more than one CLDB nodes, only one CLDB service will start successfully, 
+# If there are more than one CLDB nodes, only one CLDB service will start successfully,
 # and other CLDB services will shutdown because CLDB HA is not enabled until M5 License is applied on MCS.
 # Check whether CLDB is running.
 source /opt/mapr/conf/env.sh
 PATH=$JAVA_HOME/bin:$PATH
 jps | grep -q CLDB
 [ $? -ne 0 ] && exit
+
+# Show current CLDB
+maprcli node cldbmaster
 
 # Give full admin permission to the mapr user.
 #{grant_perm_to_mapr}
