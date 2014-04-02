@@ -111,6 +111,8 @@ generate_ssh_rsa_keypair('root', '/root')
 hadoop_package node[:hadoop][:packages][:hadoop][:name]
 check_hadoop_daemon_sh
 
+validate_fqdn_resolution
+
 # include other basic hadoop recipes
 include_recipe 'hadoop_cluster::volumes_conf'
 include_recipe 'hadoop_cluster::cluster_conf'

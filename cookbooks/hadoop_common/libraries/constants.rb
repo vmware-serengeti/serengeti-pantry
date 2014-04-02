@@ -24,6 +24,10 @@ module HadoopCluster
         :code => 'ERROR_COMMAND_FAILURE',
         :msg => "Unable to run command '%s' on node %s. SSH to this node and run the command 'sudo chef-client' to view error messages."
       },
+      :FQDN_RESOLUTION_FAILURE => {
+        :code => 'ERROR_FQDN_RESOLUTION_FAILURE',
+        :msg => "Cannot resolve IP %s to FQDN on node %s, so unable to deploy a Hadoop 2.x cluster which requires the DNS server is configured with FQDN/IP forward and reverse resolution."
+      },
     }
 
   end

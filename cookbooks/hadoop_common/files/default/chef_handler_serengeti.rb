@@ -53,6 +53,9 @@ class Chef
               else
                 err_msg = BOOTSTRAP_ERRORS[:COMMON_FAILURE][:msg] % [node_name, exception.to_s]
               end
+            when 'HadoopCluster::Exceptions::FQDNResolutionError'
+              ip = ip_of_hdfs_network(node)
+              err_msg = BOOTSTRAP_ERRORS[:FQDN_RESOLUTION_FAILURE][:msg] % [ip, node_name]
             else
               err_msg = BOOTSTRAP_ERRORS[:COMMON_FAILURE][:msg] % [node_name, exception.to_s]
           end

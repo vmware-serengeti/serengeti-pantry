@@ -93,7 +93,11 @@ module HadoopCluster
   # Use hadoop_version.to_f to get the major.minor version as float.
   # Use hadoop_version.to_i to get the major version as int.
   def hadoop_version
-    `hadoop version | head -1 | awk '{print $2}'` rescue "1.0.0"
+    `hadoop version | head -1 | awk '{print $2}'`.strip rescue "1.0"
+  end
+
+  def is_hadoop2
+    hadoop_version.to_i >= 2
   end
 
   class Chef::Recipe ; include HadoopCluster ; end

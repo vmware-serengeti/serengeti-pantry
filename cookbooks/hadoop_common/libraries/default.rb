@@ -104,6 +104,20 @@ module HadoopCluster
     return ip
   end
 
+  # Hadoop 2.x requires the DNS server is configured with FQDN/IP forward and reverse resolution.
+  # Otherwise, datanode is unable to register itself to namenode.
+  def validate_fqdn_resolution
+    run_in_ruby_block __method__ do
+      if is_hadoop2
+        ip = ip_of_hdfs_network(node)
+        fqdn = fqdn_of_hdfs_network(node)
+        if fqdn == ip
+          raise HadoopCluster::Exceptions::FQDNResolutionError
+        end
+      end
+    end
+  end
+
   def update_ipconfigs
     file_name = "/etc/portgroup2eth.json"
     return unless File.exist?(file_name)
