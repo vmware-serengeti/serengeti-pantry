@@ -356,7 +356,8 @@ EOF
   # Setup keyless ssh for the user from the node which has the role to this node
   def setup_keyless_ssh_for_user_on_role(username, role)
     keys = rsa_pub_keys_of_user(username, role)
-    file "/home/#{username}/.ssh/authorized_keys" do
+    home = (username == 'root') ? '/root' : "/home/#{username}"
+    file "#{home}/.ssh/authorized_keys" do
       owner username
       group username
       mode  '0640'

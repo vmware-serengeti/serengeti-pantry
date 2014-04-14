@@ -108,25 +108,8 @@ if namenode_ha_enabled
   zkfc_count = all_nodes_count({"role" => "hadoop_namenode", "facet_name" => node[:facet_name]})
   wait_for(node[:hadoop][:zkfc_service_name], {"provides_service" => node[:hadoop][:zkfc_service_name], "facet_name" => node[:facet_name]}, true, zkfc_count)
 
-  # copy rsa pub key to other namenode for hdfs HA to automatic failover
-  if is_primary_namenode
-    rsa_pub_key_conditions = {"facet_name" => node[:facet_name], "facet_index" => 1}
-  else
-    rsa_pub_key_conditions = {"facet_name" => node[:facet_name], "facet_index" => 0}
-  end
-  rsa_pub_key = rsa_pub_keys_of_user_for_condition("root", rsa_pub_key_conditions).first
-  execute "copy rsa pub key" do
-    user 'root'
-    command %Q{
-      if [ -e /root/.ssh/authorized_keys ]; then
-        if [ ! grep '#{rsa_pub_key}' /root/.ssh/authorized_keys ]; then
-          echo '#{rsa_pub_key}' >> /root/.ssh/authorized_keys
-        fi
-      else
-        echo '#{rsa_pub_key}' > /root/.ssh/authorized_keys
-      fi
-    }
-  end
+  # setup keyless ssh between namenodes to support HDFS HA and automatic failover
+  setup_keyless_ssh_for_user_on_role('root', 'hadoop_namenode')
 end
 
 if is_primary_namenode
