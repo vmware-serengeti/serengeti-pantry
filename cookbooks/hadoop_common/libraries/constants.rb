@@ -12,9 +12,7 @@ module HadoopCluster
       },
       :PACKAGE_REPO_FAILURE => {
         :code => 'PACKAGE_REPO_FAILURE',
-        :msg => "Cannot install package %s on node %s. The yum repo you set for the distro doesn't work. " +
-          "Are you using a yum repo for RHEL/CentOS 5? We expect the repo for RHEL/CentOS 6. Or are the rpm files in the yum repo broken?\n" +
-          "SSH to this node and run 'sudo yum install %s -y' to view error messages."
+        :msg => "Unable to install package %s on node %s using the specified Yum repository. The RPM files may be damaged, or intended for a different operating system version. SSH to this node and run 'sudo yum install %s -y' to view error messages."
       },
       :SERVICE_FAILURE => {
         :code => 'ERROR_SERVICE_FAILURE',
@@ -26,7 +24,7 @@ module HadoopCluster
       },
       :FQDN_RESOLUTION_FAILURE => {
         :code => 'ERROR_FQDN_RESOLUTION_FAILURE',
-        :msg => "Cannot resolve IP %s to FQDN on node %s, so unable to deploy a Hadoop 2.x cluster which requires the DNS server is configured with FQDN/IP forward and reverse resolution."
+        :msg => "Unable to resolve the IP address %s to the FQDN on node %s. To deploy Hadoop 2.x the DNS server must provide forward and reverse FQDN/IP resolution."
       },
     }
 
