@@ -72,7 +72,7 @@ execute 'create common user dirs on HDFS' do
     if [ "$hadoop_users" = "/user/" ]; then hadoop_users='' ; fi
     hadoop_users="$hadoop_users"
     hadoop fs -mkdir     /user /user/hive/ /user/hive/warehouse $hadoop_users;
-    hadoop fs -chmod a+w user /user/hive/ /user/hive/warehouse;
+    hadoop fs -chmod a+w /user /user/hive/ /user/hive/warehouse;
     for user in $hadoop_users ; do
       hadoop fs -chown ${user#/user/} $user;
     done ;
@@ -83,6 +83,9 @@ execute 'create common user dirs on HDFS' do
     hadoop fs -mkdir -p /tmp/hadoop-yarn/staging/history/done_intermediate
     hadoop fs -chmod -R 1777 /tmp/hadoop-yarn/staging/history/done_intermediate
     hadoop fs -chown -R mapred:mapred /tmp/hadoop-yarn/staging
+    hadoop fs -mkdir -p /tmp/hadoop-mapred/mapred
+    hadoop fs -chmod -R 777 /tmp/hadoop-mapred
+    hadoop fs -chmod -R 1777 /tmp/hadoop-mapred/mapred
 
     exit_status=$?
     if [ $exit_status -eq 0 ]; then touch /mnt/hadoop/.initialize_hdfs_dirs.log ; fi
