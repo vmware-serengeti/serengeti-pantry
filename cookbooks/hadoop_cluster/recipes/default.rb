@@ -98,7 +98,7 @@ group 'supergroup' do
   group_name 'supergroup'
   gid        node[:groups]['supergroup'][:gid]
   action     [:create]
-  members    ['hdfs', 'root']
+  members    ['serengeti', 'hdfs', 'root']
 end
 
 # Generate ssh rsa keypair for user root
