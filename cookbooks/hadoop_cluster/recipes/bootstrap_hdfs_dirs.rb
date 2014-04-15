@@ -85,7 +85,6 @@ execute 'create common user dirs on HDFS' do
     hadoop fs -chown -R mapred:mapred /tmp/hadoop-yarn/staging
     hadoop fs -mkdir -p /tmp/hadoop-mapred/mapred
     hadoop fs -chmod -R 777 /tmp/hadoop-mapred
-    hadoop fs -chmod -R 1777 /tmp/hadoop-mapred/mapred
 
     exit_status=$?
     if [ $exit_status -eq 0 ]; then touch /mnt/hadoop/.initialize_hdfs_dirs.log ; fi
