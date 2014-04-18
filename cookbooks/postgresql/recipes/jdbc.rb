@@ -2,7 +2,7 @@
 # Cookbook Name:: postgresql
 # Recipe:: jdbc
 #
-# Copyright 2012-2013 VMware Inc.
+# Copyright 2012-2014 VMware Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

@@ -158,7 +158,7 @@ In Ironfan, the Hadoop admin can add the following code in cluster role file, an
 Please send email to our mailing lists for [developers](https://groups.google.com/group/serengeti-dev) or for [users](https://groups.google.com/group/serengeti-user) if you have any questions.
 
 # Notice
-Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
+Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
 
 This product is licensed to you under the Apache License, Version 2.0 (the "License").  
 You may not use this product except in compliance with the License.  
