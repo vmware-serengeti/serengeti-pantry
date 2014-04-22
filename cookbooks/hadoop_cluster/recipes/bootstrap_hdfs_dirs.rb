@@ -75,6 +75,7 @@ execute 'create common user dirs on HDFS' do
     hadoop fs -chmod a+w /user /user/hive/ /user/hive/warehouse;
     for user in $hadoop_users ; do
       hadoop fs -chown ${user#/user/} $user;
+      hadoop fs -chmod 700 $user;
     done ;
 
     hadoop fs -mkdir -p /tmp/hadoop-yarn/staging
