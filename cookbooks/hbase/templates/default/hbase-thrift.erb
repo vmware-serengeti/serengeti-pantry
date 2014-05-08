@@ -23,9 +23,9 @@
 HBASE_DAEMON_SH=<%= @node[:hbase][:home_dir] %>/bin/hbase-daemon.sh
 HBASE_SH=<%= @node[:hbase][:home_dir] %>/bin/hbase
 
-if $HBASE_SH version 2>&1 | grep "0.98\|0.99" > /dev/null 2>&1; then
+if $HBASE_SH version 2>&1 | grep -i "HBase 0\.98\|HBase 0\.99" > /dev/null 2>&1; then
   $HBASE_DAEMON_SH $1 thrift2 -threadpool
-elif $HBASE_SH version 2>&1 | grep "0.94\|0.96" > /dev/null 2>&1; then
+elif $HBASE_SH version 2>&1 | grep -i "HBase 0\.94\|HBase 0\.96" > /dev/null 2>&1; then
   $HBASE_DAEMON_SH $1 thrift -threadpool
 else
   $HBASE_DAEMON_SH $1 thrift
