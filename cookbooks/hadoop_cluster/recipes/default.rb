@@ -35,11 +35,14 @@ include_recipe "hadoop_cluster::update_attributes"
 # Hadoop users and group
 #
 
-group 'hdfs' do gid 302 ; action [:create] ; end
+group 'hdfs' do
+  gid node[:groups]['hdfs'][:gid]
+  action [:create]
+end
 user 'hdfs' do
   not_if     'getent passwd hdfs'
   comment    'Hadoop HDFS User'
-  uid        302
+  uid        node[:users]['hdfs'][:uid]
   group      'hdfs'
   home       "/var/lib/hdfs"
   shell      "/bin/bash"
@@ -48,11 +51,14 @@ user 'hdfs' do
   action     [:create, :manage]
 end
 
-group 'mapred' do gid 303 ; action [:create] ; end
+group 'mapred' do
+  gid node[:groups]['mapred'][:gid]
+  action [:create]
+end
 user 'mapred' do
   not_if     'getent passwd mapred'
   comment    'Hadoop Mapred Runner'
-  uid        303
+  uid        node[:users]['mapred'][:uid]
   group      'mapred'
   home       "/var/lib/mapred"
   shell      "/bin/bash"
@@ -61,11 +67,14 @@ user 'mapred' do
   action     [:create, :manage]
 end
 
-group 'yarn' do gid 304 ; action [:create] ; end
+group 'yarn' do
+  gid node[:groups]['yarn'][:gid]
+  action [:create]
+end
 user 'yarn' do
   not_if     'getent passwd yarn'
   comment    'Hadoop Yarn User'
-  uid        304
+  uid        node[:users]['yarn'][:uid]
   group      'yarn'
   home       "/var/lib/yarn"
   shell      "/bin/bash"
@@ -84,7 +93,7 @@ end
 user 'webuser' do
   not_if     'getent passwd webuser'
   comment    'Hadoop Web Server User'
-  uid        305
+  uid        node[:users]['webuser'][:uid]
   group      'hadoop'
   home       "/var/lib/webuser"
   shell      "/bin/bash"

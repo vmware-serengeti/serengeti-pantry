@@ -53,6 +53,12 @@ default[:groups]['hadoop'    ][:gid] = 300
 default[:groups]['supergroup'][:gid] = 301
 default[:groups]['hdfs'      ][:gid] = 302
 default[:groups]['mapred'    ][:gid] = 303
+default[:groups]['yarn'      ][:gid] = 304
+# Users
+default[:users]['hdfs'   ][:uid] = 302
+default[:users]['mapred' ][:uid] = 303
+default[:users]['yarn'   ][:uid] = 304
+default[:users]['webuser'][:uid] = 305
 
 # Allow hadoop to use system disk?
 default[:hadoop][:use_root_as_scratch_vol]    = false
