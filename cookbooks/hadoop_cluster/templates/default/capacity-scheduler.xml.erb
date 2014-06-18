@@ -196,7 +196,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.resource-calculator</name>
-    <value><%= node[:hadoop][:resource_calculator] %></value>
+    <value><%= node[:hadoop][:conf][:resource_calculator] %></value>
     <description>
       The ResourceCalculator implementation to be used to compare
       Resources in the scheduler.

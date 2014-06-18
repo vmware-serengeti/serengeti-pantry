@@ -34,10 +34,6 @@ def default_attributes_for_yarn
   node.default[:hadoop][:hadoop_hdfs_dir] = '/usr/lib/hadoop-hdfs' # directory that HADOOP HDFS is installed in
   node.default[:hadoop][:hadoop_mapred_dir] = '/usr/lib/hadoop-mapreduce' # directory that HADOOP MAPREDUCE is installed in. CDH4 MRv1 and MRv2 has different HADOOP_MAPRED_HOME
   node.default[:hadoop][:yarn_home_dir] = '/usr/lib/hadoop-yarn' # directory that HADOOP YARN is installed in
-
-  # YARN default settings
-  node.default[:hadoop][:resource_calculator] = "org.apache.hadoop.yarn.server.resourcemanager.resource.DefaultResourceCalculator"
-  node.default[:hadoop][:aux_services] = "mapreduce.shuffle"
 end
 
 # Zookeeper Service
@@ -121,8 +117,8 @@ else
 end
 
 # hadoop system services
-node.default[:hadoop][:namenode_service_port] = is_hadoop_yarn? ? 9000 : 8020
-node.default[:hadoop][:jobtracker_service_port] = is_hadoop_yarn? ? 9001 : 8021
+node.default[:hadoop][:namenode_service_port] = 8020
+node.default[:hadoop][:jobtracker_service_port] = 8021
 node.default[:hadoop][:namenode_web_service_port] = 50070
 
 # hadoop 2.0 hdfs HA services

@@ -5,7 +5,7 @@
 <%- if node[:hadoop][:cluster_has_hdfs_ha_or_federation] %>
 
 <property>
-  <name>fs.default.name</name>
+  <name><%= node[:hadoop][:conf][:fs_default_name] %></name>
   <%-
     first_facet_has_no_hdfs_ha = @namenode_facets[0][@nameservices.first].length == 1
     if node[:hadoop][:cluster_has_only_federation] or first_facet_has_no_hdfs_ha
@@ -24,7 +24,7 @@
   <%- end %>
 <%- else %>
 <property>
-  <name>fs.default.name</name>
+  <name><%= node[:hadoop][:conf][:fs_default_name] %></name>
   <value>hdfs://<%= @namenode_address %>:<%= @namenode_port %></value>
 </property>
 <%- end %>
@@ -63,7 +63,9 @@
 
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['core-site.xml'] || {} rescue conf = {} %>
-<%- conf.map do |key, value| %>
+<%- conf.map do |key, value|
+  next if ['fs.default.name', 'fs.defaultFS'].include?(key)
+%>
 <property>
   <name><%= key %></name>
   <value><%= value %></value>

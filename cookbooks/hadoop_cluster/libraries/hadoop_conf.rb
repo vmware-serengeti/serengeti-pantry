@@ -39,7 +39,8 @@ module HadoopCluster
 
   # Return user defined namenode uri
   def namenode_uri_conf
-    uri = hadoop_conf('core-site.xml', 'fs.default.name')
+    uri = hadoop_conf('core-site.xml', 'fs.defaultFS')
+    uri ||= hadoop_conf('core-site.xml', 'fs.default.name')
     # fs.default.name is something like : 'hdfs://192.168.1.100:8020'
     uri ? uri.split('://')[1].split(':') : nil rescue nil
   end
@@ -74,20 +75,23 @@ module HadoopCluster
     all_conf['hadoop'] || {}
   end
 
-  # Return user defined cluster configuration
-  def all_conf
-    conf = node['cluster_configuration'] || {} rescue conf = {}
-    conf.dup
-  end
-
   # check the hadoop version after the hadoop package is installed and set attributes for hadoop 2.2
-  def set_properties_for_hadoop_2_2
-    if hadoop_version.to_f >= 2.2
-      node.default[:hadoop][:resource_calculator] = "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
-      node.default[:hadoop][:aux_services] = "mapreduce_shuffle"
+  def set_hadoop_conf_properties
+    run_in_ruby_block __method__ do
+      ver = hadoop_version.to_f
+      if ver < 2
+        node.default[:hadoop][:conf][:fs_default_name] = "fs.default.name"
+      else
+        node.default[:hadoop][:conf][:fs_default_name] = "fs.defaultFS"
+        node.default[:hadoop][:conf][:resource_calculator] = "org.apache.hadoop.yarn.server.resourcemanager.resource.DefaultResourceCalculator"
+        node.default[:hadoop][:conf][:aux_services] = "mapreduce.shuffle"
+      end
+      if ver >= 2.2
+        node.default[:hadoop][:conf][:resource_calculator] = "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+        node.default[:hadoop][:conf][:aux_services] = "mapreduce_shuffle"
+      end
     end
   end
-
 end
 
 class Chef::Recipe ; include HadoopCluster ; end
