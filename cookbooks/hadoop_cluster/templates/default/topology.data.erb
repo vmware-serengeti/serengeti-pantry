@@ -1,1 +1,3 @@
+<%- conf = node['cluster_configuration']['hadoop']['topology.data'] || {} rescue conf = {} %>
+<%= conf['text'].to_s.split(',').join("\n") %>
 <%= node[:hadoop][:rack_topology][:data] if node[:hadoop][:rack_topology][:enabled] %>
