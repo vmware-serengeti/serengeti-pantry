@@ -68,7 +68,7 @@ service "restart-#{node[:hadoop][:namenode_service_name]}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/hadoop-metrics2.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   unless ['create', 'launch'].include?(node[:cluster_action])
-    # When running 'cluster create' or 'cluster launch', new nodes are added into this cluster.
+    # When new nodes are added into this cluster, Ironfan knife command is 'cluster create' or 'cluster launch'.
     # chef-client will only append new lines to /etc/hadoop/conf/topology.data (containing ip to rack mapping), and no existing lines are updated.
     # And when Namenode adds a new Datanode (having a new IP), it will lookup topology.data to find its rack info.
     # So there is no need to restart Namenode daemon in this case.

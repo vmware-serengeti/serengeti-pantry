@@ -52,6 +52,9 @@ service "restart-#{service_name}" do
   subscribes :restart, resources("template[/etc/hadoop/conf/log4j.properties]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/capacity-scheduler.xml]"), :delayed
   subscribes :restart, resources("template[/etc/hadoop/conf/mapred-queue-acls.xml]"), :delayed
+  unless ['create', 'launch'].include?(node[:cluster_action])
+    subscribes :restart, resources("template[/etc/hadoop/conf/topology.data]"), :delayed
+  end
   notifies :create, resources("ruby_block[#{service_name}]"), :immediately
 end if is_service_running
 
