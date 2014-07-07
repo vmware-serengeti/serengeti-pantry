@@ -44,6 +44,17 @@ end
 # so wait until HDFS is ready.
 include_recipe "hadoop_cluster::wait_for_hdfs"
 
+execute 'create hbase root dir' do
+  only_if { rootdir_conf.nil? and node[:hbase][:hdfshome] } # don't create the root dir if it's specified by the user explicitly
+  not_if "hadoop fs -ls #{node[:hbase][:hdfshome]}"
+  command %Q{
+rootdir=#{node[:hbase][:hdfshome]}
+hadoop fs -mkdir $rootdir
+hadoop fs -chmod 775 $rootdir
+hadoop fs -chown hbase:hadoop $rootdir
+  }
+end
+
 ## Launch service
 set_bootstrap_action(ACTION_START_SERVICE, node[:hbase][:master_service_name])
 

@@ -25,12 +25,10 @@
 <property>
   <name>hbase.cluster.distributed</name>
   <value>true</value>
-  <final>true</final>
 </property>
 <property>
   <name>hbase.rootdir</name>
   <value><%= @hbase_hdfs_home %></value>
-  <final>true</final>
 </property>
 <% if node.role?('hbase_master') %>
 <property>
@@ -55,7 +53,6 @@
 <property>
   <name>hbase.zookeeper.quorum</name>
   <value><%= @zookeeper_quorum %></value>
-  <final>true</final>
 </property>
 <property>
   <name>hbase.zookeeper.dns.interface</name>
@@ -64,13 +61,13 @@
 
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hbase']['hbase-site.xml'] || {} rescue conf = {} %>
-<%- conf.map do |key, value| %>
-<%- unless key == "hbase.rootdir" %>
+<%- conf.map do |key, value|
+  next if ['hbase.rootdir'].include?(key)
+%>
 <property>
   <name><%= key %></name>
   <value><%= value %></value>
 </property>
-<%- end %>
 <%- end %>
 <!-- end -->
 </configuration>

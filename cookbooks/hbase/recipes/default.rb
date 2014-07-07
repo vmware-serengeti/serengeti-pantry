@@ -41,20 +41,6 @@ end
 ulimit_nofile = 32768
 ulimit_nproc = 32000
 
-def get_root_dir namespace
-  "hdfs://#{namespace}#{node[:hbase][:hdfshome]}"
-end
-
-def set_sys_limit desc, user, ulimit_type, ulimit_value
-  bash desc do
-    not_if "egrep -q '#{user}.*#{ulimit_type}.*#{ulimit_value}' /etc/security/limits.conf"
-    code <<EOF
-      egrep -q '#{user}.*#{ulimit_type}' || ( echo '#{user} - #{ulimit_type}' >> /etc/security/limits.conf )
-      sed -i "s/#{user}.*-.*#{ulimit_type}.*/#{user} - #{ulimit_type} #{ulimit_value}/" /etc/security/limits.conf
-EOF
-  end
-end
-
 set_sys_limit "Increase maximum num of open files ulimit", "@hbase", "nofile", ulimit_nofile
 set_sys_limit "Increase maximum num of processes ulimit", "@hbase", "nproc", ulimit_nproc
 
@@ -130,9 +116,10 @@ end
 matched_namespace = nil
 matched_pattern = ''
 # try to guess a valid namespace name if user defined hbase.rootdir attr
-conf = node['cluster_configuration']['hbase']['hbase-site.xml'] || {} rescue {}
-if !conf['hbase.rootdir'].nil?
-  user_defined_namespace = conf['hbase.rootdir']
+
+rootdir = rootdir_conf
+if rootdir
+  user_defined_namespace = rootdir
   valid_namespaces_map.each do |namespace, patterns|
     patterns.each do |pattern|
       if user_defined_namespace.include? pattern and pattern.length > matched_pattern.length
@@ -142,16 +129,16 @@ if !conf['hbase.rootdir'].nil?
     end
   end
 end
-
 namespace = matched_namespace || default_namespace
-hbase_hdfs_home = get_root_dir(namespace)
 
-zk_quorum = zookeepers_quorum
+hbase_hdfs_home = get_hbase_root_dir(namespace)
 
 # get zookeeper_session_timeout to be used in hbase-daemon.sh
 zookeeper_session_timeout = node['cluster_configuration']['hbase']['hbase-site.xml']['zookeeper.session.timeout'] rescue nil
 zookeeper_session_timeout ||= node[:hbase][:zookeeper_session_timeout]
 zookeeper_session_timeout = zookeeper_session_timeout.to_i / 1000 + 120 # convert to seconds, and plus extra 2 minutes
+
+zk_quorum = zookeepers_quorum
 
 template_variables = {
   :hbase_hdfs_home => hbase_hdfs_home,

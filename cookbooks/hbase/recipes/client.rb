@@ -28,11 +28,7 @@ include_recipe "hbase"
   end
 end
 
-log = 'wait for HBase Master daemon to be ready'
-run_in_ruby_block(log) do
-  Chef::Log.info(log)
-  provider_for_service(node[:hbase][:master_service_name])
-end
+wait_for_hbase_master_service
 
 service "start-#{node[:hbase][:rest_service_name]}" do
   service_name node[:hbase][:rest_service_name]
