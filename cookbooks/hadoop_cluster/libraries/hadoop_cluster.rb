@@ -178,7 +178,7 @@ module HadoopCluster
 
   def jobtracker_port
     # if the user has specified the jobtracker port, use it.
-    jobtrackerport_conf || node[:hadoop][:jobtracker_service_port]
+    jobtracker_port_conf || node[:hadoop][:jobtracker_service_port]
   end
 
   # The resourcemanager's hostname, or the local node's numeric ip if 'localhost' is given.
@@ -247,6 +247,7 @@ module HadoopCluster
       vars[:yarn_log_dirs] = yarn_log_dirs.join(',')
     else
       vars[:jobtracker_address] = jobtracker_address
+      vars[:jobtracker_port] = jobtracker_port
     end
 
     if node[:hadoop][:cluster_has_hdfs_ha_or_federation]

@@ -12,6 +12,11 @@
 
 <!-- Resource Manager Configs -->
 <property>
+<property>
+  <description>The hostname of the RM.</description>
+  <name>yarn.resourcemanager.hostname</name>
+  <value><%= @resourcemanager_address %></value>
+</property>
   <description>The address of the applications manager interface in the RM.</description>
   <name>yarn.resourcemanager.address</name>
   <value><%= @resourcemanager_address %>:8032</value>
@@ -105,7 +110,9 @@
 
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['yarn-site.xml'] || {} rescue conf = {} %>
-<%- conf.map do |key, value| %>
+<%- conf.map do |key, value|
+  next if ['yarn.resourcemanager.hostname'].include?(key)
+%>
 <property>
   <name><%= key %></name>
   <value><%= value %></value>

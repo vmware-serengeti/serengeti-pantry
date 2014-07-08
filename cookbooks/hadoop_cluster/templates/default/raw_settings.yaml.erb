@@ -1,9 +1,6 @@
---
 # This file just shows the attributes chef used to configure the cluster
 
 :cluster_name:             <%= node[:cluster_name]                  %>
-:cluster_role:             <%= node[:cluster_role]                  %>
-:cluster_role_index:       <%= node[:cluster_role_index]            %>
 
 :hadoop_handle:            <%= node[:hadoop][:hadoop_handle]        %>
 :dfs_replication:          <%= node[:hadoop][:dfs_replication]      %>
@@ -24,9 +21,9 @@
 :fs_checkpoint_dirs:       <%= @fs_checkpoint_dirs                  %>
 :dfs_data_dirs:            <%= @dfs_data_dirs                       %>
 
-:namenode_address:         <%= @namenode_address                    %>            
-:jobtracker_address:       <%= @jobtracker_address                  %>
-
+:namenode_address:         <%= "#{@namenode_address}:#{@namenode_port}" %>
+:jobtracker_address:       <%= "#{@jobtracker_address}:#{@jobtracker_port}" unless @jobtracker_address.to_s.empty? %>
+:resourcemanager_address:  <%= "#{@resourcemanager_address}" %>
 
 <%- memory_in_bytes = node[:memory][:total].gsub(/kB$/, '').to_i * 1024 %>
 :n_cpus:                   <%= node[:cpu][:total] %>

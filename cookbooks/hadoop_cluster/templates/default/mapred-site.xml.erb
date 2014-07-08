@@ -3,12 +3,12 @@
 <!-- check for all settings at http://hadoop.apache.org/common/docs/stable/mapred-default.html -->
 <configuration>
 
-<% if node.role?('hadoop_jobtracker') %>
+<%- if node.role?('hadoop_jobtracker') %>
 <property>
   <name>mapred.job.tracker.http.address</name>
   <value>0.0.0.0:50030</value>
 </property>
-<% end %>
+<%- end %>
 
 <%- if node[:is_hadoop_yarn] %>
 <property>
@@ -20,18 +20,13 @@
   <value><%= @mapred_network_dev %></value>
 </property>
 <property>
-  <name>mapreduce.jobtracker.address</name>
-  <value><%= @resourcemanager_address %>:8021</value>
-</property>
-
-<property>
   <name>yarn.app.mapreduce.am.staging-dir</name>
   <value>/tmp/hadoop-yarn/staging</value>
 </property>
 <%- else %>
 <property>
   <name>mapred.job.tracker</name>
-  <value><%= @jobtracker_address %>:8021</value>
+  <value><%= @jobtracker_address %>:<%= @jobtracker_port %></value>
 </property>
 <%- end %>
 
@@ -207,7 +202,9 @@
 
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['mapred-site.xml'] || {} rescue conf = {} %>
-<%- conf.map do |key, value| %>
+<%- conf.map do |key, value|
+  next if ['mapred.job.tracker'].include?(key)
+%>
 <property>
   <name><%= key %></name>
   <value><%= value %></value>

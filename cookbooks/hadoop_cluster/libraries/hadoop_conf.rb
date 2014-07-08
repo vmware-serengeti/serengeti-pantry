@@ -55,8 +55,8 @@ module HadoopCluster
 
   # Return user defined resourcemanager uri
   def resourcemanager_uri_conf
-    uri = hadoop_conf('mapred-site.xml', 'mapreduce.jobtracker.address')
-    # mapreduce.jobtracker.address is something like : '192.168.1.100:8021'
+    uri = hadoop_conf('yarn-site.xml', 'yarn.resourcemanager.hostname')
+    # yarn.resourcemanager.hostname is the hostname of ResourceManager node
     uri ? uri.split(':') : nil rescue nil
   end
 
