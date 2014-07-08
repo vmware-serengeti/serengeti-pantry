@@ -33,7 +33,8 @@ log4j.appender.DRFA.File=${hadoop.log.dir}/${hadoop.log.file}
 log4j.appender.DRFA.DatePattern=.yyyy-MM-dd
 
 # 30-day backup
-log4j.appender.DRFA.MaxBackupIndex=<%= conf['log4j.appender.DRFA.MaxBackupIndex'] || '30' %>
+# DRFA doesn't support MaxBackupIndex
+#log4j.appender.DRFA.MaxBackupIndex=30
 log4j.appender.DRFA.layout=org.apache.log4j.PatternLayout
 
 # Pattern format: Date LogLevel LoggerName LogMessage
