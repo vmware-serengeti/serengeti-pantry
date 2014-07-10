@@ -90,6 +90,8 @@ end
 # as 'root' later on, passing the below credentials in the PG client.
 bash "assign-postgres-password" do
   user 'postgres'
+  retries 6
+  retry_delay 5
   code <<-EOH
 echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node['postgresql']['password']['postgres']}';" | psql
   EOH
