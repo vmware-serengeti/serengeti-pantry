@@ -27,7 +27,6 @@ def get_hbase_root_dir namespace
       suffix = Time.now.strftime("%Y%m%d%H%M%S%6N")
       node.normal[:hbase][:hdfshome] = "/hadoop/hbase/#{node[:cluster_name]}-#{suffix}"
       node.normal[:hbase][:rootdir] = "hdfs://#{namespace}#{node[:hbase][:hdfshome]}"
-      provide_service(node[:hbase][:provider][:rootdir], {}, false) # don't run in ruby_block
     else
       # wait for hbase master to provide hbase.rootdir
       masternode = provider_for_service(node[:hbase][:provider][:rootdir])
@@ -36,6 +35,9 @@ def get_hbase_root_dir namespace
     end
   end
   Chef::Log.info('hbase.rootdir is ' + node[:hbase][:rootdir])
+  if is_primary_hbase_master
+    provide_service(node[:hbase][:provider][:rootdir], {}, false) # don't run in ruby_block
+  end
   node[:hbase][:rootdir]
 end
 
