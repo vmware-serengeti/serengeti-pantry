@@ -290,14 +290,14 @@ EOF
   end
 
   def wait_for_disks_ready
-    set_action(ACTION_FORMAT_DISK, 'format_disk')
-    while true
-      if `/usr/sbin/vmware-rpctool 'info-get guestinfo.disk.format.status'`.strip == "Disks Ready"
-        break
-      else
-        sleep 1
-      end
+    set_action(ACTION_FORMAT_DISK, 'format_disk') if !is_disk_ready?
+    while !is_disk_ready?
+      sleep 1
     end
+  end
+
+  def is_disk_ready?
+    `/usr/sbin/vmware-rpctool 'info-get guestinfo.disk.format.status'`.strip == "Disks Ready"
   end
 
   # Generate ssh rsa keypair for the specified user
