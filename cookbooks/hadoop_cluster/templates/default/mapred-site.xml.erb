@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
-<!-- check for all settings at http://hadoop.apache.org/common/docs/stable/mapred-default.html -->
+<!-- check for all settings at http://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml -->
 <configuration>
 
 <%- if node.role?('hadoop_jobtracker') %>
@@ -199,6 +199,12 @@
   <description> This is the max level of the task cache. For example, if the level is 2, the tasks cached are at the host level and at the rack level.</description>
 </property>
 <% end %>
+
+<property>
+  <name>yarn.app.mapreduce.am.resource.mb</name>
+  <value><%= node[:yarn][:am_resource_mem] %></value>
+  <description>The amount of memory the MR AppMaster needs.</description>
+</property>
 
 <!-- properties specified by users -->
 <%- conf = node['cluster_configuration']['hadoop']['mapred-site.xml'] || {} rescue conf = {} %>

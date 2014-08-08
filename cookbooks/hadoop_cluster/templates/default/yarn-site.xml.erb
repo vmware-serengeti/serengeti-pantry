@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- check for all settings at http://archive.cloudera.com/cdh4/cdh/4/hadoop/hadoop-yarn/hadoop-yarn-common/yarn-default.xml -->
+<!-- check for all settings at http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-common/yarn-default.xml -->
 <configuration>
 <property>
   <name>yarn.nodemanager.aux-services</name>
@@ -73,18 +73,10 @@
   <value>/var/log/hadoop-yarn/apps</value>
 </property>
 
-<!-- need performance team's investigation -->
 <property>
-  <description>Amount of physical memory, in MB, that can be allocated
-    for containers.</description>
+  <description>Amount of physical memory, in MB, that can be allocated for containers.</description>
   <name>yarn.nodemanager.resource.memory-mb</name>
   <value><%= node[:yarn][:nm_resource_mem] %></value>
-</property>
-
-<property>
-  <name>yarn.app.mapreduce.am.resource.mb</name>
-  <value><%= node[:yarn][:am_resource_mem] %></value>
-  <description>The amount of memory the MR AppMaster needs.</description>
 </property>
 
 <%- if node[:hadoop][:rack_topology][:hve_enabled] %>
