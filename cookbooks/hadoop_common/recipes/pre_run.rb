@@ -21,6 +21,8 @@ Chef::Log.formatter = proc do |severity, datetime, progname, msg|
   "[#{datetime.strftime('%Y-%m-%dT%H:%M:%S.%L%z')}] #{severity}: #{msg}\n"
 end
 
+Chef::Log.info("Chef Server is " + Chef::Config[:chef_server_url])
+
 # add chef error reporting handler
 include_recipe 'hadoop_common::add_chef_handler'
 
