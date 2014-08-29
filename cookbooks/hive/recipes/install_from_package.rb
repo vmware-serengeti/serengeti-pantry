@@ -18,6 +18,9 @@ include_recipe "hadoop_common::add_repo"
 #
 # Install package
 #
-package node[:hadoop][:packages][:hive][:name]
+package node[:hadoop][:packages][:hive][:name] do
+  retries 6
+  retry_delay 5
+end
 
 make_link("/usr/lib/hive", node[:hive][:home_dir])

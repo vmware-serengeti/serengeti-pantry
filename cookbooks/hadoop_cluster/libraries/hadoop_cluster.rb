@@ -361,6 +361,11 @@ EOF
     set_bootstrap_action(ACTION_INSTALL_PACKAGE, package_name, true)
     package_name.split.each do |name|
       package name do
+        # Add retry for basic hadoop rpms which have big file size (about 20M).
+        # The yum install command might timeout when the yum server is overloaded.
+        retries 6
+        retry_delay 5
+
         if node[:hadoop][:package_version] != 'current'
           version node[:hadoop][:package_version]
         end

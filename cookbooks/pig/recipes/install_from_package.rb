@@ -24,5 +24,8 @@ include_recipe "hadoop_common::add_repo"
 #
 # Install package
 #
-package node[:hadoop][:packages][:pig][:name]
+package node[:hadoop][:packages][:pig][:name] do
+  retries 6
+  retry_delay 5
+end
 

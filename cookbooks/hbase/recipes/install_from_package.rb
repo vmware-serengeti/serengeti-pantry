@@ -23,6 +23,9 @@ include_recipe "hadoop_common::add_repo"
 #
 # Install package
 #
-package node[:hbase][:package_name]
+package node[:hbase][:package_name] do
+  retries 6
+  retry_delay 5
+end
 
 
