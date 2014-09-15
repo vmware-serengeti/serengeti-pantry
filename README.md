@@ -110,7 +110,7 @@ We have tested that VMware Serengeti Cookbooks can be used to successfully deplo
 * [Pivotal HD 1.x and 2.0](http://www.gopivotal.com/big-data/pivotal-hd)
 * [MapR 2.1.x and 3.1](http://package.mapr.com/releases/)
 * [Intel Hadoop 2.x and 3.0](http://www.intel.cn/content/www/cn/zh/big-data/intel-distribution-of-hadoop.html)
-* [Bigtop 0.7.0](http://bigtop.apache.org/)
+* [Bigtop 0.8.0](http://bigtop.apache.org/)
 
 Other Hadoop 0.20, 1.x and 2.x series distributions should also work well but not tested.
 Please let us know if other Hadoop/Pig/Hive combination works in your environment.

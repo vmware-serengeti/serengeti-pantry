@@ -1,3 +1,16 @@
+# 2.1.0 (2014-9-15)
+
+New features:
+* Add support for configuration of topology.data
+* Add support for configuring Namenode address for HBase Only Cluster
+* Add support for configuring Jobtracker or ResourceManager address for Tasktracker/NodeManager Only Cluster
+
+Enhancement:
+* Set Namenode listening port to default port 8020
+* Each HBase cluster has different hbase.rootdir
+* Add retry for installing rpms which have big file size
+* Other bug fix
+
 # 2.0.0 (2014-4-1)
 
 New features:
