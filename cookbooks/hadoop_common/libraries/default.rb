@@ -290,6 +290,7 @@ EOF
   end
 
   def wait_for_disks_ready
+    return if node[:no_wait_for_disks]
     set_action(ACTION_FORMAT_DISK, 'format_disk') if !is_disk_ready?
     while !is_disk_ready?
       sleep 1
