@@ -1,0 +1,24 @@
+<%- conf = node['cluster_configuration']['kubernetes']['env'] || {} rescue conf = {} %>
+# Kubernetes
+export GOPATH="<%= conf['GOPATH'] %>"
+export KUBE_HOME=/opt/kubernetes/src/go/src/github.com/GoogleCloudPlatform/kubernetes
+export PATH=$KUBE_HOME/cluster:$GOPATH/bin:/usr/local/go/bin:$PATH
+
+export GOVC_URL=<%= conf['GOVC_URL'] %>
+export GOVC_DATACENTER="<%= conf['GOVC_DATACENTER'] %>"
+export GOVC_DATASTORE="<%= conf['GOVC_DATASTORE'] %>"
+export GOVC_RESOURCE_POOL="<%= conf['GOVC_RESOURCE_POOL'] %>"
+export GOVC_NETWORK="<%= conf['GOVC_NETWORK'] %>"
+export GOVC_GUEST_LOGIN="<%= conf['GOVC_GUEST_LOGIN'] %>"
+export GOVC_INSECURE=<%= conf['GOVC_INSECURE'] %>
+export KUBERNETES_PROVIDER=vsphere
+
+# VM instances settings
+export KUBE_USER=<%= conf['KUBE_USER'] %>
+export KUBE_USER_HOME=/home/$KUBE_USER
+export USE_EXTERNAL_INSTANCES=true
+export INSTANCE_RESOURCE_POOL="<%= conf['INSTANCE_RESOURCE_POOL'] %>"
+export KUBE_CLUSTER_NAME=<%= @cluster_name %>
+export NUM_MINIONS=<%= @minions_num %>
+export SKIP_VERIFY="-insecure_skip_tls_verify"
+
