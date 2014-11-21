@@ -112,6 +112,8 @@ else
   end
 end
 
+set_bootstrap_action(ACTION_START_SERVICE, 'mesos-master', true)
+
 if node['platform'] == 'debian'
   bash 'start-mesos-master' do
     user 'root'

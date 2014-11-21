@@ -3,6 +3,7 @@
 # Recipe:: docker
 #
 # Copyright (C) 2013 Medidata Solutions, Inc.
+# Portions Copyright (c) 2014 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +17,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-include_recipe 'docker'
+
 include_recipe 'mesos::slave'
 
+set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'docker-io', true)
+
+# install docker
+execute 'install epel yum repo' do
+  not_if 'rpm -q epel-release'
+  command 'rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'
+end
+
+package 'docker-io'
+service 'docker' do
+  action [:enable, :start]
+  supports :status => true, :restart => true
+end
+
+# install mesos docker executor
 package 'python-setuptools'
 
 directory '/var/lib/mesos/executors' do
