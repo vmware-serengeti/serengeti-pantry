@@ -13,7 +13,7 @@
 #   limitations under the License.
 #
 
-default['mesos']['version']                       = '0.20.1'
+default['mesos']['version']                       = '0.21.0'
 default['mesos']['common']['port']                = 5050
 default['mesos']['common']['logs_dir']            = '/var/log/mesos'
 default['mesos']['common']['logging_level']       = 'ERROR'
@@ -42,5 +42,5 @@ when 'ubuntu'
 when 'debian'
   default['mesos']['python_egg'] = "http://downloads.mesosphere.io/master/debian/7/mesos-#{node['mesos']['version']}-py2.7-linux-x86_64.egg"
 else
-  default['mesos']['python_egg'] = 'http://downloads.mesosphere.io/master/ubuntu/13.04/mesos-0.20.1-py2.7-linux-x86_64.egg'
+  default['mesos']['python_egg'] = "http://downloads.mesosphere.io/master/ubuntu/13.04/mesos-#{node['mesos']['version']}-py2.7-linux-x86_64.egg"
 end

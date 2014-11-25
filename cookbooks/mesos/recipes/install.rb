@@ -28,6 +28,8 @@ include_recipe 'java::default'
 distro = node['platform']
 distro_version = node['platform_version']
 
+set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'mesos', true)
+
 case distro
 when 'debian', 'ubuntu'
   include_recipe 'apt'

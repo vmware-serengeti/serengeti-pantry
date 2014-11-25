@@ -20,11 +20,14 @@
 
 include_recipe 'mesos::slave'
 
+set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'docker-io', true)
+
 # install docker
 execute 'install epel yum repo' do
   not_if 'rpm -q epel-release'
   command 'rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'
 end
+
 package 'docker-io'
 service 'docker' do
   action [:enable, :start]
