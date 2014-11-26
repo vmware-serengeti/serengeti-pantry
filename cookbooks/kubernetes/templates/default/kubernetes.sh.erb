@@ -14,8 +14,8 @@ export GOVC_INSECURE=<%= conf['GOVC_INSECURE'] %>
 export KUBERNETES_PROVIDER=vsphere
 
 # VM instances settings
-export KUBE_USER=<%= conf['KUBE_USER'] %>
-export KUBE_USER_HOME=/home/$KUBE_USER
+export KUBE_SSH_USER=<%= conf['KUBE_USER'] %>
+export KUBE_SSH_USER_HOME=/home/$KUBE_SSH_USER
 export USE_EXTERNAL_INSTANCES=true
 export INSTANCE_RESOURCE_POOL="<%= conf['INSTANCE_RESOURCE_POOL'] %>"
 export KUBE_CLUSTER_NAME=<%= @cluster_name %>

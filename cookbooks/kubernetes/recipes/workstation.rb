@@ -45,22 +45,30 @@ template "/etc/profile.d/#{env_file}" do
   source "#{env_file}.erb"
 end
 
-step="build Kubernetes from source code"
-set_bootstrap_action(step, '', true)
-lock_file = "/opt/kubernetes/.kubernetes_installed.lock"
-execute step do
-  creates lock_file
+execute "install govc" do
+  not_if 'which govc'
   command %Q{
 set -e
 . /etc/profile.d/#{env_file}
 if [ ! -e $GOPATH/bin/govc ]; then
   mkdir -p $GOPATH
   go get github.com/vmware/govmomi/govc
+  mkdir -p $GOPATH/src/github.com/GoogleCloudPlatform
 fi
+}
+end
 
-gcp=$GOPATH/src/github.com/GoogleCloudPlatform
-mkdir -p $gcp
-cd $gcp
+lock_file = "/opt/kubernetes/.kubernetes_installed.lock"
+if node[:kubernetes][:install_from_source] and !File.exist?(lock_file)
+  step="Installing Kubernetes from source code"
+  set_bootstrap_action(step, '', true)
+  execute step do
+    creates lock_file
+    command %Q{
+set -e
+. /etc/profile.d/#{env_file}
+
+cd $GOPATH/src/github.com/GoogleCloudPlatform
 if [ ! -e kubernetes ]; then
   git clone https://github.com/jessehu/kubernetes.git
   cd kubernetes
@@ -76,46 +84,32 @@ release/build-release.sh $KUBE_CLUSTER_NAME
 
 touch {$lock_file}
 }
+  end
+elsif node[:kubernetes][:install_from_tarball] and !File.exist?(node[:kubernetes][:home_dir])
+  step="Installing Kubernetes from binary tarball"
+  set_bootstrap_action(step, '', true)
+  url = current_distro['tarball']
+  ver = distro_version
+  install_from_release('kubernetes') do
+    release_url   url
+    version       ver
+    home_dir      node[:kubernetes][:home_dir]
+    action        [:install]
+    has_binaries  []
+  end
 end
 
-step="update salt master and minions"
-set_bootstrap_action(step, '', true)
-bash step do
-  command %Q{
-set -e
-. /etc/profile.d/#{env_file}
-. $KUBE_HOME/cluster/kube-env.sh
-. $KUBE_HOME/cluster/$KUBERNETES_PROVIDER/util.sh
-detect-master
-(
-  num_minions=$(kubecfg.sh list minions | wc -l)
-  num_minions=$((num_minions - 3))
-  if [ $num_minions != $NUM_MINIONS ]; then
-    echo "echo New minions added or minions removed. Updating salt master and minions ..."
-    echo "sudo salt '*' mine.update"
-    echo "sudo salt --force-color '*' state.highstate"
-  fi
-) | kube-ssh ${KUBE_MASTER_IP} bash
-
-# wait for minions 
-sleep_time=3
-timeout=60
-while true; do
-  num_minions=$(kubecfg.sh list minions | wc -l)
-  num_minions=$((num_minions - 3))
-  if [ $num_minions = $NUM_MINIONS ]; then exit; fi
-  timeout=$((timeout - sleep_time));
-  echo "Waiting for salt master to update the minions list. $timeout seconds left."
-  if [ $timeout = 0 ]; then
-    echo "WARNING: salt master hasn't detected the new minions, please check it later." > /dev/stderr
-    exit 0
-  fi
-  sleep $sleep_time
-done
-}
+## Patch Kubernetes vSphere plugin to support Serengeti
+files = %w[config-default.sh util.sh templates/hostname.sh]
+files.each do |file|
+  template "#{node[:kubernetes][:home_dir]}/cluster/vsphere/#{file}" do
+    owner "root"
+    mode file.end_with?('.sh') ? "0755" : "0644"
+    source "vsphere/#{file}.erb"
+  end
 end
 
-step="deploy the Kubernetes cluster on master and minions nodes"
+step="Deploying Kubernetes master and minions nodes"
 set_bootstrap_action(step, '', true)
 execute step do
   user 'serengeti'
@@ -126,4 +120,3 @@ cd $KUBE_HOME
 kube-up.sh 1>~/kube.log 2>&1
 }
 end
-

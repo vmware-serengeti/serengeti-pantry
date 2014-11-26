@@ -14,3 +14,8 @@
 #
 
 default[:no_wait_for_disks] = true
+
+default[:kubernetes][:install_from_tarball] = true
+conf = node['cluster_configuration']['kubernetes']['env'] || {} rescue conf = {}
+default[:kubernetes][:gopath] = conf['GOPATH'] || '/opt/kubernetes/src/go'
+default[:kubernetes][:home_dir] = "#{default[:kubernetes][:gopath]}/src/github.com/GoogleCloudPlatform/kubernetes"

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Update hostname in /etc/hosts and /etc/hostname
+echo ${MY_NAME} > /etc/hostname
+entry="127.0.1.1 ${MY_NAME}"
+if ! grep -q "$entry" /etc/hosts; then
+  echo $entry >> /etc/hosts
+fi
+hostname ${MY_NAME}
