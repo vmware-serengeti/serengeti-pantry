@@ -28,4 +28,15 @@ module ::Mesos
     Chef::Log.warn("Error while attempting to discover exhibitor zookeepers: Retry #{6 - tries} of 5")
     retry unless (tries -= 1).zero?
   end
+
+  def generate_mesos_param_files(node_type, pairs)
+    pairs.each do |key, value|
+      file = "/etc/mesos-#{node_type}/#{key}"
+      execute file do
+        not_if "test '`cat ${file}`' = '#{value}'"
+        command "echo #{value} > #{file}"
+        notifies :run, "bash[restart-mesos-#{node_type}]", :delayed
+      end
+    end
+  end
 end

@@ -63,6 +63,9 @@ when 'debian', 'ubuntu'
     source "#{Chef::Config[:file_cache_path]}/mesos.deb"
     not_if { ::File.exist? '/usr/local/sbin/mesos-master' }
   end
+
+#TODO: need chronos, marathon, docker .deb from somewhere
+
 when 'rhel', 'centos', 'amazon', 'scientific'
   %w( unzip libcurl ).each do |pkg|
     yum_package pkg do
@@ -71,26 +74,25 @@ when 'rhel', 'centos', 'amazon', 'scientific'
   end
 
   package 'mesos'
+  package 'chronos' if node.role?('mesos_chronos')
+  package 'marathon' if node.role?('mesos_marathon')
 end
 
-# Set init to 'stop' by default for mesos master.
-# Running mesos::master recipe will reset this to 'start'
-template '/etc/init/mesos-master.conf' do
-  source 'mesos-master.conf.erb'
-  variables(
-    action: 'stop',
-  )
+# Set init to 'stop' by default for all services
+# Running mesos::master or mesos::slave recipe will reset to start as appropriate
+services = %w[mesos-master mesos-slave]
+services += %w[chronos] if node.role?('mesos_chronos')
+services += %w[marathon] if node.role?('mesos_marathon')
+services.each do |service|
+  template "/etc/init/#{service}.conf" do
+    source "#{service}.conf.erb"
+    variables(
+      action: 'stop',
+    )
+  end
 end
 
-# Set init to 'stop' by default for mesos slave.
-# Running mesos::slave recipe will reset this to 'start'
-template '/etc/init/mesos-slave.conf' do
-  source 'mesos-slave.conf.erb'
-  variables(
-    action: 'stop',
-  )
-end
-
+#TODO: Need to explore debian-side Chronos/Marathon/Docker support
 if distro == 'debian'
   bash 'reload-configuration-debian' do
     user 'root'

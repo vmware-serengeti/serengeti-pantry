@@ -18,21 +18,30 @@
 # limitations under the License.
 #
 
-include_recipe 'mesos::slave'
+return unless node.role?('mesos_docker')
 
 set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'docker-io', true)
 
 # install docker
-execute 'install epel yum repo' do
-  not_if 'rpm -q epel-release'
-  command 'rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'
+package 'epel-release'
+package 'docker-io'
+
+bash 'config docker containerizer for mesos' do
+  not_if 'grep docker /etc/mesos-slave/containerizers'
+  code <<-EOH
+    echo "other_args='--insecure-registry 10.0.0.0/8'" >> /etc/sysconfig/docker
+    echo 'docker,mesos' > /etc/mesos-slave/containerizers
+    echo '5mins' > /etc/mesos-slave/executor_registration_timeout
+  EOH
+  notifies :run, 'bash[restart-mesos-slave]', :delayed
 end
 
-package 'docker-io'
 service 'docker' do
-  action [:enable, :start]
-  supports :status => true, :restart => true
+  action [ :enable, :start ]
 end
+
+return if File.exist?("#{node['mesos']['python_site_dir']}/mesos.egg")
+set_bootstrap_action('Installing mesos docker executer', '', true)
 
 # install mesos docker executor
 package 'python-setuptools'
@@ -67,5 +76,5 @@ bash 'install-mesos-egg' do
   code <<-EOH
     easy_install "#{Chef::Config[:file_cache_path]}/mesos.egg"
   EOH
-  not_if { ::File.exist?('/usr/local/lib/python2.7/dist-packages/mesos.egg') }
+  not_if { ::File.exist?("#{node['mesos']['python_site_dir']}/mesos.egg") }
 end

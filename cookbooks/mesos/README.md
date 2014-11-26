@@ -50,34 +50,23 @@ Tested on
 
 ## Attributes
 
-* `node['mesos']['version']` - Mesosphere Mesos package version. Default: 
-'0.17.0'.
-* `node['mesos']['cluster_name']` - Human readable name for the cluster, 
-displayed in the webui. Default: 'MyMesosCluster'.
-* `node['mesos']['port']` - Port to listen on. Default: 5050.
-* `node['mesos']['logs_dir']` - Location to put log files. Default: 
-'/var/log/mesos'.
-* `node['mesos']['work_dir']` - Where to place framework work directories. 
-Default: '/tmp/mesos'
-* `node['mesos']['isolation_type']` - Isolation mechanism, may be one of: 
-process, cgroups. Default: 'process'.
-* `node['mesos']['zookeeper_server_list']` - List of ZooKeeper hostnames or 
-IP addresses. Default: [].
+* `node['mesos']['version']` - Mesosphere Mesos package version. Default: '0.20.1'.
+* `node['mesos']['master']['cluster']` - Human readable name for the cluster, displayed in the webui. Default: 'MyMesosCluster'.
+* `node['mesos']['common']['port']` - Port to listen on. Default: 5050.
+* `node['mesos']['common']['logs']` - Location to put log files. Default: '/var/log/mesos'.
+* `node['mesos']['common']['ulimit']` - The ulimit of the mesos process.
+* `node['mesos']['slave']['work_dir']` - Where to place framework work directories. Default: '/tmp/mesos'.
+* `node['mesos']['slave']['isolation']` - Isolation mechanism, may be one of: process, cgroups. Default: 'process'.
+* `node['mesos']['slave']['checkpoint']` - Enable slave recovery. Default: 'true'.
+* `node['mesos']['slave']['strict']` - If true, any recovery error is fatal. Default: 'false'.
+* `node['mesos']['slave']['recover']` - Whether to recover status updates and reconnect with old executors. Default: 'reconnect'
+* `node['mesos']['zookeeper_server_list']` - List of ZooKeeper hostnames or IP addresses. Default: [].
 * `node['mesos']['zookeeper_port']` - ZooKeeper port. Default: 2181.
 * `node['mesos']['zookeeper_path']` - ZooKeeper path. Default: 'mesos'.
-* `node['mesos']['zookeeper_exhibitor_discovery']` - Flag to enable ZooKeeper 
-ensemble discovery via Netflix Exhibitor. Default: false.
-* `node['mesos']['zookeeper_exhibitor_url']` - Netflix Exhibitor ZooKeeper 
-ensemble url.
-* `node['mesos']['set_ec2_hostname']` - If true and running in ec2, set hostname
-to public dns name.  Default: true.
+* `node['mesos']['zookeeper_exhibitor_discovery']` - Flag to enable ZooKeeper ensemble discovery via Netflix Exhibitor. Default: false.
+* `node['mesos']['zookeeper_exhibitor_url']` - Netflix Exhibitor ZooKeeper ensemble url.
+* `node['mesos']['set_ec2_hostname']` - If true and running in ec2, set hostname to public dns name.  Default: true.
 * `node['mesos']['python_egg']` - URL of mesos python egg to download
-* `node['mesos']['slave']['checkpoint']` - Enable slave recovery. Default:
-'true'.
-* `node['mesos']['slave']['strict']` - If true, any recovery error is fatal.
-Default: 'false'.
-* `node['mesos']['slave']['recover']` - Whether to recover status updates and 
-reconnect with old executors. Default: 'reconnect'
 
 ## Recipes
 

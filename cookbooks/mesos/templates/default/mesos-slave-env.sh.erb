@@ -7,7 +7,6 @@
 
 # The mesos master URL to contact. Should be host:port for
 # non-ZooKeeper based masters, otherwise a zk:// or file:// URL.
-
 <% # ZK multi-node syntax: zk://host1:port1,host2:port2,.../path
   zk_url_list = []
   @zookeeper_server_list.each do |zk_server|
@@ -15,13 +14,13 @@
   end
 %>
 
-<% if zk_url_list.count > 0 %>
-  export MESOS_master=<%= 'zk://' + zk_url_list.join(',') + ',/' + @zookeeper_path %>
-<% else %>
-  export MESOS_master=unknown-machine:5050
-<% end %>
+<%- if zk_url_list.count > 0 %>
+export MESOS_master=<%= 'zk://' + zk_url_list.join(',') + '/' + @zookeeper_path %>
+<%- else %>
+export MESOS_master=unknown-machine:5050
+<%- end %>
 
 # Other options you're likely to want to set:
 export MESOS_log_dir=<%= @logs_dir %>
 export MESOS_work_dir=<%= @work_dir %>
-export MESOS_isolation=<%= @isolation_type %>
+export MESOS_isolation=<%= @isolation %>
