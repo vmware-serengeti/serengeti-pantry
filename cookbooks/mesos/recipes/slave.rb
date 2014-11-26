@@ -22,6 +22,7 @@ class ::Chef::Recipe
 end
 
 include_recipe 'mesos::install'
+include_recipe 'mesos::docker' if node.role?('mesos_docker')
 
 zk_server_list = []
 zk_port = ''
@@ -69,7 +70,7 @@ unless zk_server_list.count == 0 && zk_port.empty? && zk_path.empty?
   end
 end
 
-template '/usr/local/var/mesos/deploy/mesos-slave-env.sh.template' do
+template '/usr/local/etc/mesos/mesos-slave-env.sh.template' do
   source 'mesos-slave-env.sh.template.erb'
   variables(
     zookeeper_server_list: zk_server_list,

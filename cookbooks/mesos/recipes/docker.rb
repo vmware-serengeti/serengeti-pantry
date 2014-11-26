@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 
-include_recipe 'mesos::slave'
+return unless node.role?('mesos_docker')
 
 set_bootstrap_action(ACTION_INSTALL_PACKAGE, 'docker-io', true)
 
@@ -29,10 +29,28 @@ execute 'install epel yum repo' do
 end
 
 package 'docker-io'
-service 'docker' do
-  action [:enable, :start]
-  supports :status => true, :restart => true
+
+bash 'config docker containerizer for mesos' do
+  user 'root'
+  not_if 'grep docker /etc/mesos-slave/containerizers'
+  code <<-EOH
+    chkconfig docker on
+
+    
+    # FIXME: Docker seems to pretty consistently crash on first init.  We can work around
+    # that by starting it, poking it to make it die, then restarting it again...
+    service docker start
+    docker info
+    service docker restart
+
+    echo 'docker,mesos' > /etc/mesos-slave/containerizers
+    echo '5mins' > /etc/mesos-slave/executor_registration_timeout
+  EOH
+  notifies :run, 'bash[restart-mesos-slave]', :delayed
 end
+
+return if File.exist?("#{node['mesos']['python_site_dir']}/mesos.egg")
+set_bootstrap_action('Installing mesos docker executer', '', true)
 
 # install mesos docker executor
 package 'python-setuptools'
@@ -67,5 +85,5 @@ bash 'install-mesos-egg' do
   code <<-EOH
     easy_install "#{Chef::Config[:file_cache_path]}/mesos.egg"
   EOH
-  not_if { ::File.exist?('/usr/local/lib/python2.7/dist-packages/mesos.egg') }
+  not_if { ::File.exist?("#{node['mesos']['python_site_dir']}/mesos.egg") }
 end

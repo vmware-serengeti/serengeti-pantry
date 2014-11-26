@@ -13,7 +13,7 @@
 #   limitations under the License.
 #
 
-default['mesos']['version']                       = '0.21.0'
+default['mesos']['version']                       = '0.20.1'
 default['mesos']['common']['port']                = 5050
 default['mesos']['common']['logs_dir']            = '/var/log/mesos'
 default['mesos']['common']['logging_level']       = 'ERROR'
@@ -33,10 +33,12 @@ default['mesos']['slave']['checkpoint']           = 'true'
 default['mesos']['slave']['strict']               = 'false'
 default['mesos']['slave']['recover']              = 'reconnect'
 
+default['mesos']['python_site_dir'] = '/usr/local/lib/python2.7/dist-packages'
 case node['platform']
-when 'rhel', 'centos'
+when 'rhel', 'centos', 'fedora', 'oracle'
   default['java']['jdk_version'] = '7'
   default['mesos']['python_egg'] = "http://downloads.mesosphere.io/master/#{node['platform']}/6/mesos-#{node['mesos']['version']}-py2.6.egg"
+  default['mesos']['python_site_dir'] = '/usr/lib/python2.6/site-packages'
 when 'ubuntu'
   default['mesos']['python_egg'] = "http://downloads.mesosphere.io/master/ubuntu/13.04/mesos-#{node['mesos']['version']}-py2.7-linux-x86_64.egg"
 when 'debian'

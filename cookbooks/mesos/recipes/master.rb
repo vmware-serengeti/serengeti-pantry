@@ -84,70 +84,75 @@ if node.attribute?('ec2') && node['mesos']['set_ec2_hostname']
   end
 end
 
-# Set init to 'start' by default for mesos master.
-# This ensures that mesos-master is started on restart
-template '/etc/init/mesos-master.conf' do
-  source 'mesos-master.conf.erb'
-  variables(
-    action: 'start',
-  )
-  notifies :run, 'bash[reload-configuration]'
-end
-
-if node['platform'] == 'debian'
-  bash 'reload-configuration' do
-    action :nothing
-    user 'root'
-    code <<-EOH
-    update-rc.d mesos-master defaults
-    EOH
-  end
-else
-  bash 'reload-configuration' do
-    action :nothing
-    user 'root'
-    code <<-EOH
-    initctl reload-configuration
-    EOH
-  end
-end
-
 set_bootstrap_action(ACTION_START_SERVICE, 'mesos-master', true)
 
-if node['platform'] == 'debian'
-  bash 'start-mesos-master' do
-    user 'root'
-    code <<-EOH
-    service mesos-master start
-    EOH
-    not_if 'service mesos-master status|grep start/running'
+services = %w[mesos-master]
+services += %w[chronos] if node.role?('mesos_chronos')
+services += %w[marathon] if node.role?('mesos_marathon')
+services.each do |service|
+  # Set init to 'start' by default for mesos master.
+  # This ensures that mesos-master is started on restart
+  template "/etc/init/#{service}.conf" do
+    source "#{service}.conf.erb"
+    variables(
+      action: 'start',
+    )
+    notifies :run, "bash[reload-configuration-#{service}]"
   end
-else
-  bash 'start-mesos-master' do
-    user 'root'
-    code <<-EOH
-    start mesos-master
-    EOH
-    not_if 'status mesos-master|grep start/running'
-  end
-end
 
-if node['platform'] == 'debian'
-  bash 'restart-mesos-master' do
-    action :nothing
-    user 'root'
-    code <<-EOH
-    service mesos-master restart
-    EOH
-    not_if 'service mesos-master status|grep stop/waiting'
+  if node['platform'] == 'debian'
+    bash "reload-configuration-#{service}" do
+      action :nothing
+      user 'root'
+      code <<-EOH
+       update-rc.d #{service} defaults
+      EOH
+    end
+  else
+    bash "reload-configuration-#{service}" do
+      action :nothing
+      user 'root'
+      code <<-EOH
+       initctl reload-configuration
+      EOH
+    end
   end
-else
-  bash 'restart-mesos-master' do
-    action :nothing
-    user 'root'
-    code <<-EOH
-    restart mesos-master
-    EOH
-    not_if 'status mesos-master|grep stop/waiting'
+
+  if node['platform'] == 'debian'
+    bash "start-#{service}" do
+      user 'root'
+      code <<-EOH
+       service #{service} start
+      EOH
+      not_if "service #{service} status | grep start/running"
+    end
+  else
+    bash "start-#{service}" do
+      user 'root'
+      code <<-EOH
+       start #{service}
+      EOH
+      not_if "status #{service} | grep start/running"
+    end
+  end
+
+  if node['platform'] == 'debian'
+    bash "restart-#{service}" do
+      action :nothing
+      user 'root'
+      code <<-EOH
+       service #{service} restart
+      EOH
+      not_if "service #{service} status | grep stop/waiting"
+    end
+  else
+    bash "restart-#{service}" do
+      action :nothing
+      user 'root'
+      code <<-EOH
+       restart #{service}
+      EOH
+      not_if "status #{service} | grep stop/waiting"
+    end
   end
 end
