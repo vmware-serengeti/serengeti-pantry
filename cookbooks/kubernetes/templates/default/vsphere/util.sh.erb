@@ -255,6 +255,15 @@ function kube-up-vm {
 
   ssh-add -L > "${KUBE_TEMP}/${vm_name}-authorized_keys"
 
+  govc guest.download \
+    -vm.ipath="${vm_ipath}" \
+    -f \
+    ${KUBE_SSH_USER_HOME}/.ssh/authorized_keys \
+    "${KUBE_TEMP}/${vm_name}-authorized_keys.orig"
+
+  cat "${KUBE_TEMP}/${vm_name}-authorized_keys.orig" >> "${KUBE_TEMP}/${vm_name}-authorized_keys"
+  rm -f "${KUBE_TEMP}/${vm_name}-authorized_keys.orig"
+
   govc guest.upload \
     -vm.ipath="${vm_ipath}" \
     -f \
