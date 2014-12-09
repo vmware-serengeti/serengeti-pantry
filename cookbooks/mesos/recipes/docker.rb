@@ -32,6 +32,8 @@ bash 'config docker containerizer for mesos' do
   code <<-EOH
     chkconfig docker on
 
+    echo "other_args='--insecure-registry 10.0.0.0/8'" >> /etc/sysconfig/docker
+
     # FIXME: Docker seems to pretty consistently crash on first init.  We can work around
     # that by starting it, poking it to make it die, then restarting it again...
     service docker start
