@@ -3,6 +3,7 @@
 # Attribute:: default
 #
 # Copyright 2013-2014, Limelight Networks, Inc.
+# Portions Copyright (c) 2014 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +16,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+
+#
+# Check available configuration on https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Deployment_Guide/SSSD-Introduction.html
 #
 
 default['sssd_ldap']['id_provider'] = 'ldap'
@@ -46,9 +51,12 @@ default['sssd_ldap']['ldap_default_authtok'] = 'bind_password'
 
 default['sssd_ldap']['authconfig_params'] = '--enablesssd --enablesssdauth --enablelocauthorize --update'
 
-default['sssd_ldap']['access_provider'] = nil # Should be set to 'ldap'
+default['sssd_ldap']['access_provider'] = 'ldap'
 default['sssd_ldap']['ldap_access_filter'] = nil # Can use simple LDAP filter such as 'uid=abc123' or more expressive LDAP filters like '(&(objectClass=employee)(department=ITSupport))'
 
 default['sssd_ldap']['min_id'] = '1'
 default['sssd_ldap']['max_id'] = '0'
-default['sssd_ldap']['ldap_sudo'] = 'false'
+
+default['sssd_ldap']['ldap_sudo_smart_refresh_interval'] = 900  # 15 minutes
+default['sssd_ldap']['ldap_sudo_full_refresh_interval'] = 21600 # 6 hours
+default['sssd_ldap']['ldap_sudo'] = false

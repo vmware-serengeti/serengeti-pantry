@@ -3,6 +3,7 @@
 # Recipe:: default
 #
 # Copyright 2013-2014, Limelight Networks, Inc.
+# Portions Copyright (c) 2014 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,9 +22,28 @@ package 'sssd' do
   action :install
 end
 
-package 'libsss_sudo' do
-  action :install
-  only_if { node['sssd_ldap']['ldap_sudo'] == 'true' }
+if node['platform_family'] == 'rhel' and node['platform_version'].to_f < 6
+  if node['sssd_ldap']['ldap_sudo']
+    # The libsss_sudo rpm on https://repos.fedorapeople.org/repos/jhrozek/sssd-libs/epel-5/x86_64/ doesn't work
+    Chef::Log.warn('RHEL/CentOS 5 does not provide official libsss_sudo rpm. SSSD LDAP sudo will be disabled.')
+    node.normal['sssd_ldap']['ldap_sudo'] = false
+  end
+end
+
+if node['sssd_ldap']['ldap_sudo']
+  package 'libsss_sudo' do
+    action :install
+  end
+
+  vars = {
+    :sss => 'sss',
+    :sudo => ', sudo'
+  }
+else
+  vars = {
+    :sss => '',
+    :sudo => ''
+  }
 end
 
 # Only run on RHEL
@@ -46,6 +66,7 @@ if platform_family?('rhel')
     owner 'root'
     group 'root'
     mode '0644'
+    variables vars
   end
 
 end
@@ -56,6 +77,7 @@ template '/etc/sssd/sssd.conf' do
   owner 'root'
   group 'root'
   mode '0600'
+  variables vars
   if platform_family?('rhel')
     notifies :run, 'execute[authconfig]', :immediately # this needs to run immediately so it doesn't happen after sssd service block below, or sssd is not running when recipe completes
   else

@@ -1,6 +1,16 @@
 #
-# Managed by Chef
+# This file is managed by Chef
+#
 # /etc/nsswitch.conf
+#
+# An example Name Service Switch config file. This file should be
+# sorted with the most-used services at the beginning.
+#
+# The entry '[NOTFOUND=return]' means that the search for an
+# entry should stop if the search in the previous entry turned
+# up nothing. Note that if the search failed due to some other reason
+# (like no NIS server responding) then the search continues with the
+# next entry.
 #
 
 passwd:     files sss
@@ -25,4 +35,4 @@ publickey:  nisplus
 automount:  files nisplus
 aliases:    files nisplus
 
-sudoers:    files <% if node['sssd_ldap']['ldap_sudo'] == 'true' %>ldap<% end %>
+sudoers:    files <%= @sss %>
