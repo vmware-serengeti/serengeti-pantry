@@ -90,6 +90,9 @@ if prefix
 end
 
 # if new rpms are added into the remote yum repo, yum won't be aware of it unless the cache is cleaned
-execute "clean yum repo cache" do
-  command "yum clean all"
+if !node[:disable_clean_yum_cache]
+  execute "clean yum repo cache" do
+    command "yum clean all"
+  end
 end
+
