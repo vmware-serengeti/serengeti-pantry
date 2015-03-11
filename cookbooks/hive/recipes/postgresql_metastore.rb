@@ -82,9 +82,14 @@ execute "Import hive metastore schema" do
   command %Q{
     # the expected postgres sql file for hive
     schema_file_path=#{node[:hive][:home_dir]}/scripts/metastore/upgrade/postgres/hive-schema-`cat #{node[:hive][:home_dir]}/version`.postgres.sql
+    # Use hive-schema-0.13.0.postgres.sql for Hive 0.13.1 in CDH 5.2 because Hive 0.13.1 doesn't contain hive-schema-0.13.1.postgres.sql
+    schema_file_path_minor=`echo ${schema_file_path} | sed -e 's/[[:digit:]]\\+.postgres.sql/*.postgres.sql/'`
+    schema_file_path_minor=`ls ${schema_file_path_minor} | tail -1`
 
     if [ -f $schema_file_path ]; then
       schema_file=$schema_file_path
+    elif [ -f $schema_file_path_minor ]; then
+      schema_file=$schema_file_path_minor
     elif [ -f #{schema_file_path_ver0100} ]; then
       schema_file=#{schema_file_path_ver0100}
     elif [ -f #{schema_file_path_ver090} ]; then
