@@ -1,3 +1,8 @@
+# 2.1.1 (2014-11-27)
+
+New features:
+* Add roles and cookbooks for Mesos and Kubernetes
+
 # 2.1.0 (2014-9-15)
 
 New features:
