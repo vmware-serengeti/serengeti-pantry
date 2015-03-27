@@ -13,10 +13,18 @@
 #   limitations under the License.
 #
 
-# Config IPs of Zookeeper and CLDB nodes
+# Config MapR
 client = node.role?('mapr_client') ? "-c" : ""
-config_command = "/opt/mapr/server/configure.sh #{client} -N #{node[:cluster_name]} -C " + cldbs_address + " -Z " + zookeepers_address
-execute "config IPs of MapR Zookeeper and CLDB nodes" do
+config_command = "/opt/mapr/server/configure.sh #{client}" +
+  " -N #{node[:cluster_name]} -C " + cldbs_address + " -Z " + zookeepers_address
+
+rm = resourcemanagers_address
+hs = historyserver_address
+if !rm.empty?
+  config_command += " -RM #{rm} -HS #{hs}"
+end
+
+execute "config MapR" do
   user "root"
   command config_command
 end

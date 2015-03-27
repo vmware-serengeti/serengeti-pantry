@@ -62,7 +62,7 @@ done
 # Check whether CLDB is running.
 source /opt/mapr/conf/env.sh
 PATH=$JAVA_HOME/bin:$PATH
-jps | grep -q CLDB
+ps aux | grep -v grep | grep CLDB
 [ $? -ne 0 ] && exit
 
 # Show current CLDB

@@ -40,6 +40,15 @@ module MapR
     all_provider_public_ips_for_role('mapr_zookeeper').join(",")
   end
 
+  def resourcemanagers_address
+    all_provider_public_ips_for_role('mapr_resourcemanager').join(",")
+  end
+
+  # there should be only one History Server
+  def historyserver_address
+    all_provider_public_ips_for_role('mapr_historyserver').first
+  end
+
   # Wait until Zookeepers daemons have started
   def wait_for_zookeeper_nodes
     if !is_mapr_zookeeper

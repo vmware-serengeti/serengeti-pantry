@@ -13,6 +13,8 @@
 #   limitations under the License.
 #
 
+# Doc reference http://doc.mapr.com/display/MapR/Planning+the+Cluster
+
 include_recipe 'mapr::prereqs'
 
 ## Install MapR packages specified by roles
@@ -23,7 +25,10 @@ role2pkg = {
   'mapr_fileserver' => 'mapr-fileserver',
   'mapr_nfs' => true,
   'mapr_jobtracker' => 'mapr-jobtracker',
+  'mapr_resourcemanager' => 'mapr-resourcemanager',
   'mapr_tasktracker' => 'mapr-tasktracker',
+  'mapr_nodemanager' => 'mapr-nodemanager',
+  'mapr_historyserver' => 'mapr-historyserver',
   'mapr_webserver' => 'mapr-webserver',
   'mapr_metrics' => 'mapr-metrics',
   'mapr_pig' => 'mapr-pig',
@@ -36,8 +41,13 @@ role2pkg.each do |role_name, pkg_name|
   if node.role?(role_name)
     set_bootstrap_action(ACTION_INSTALL_PACKAGE, role_name.gsub('_', '-'), true)
     if pkg_name == true
+      # this package has dedicated recipe
       include_recipe role_name.sub('_', '::')
     else
+      if role_name == 'mapr_historyserver' and node[:facet_index] != 0
+        # only one history server is needed
+        next
+      end
       package pkg_name
     end
   end
