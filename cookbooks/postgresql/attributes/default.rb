@@ -26,7 +26,7 @@ when "debian"
   when node['platform_version'].to_f < 7.0 # All 6.X
     default['postgresql']['version'] = "8.4"
   else
-    default['postgresql']['version'] = "9.1"
+    default['postgresql']['version'] = "9.4"
   end
 
   default['postgresql']['dir'] = "/etc/postgresql/#{node['postgresql']['version']}/main"
@@ -49,7 +49,7 @@ when "ubuntu"
   when node['platform_version'].to_f <= 11.04
     default['postgresql']['version'] = "8.4"
   else
-    default['postgresql']['version'] = "9.1"
+    default['postgresql']['version'] = "9.4"
   end
 
   default['postgresql']['dir'] = "/etc/postgresql/#{node['postgresql']['version']}/main"
@@ -69,7 +69,7 @@ when "fedora"
   if node['platform_version'].to_f <= 12
     default['postgresql']['version'] = "8.3"
   else
-    default['postgresql']['version'] = "8.4"
+    default['postgresql']['version'] = "9.4"
   end
 
   default['postgresql']['dir'] = "/var/lib/pgsql/data"
@@ -80,7 +80,7 @@ when "fedora"
 
 when "amazon"
 
-  default['postgresql']['version'] = "8.4"
+  default['postgresql']['version'] = "9.4"
   default['postgresql']['dir'] = "/var/lib/pgsql/data"
   default['postgresql']['client']['packages'] = %w{postgresql-devel}
   default['postgresql']['server']['packages'] = %w{postgresql-server}
@@ -89,7 +89,7 @@ when "amazon"
 
 when "redhat", "centos", "scientific", "oracle"
 
-  default['postgresql']['version'] = "8.4"
+  default['postgresql']['version'] = "9.4"
   ver = default['postgresql']['version'].split('.').join
 
   if node['platform_version'].to_f < 6.0
@@ -115,7 +115,7 @@ when "suse"
   if node['platform_version'].to_f <= 11.1
     default['postgresql']['version'] = "8.3"
   else
-    default['postgresql']['version'] = "9.0"
+    default['postgresql']['version'] = "9.4"
   end
 
   default['postgresql']['dir'] = "/var/lib/pgsql/data"
@@ -125,7 +125,7 @@ when "suse"
   default['postgresql']['server']['service_name'] = "postgresql"
 
 else
-  default['postgresql']['version'] = "8.4"
+  default['postgresql']['version'] = "9.4"
   default['postgresql']['dir']         = "/etc/postgresql/#{node['postgresql']['version']}/main"
   default['postgresql']['client']['packages'] = ["postgresql"]
   default['postgresql']['server']['packages'] = ["postgresql"]

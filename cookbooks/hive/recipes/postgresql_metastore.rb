@@ -13,6 +13,13 @@
 #   limitations under the License.
 #
 
+# If this node is created by Serengeti 2.1.x, postgresql 8.4.17 was already installed.
+# Then we will not reinstall postgresql 9.4 provided by Serengeti 2.2.x.
+# We can do the migration from postgresql 8.4.17 to 9.4 in future.
+if system('/usr/bin/psql -V | grep 8.4.17')
+  return
+end
+
 ## Install postgresql database
 include_recipe 'postgresql::server'
 
