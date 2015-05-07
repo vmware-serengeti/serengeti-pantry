@@ -26,6 +26,7 @@ Chef::Log.info("Chef Server is " + Chef::Config[:chef_server_url])
 # add chef error reporting handler
 include_recipe 'hadoop_common::add_chef_handler'
 
+wait_for_fqdn_ddns_registration()
 
 ### When there are multi NICs on the node ###
 

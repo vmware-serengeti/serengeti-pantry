@@ -301,6 +301,18 @@ EOF
     `/usr/sbin/vmware-rpctool 'info-get guestinfo.disk.format.status'`.strip == "Disks Ready"
   end
 
+  def wait_for_fqdn_ddns_registration
+    return if node[:no_wait_for_network]
+    Chef::Log.info('Waiting for FQDN registered in DDNS') if !is_network_ready?
+    while !is_network_ready?
+      sleep 1
+    end
+  end
+
+  def is_network_ready?
+    `/usr/sbin/vmware-rpctool 'info-get guestinfo.FqdnRegisterCode'`.strip == '0'
+  end
+
   # Generate ssh rsa keypair for the specified user
   def generate_ssh_rsa_keypair(username, homedir = nil)
     homedir ||= "/home/#{username}"
