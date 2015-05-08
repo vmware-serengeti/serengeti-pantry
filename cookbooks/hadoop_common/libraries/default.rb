@@ -310,7 +310,13 @@ EOF
   end
 
   def is_network_ready?
-    `/usr/sbin/vmware-rpctool 'info-get guestinfo.FqdnRegisterCode'`.strip == '0'
+    registrater_code = get_fqdn_ddns_registrater_code
+    raise 'FQDN registration in DDNS failed' if registrater_code == '-1'
+    return registrater_code == '0'
+  end
+
+  def get_fqdn_ddns_registrater_code
+    `/usr/sbin/vmware-rpctool 'info-get guestinfo.FqdnRegisterCode'`.strip
   end
 
   # Generate ssh rsa keypair for the specified user
