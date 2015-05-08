@@ -1,3 +1,9 @@
+# 2.2.0 (2015-5-8)
+
+Enhancement:
+* Use postgresql 9.4 for Hive
+* Support for Hadoop 2.x in MapR 4.0
+
 # 2.1.1 (2014-11-27)
 
 New features:
