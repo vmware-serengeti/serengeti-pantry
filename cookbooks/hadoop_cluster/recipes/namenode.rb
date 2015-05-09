@@ -80,15 +80,20 @@ end if is_namenode_running
 service "start-#{node[:hadoop][:namenode_service_name]}" do
   service_name node[:hadoop][:namenode_service_name]
 
-  # Do not starts the service to start at system boot time
+  # Do not start the service during OS bootup. chef-client will start it.
   action [ :disable, :start ]
   supports :status => true, :restart => true
 
   notifies :create, resources("ruby_block[#{node[:hadoop][:namenode_service_name]}]"), :immediately
 end
 
-# run this regardless namenode is already started before bootstrapping or started by this recipe
-include_recipe "hadoop_cluster::wait_on_hdfs_safemode"
+# In Namenode HA case, when trying to get safemode status,
+# the primary namenode service wants to connect to standby namenode service which is waiting for primary namenode.
+# Then deadlock occurs. So need to skip this step.
+unless namenode_ha_enabled
+  # run this regardless namenode is already started before bootstrapping or started by this recipe
+  include_recipe "hadoop_cluster::wait_on_hdfs_safemode"
+end
 
 if namenode_ha_enabled
   # Register to provide primary namenode formatted

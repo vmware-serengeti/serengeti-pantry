@@ -12,6 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
+
 # Wait for primary namenode started
 wait_for(node[:hadoop][:primary_namenode_format], {"provides_service" => node[:hadoop][:primary_namenode_format], "facet_name" => node[:facet_name]})
 

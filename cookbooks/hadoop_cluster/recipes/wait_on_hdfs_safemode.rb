@@ -26,7 +26,7 @@
 # run_list order.
 #
 
-execute "wait_for_namenode" do
+execute "wait_for_hdfs_safemode" do
   command %Q{
     i=0
     while [ $i -le #{node[:hadoop][:namenode_wait_for_safemode_timeout]} ]
