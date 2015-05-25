@@ -18,10 +18,12 @@ client = node.role?('mapr_client') ? "-c" : ""
 config_command = "/opt/mapr/server/configure.sh #{client}" +
   " -N #{node[:cluster_name]} -C " + cldbs_address + " -Z " + zookeepers_address
 
-rm = resourcemanagers_address
-hs = historyserver_address
-if !rm.empty?
-  config_command += " -RM #{rm} -HS #{hs}"
+unless is_mapr3_distro
+  rm = resourcemanagers_address
+  hs = historyserver_address
+  if !rm.empty?
+    config_command += " -RM #{rm} -HS #{hs}"
+  end
 end
 
 execute "config MapR" do

@@ -15,6 +15,10 @@
 
 module MapR
 
+  def is_mapr3_distro
+    distro_vendor.downcase == 'mapr' and distro_version.to_f < 4
+  end
+
   # whether this node has mapr_zookeeper role
   def is_mapr_zookeeper
     node.role?('mapr_zookeeper')
