@@ -102,7 +102,11 @@ package "pdsh"
 name = node.role?('mapr_client') ? 'mapr-client.x86_64' : 'mapr-core'
 set_bootstrap_action(ACTION_INSTALL_PACKAGE, name, true)
 # because we set arch in pacakge name 'mapr-client.x86_64', we have to use 'yum_package' instead of 'package'
-yum_package name
+# mapr-core package has about 250M and 'yum install mapr-core' will report timeout error if the network speed is not fast enough. So add retries here. See https://communities.vmware.com/message/2527660#2527660
+yum_package name do
+  retries 8
+  retry_delay 10
+end
 
 # Applying patches. MapR 2.1.3 has a bug http://answers.mapr.com/questions/7177, which will be fixed in MapR 2.1.3.3+ and 3.0.1+.
 filename = 'createTTVolume.sh'
