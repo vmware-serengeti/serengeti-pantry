@@ -1,3 +1,4 @@
+name              "hadoop_cluster"
 maintainer        "VMware Inc."
 maintainer_email  "serengeti-dev@googlegroups.com"
 license           "Apache 2.0"

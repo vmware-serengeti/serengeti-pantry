@@ -1,3 +1,4 @@
+name             "hbase"
 maintainer       "VMware Inc."
 maintainer_email "bchang@vmware.com"
 license          "Apache License 2.0"

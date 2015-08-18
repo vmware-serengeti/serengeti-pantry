@@ -1,3 +1,4 @@
+name             "zookeeper"
 maintainer       "VMware Inc."
 maintainer_email "bchang@vmware.com"
 license          "Apache 2.0"

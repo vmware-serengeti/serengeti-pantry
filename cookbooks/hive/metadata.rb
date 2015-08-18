@@ -2,6 +2,7 @@ maintainer       "Philip (flip) Kromer - Infochimps, Inc"
 maintainer_email "coders@infochimps.com"
 license          "Apache 2.0"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
+name             "hive"
 version          "3.0.5"
 
 description      "Installs/Configures hive"

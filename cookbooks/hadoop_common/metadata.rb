@@ -1,3 +1,4 @@
+name              "hadoop_common"
 maintainer        "VMware, Inc"
 maintainer_email  "serengeti-dev@googlegroups.com"
 license           "Apache License 2.0"
