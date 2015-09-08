@@ -15,6 +15,12 @@
 
 return if node[:platform] == "fedora"
 
+# Hive 1.0+ uses hive-server2 instead of hive-server
+if is_bigtop_hadoop2_distro and distro_version.to_f >= 1
+  node.default[:hadoop][:packages][:hive_server][:name] = 'hive-server2'
+  node.default[:hadoop][:hive_service_name] = 'hive-server2'
+end
+
 if node[:hadoop][:install_from_tarball]
   template '/etc/init.d/hive-server' do
     source 'hive-server.erb'

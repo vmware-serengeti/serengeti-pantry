@@ -81,6 +81,18 @@ template schema_file_path_ver0100 do
   mode '0644'
 end
 
+# Hive 1.0.0 rpm in Bigtop 1.0.0 doesn't contain 'hive-schema-1.0.0.postgres.sql', so use 'hive-schema-0.14.0.postgres.sql' instead
+schema_file_path_ver0140="#{node[:hive][:home_dir]}/scripts/metastore/upgrade/postgres/hive-schema-0.14.0.postgres.sql"
+schema_file_path_ver100="#{node[:hive][:home_dir]}/scripts/metastore/upgrade/postgres/hive-schema-1.0.0.postgres.sql"
+execute "Add hive 1.0.0 sql file" do
+  not_if { File.exists?(schema_file_path_ver100) }
+  command %Q{
+    if [ -f "#{node[:hive][:home_dir]}"/scripts/metastore/upgrade/postgres/hive-schema-0.14.0.postgres.sql ]; then
+      cp -f #{schema_file_path_ver0140} #{schema_file_path_ver100}
+    fi
+  }
+end
+
 log = "#{node[:hive][:log_dir]}/.hive_metastore_schema_imported.log"
 execute "Import hive metastore schema" do
   not_if { File.exists?(log) }
