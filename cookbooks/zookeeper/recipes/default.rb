@@ -96,11 +96,11 @@ index = 0
 servers = ""
 if ips.size > 1
   ips.each do |ip|
-    servers += "server.#{index}=#{ip}:#{@node[:zookeeper][:peer_port]}:#{@node[:zookeeper][:leader_port]}\n"
+    servers += "server.#{index}=#{ip}:#{node[:zookeeper][:peer_port]}:#{node[:zookeeper][:leader_port]}\n"
     index += 1
   end
 else
-  servers = "server=#{ip}:#{@node[:zookeeper][:peer_port]}:#{@node[:zookeeper][:leader_port]}"
+  servers = "server=#{ip}:#{node[:zookeeper][:peer_port]}:#{node[:zookeeper][:leader_port]}"
 end
 
 %w[ zoo.cfg log4j.properties ].each do |file|

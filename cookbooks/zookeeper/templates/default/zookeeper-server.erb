@@ -14,5 +14,5 @@
 # Short-Description: Zookeeper Server daemon
 ### END INIT INFO
 
-ZK_SERVER_SH=<%= @node[:zookeeper][:home_dir] %>/bin/zkServer.sh
+ZK_SERVER_SH=<%= node[:zookeeper][:home_dir] %>/bin/zkServer.sh
 su zookeeper -c "$ZK_SERVER_SH $1"
