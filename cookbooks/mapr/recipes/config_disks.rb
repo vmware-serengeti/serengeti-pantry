@@ -23,8 +23,48 @@ end
 
 ## format local disk for MapR
 disk_file = '/opt/mapr/conf/disks.txt'
-if !File.exists?(disk_file)
-  disks = node[:disk][:disk_devices].values.collect{ |disk| disk if File.exists?(disk) }
+disks = node[:disk][:disk_devices].values.collect{ |disk| disk if File.exists?(disk) }
+
+new_disks = []
+old_disks = []
+
+if File.exists?(disk_file)
+  # get new disks if there are failed disks in MapR cluster
+  old_disks = File.read(disk_file).split("\n")
+  disks.each do | disk |
+    new_disks << disk unless old_disks.include?(disk)
+  end
+else
+  new_disks = disks
+end
+
+if new_disks.any?
+  Chef::Log.info "new disks: #{new_disks.to_s}"
+
+  new_disks_file = '/opt/mapr/conf/new_disks.txt'
+  new_disks_string = new_disks.join(',')
+
+  file new_disks_file do
+    owner "mapr"
+    group "mapr"
+    content new_disks_string.gsub("," , "\n") + "\n"
+  end
+
+  set_bootstrap_action(ACTION_FORMAT_DISK, '', true)
+  bash "format new disks for MapR" do
+    user "root"
+    code "/opt/mapr/server/disksetup -F -M #{new_disks_file}"
+    retries 10
+    retry_delay 3
+  end
+
+  file new_disks_file do
+    owner "mapr"
+    group "mapr"
+    action :delete
+  end
+
+  # Update all data disks to disks.txt
   disk_string = disks.join(',')
   file disk_file do
     owner "mapr"
@@ -32,12 +72,5 @@ if !File.exists?(disk_file)
     content disk_string.gsub("," , "\n") + "\n"
   end
 
-  set_bootstrap_action(ACTION_FORMAT_DISK, '', true)
-  bash "format disks for MapR" do
-    user "root"
-    code "/opt/mapr/server/disksetup -F -M #{disk_file}"
-    retries 10
-    retry_delay 3
-  end
   clear_bootstrap_action
 end
