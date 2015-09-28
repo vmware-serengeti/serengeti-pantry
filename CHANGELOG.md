@@ -1,3 +1,9 @@
+# 2.3.0 (2015-9-28)
+
+* Compatible with Chef 12
+* Support disk fix for MapR cluster
+* Support Hive 1.0.0 in Bigtop 1.0.0
+
 # 2.2.0 (2015-5-8)
 
 Enhancement:
