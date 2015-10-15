@@ -32,6 +32,14 @@ else
   package node[:hadoop][:packages][:hive_server][:name]
 end
 
+# CDH 5.4 contains Hive 1.1
+if is_cdh4_distro and distro_version.to_f >= 5.4
+  execute 'fix hive server 2 issue in CDH 5.4' do
+    not_if 'grep -q hiveserver2 /etc/init.d/hive-server'
+    command "sed -i 's|--service hiveserver |--service hiveserver2 |' /etc/init.d/hive-server"
+  end
+end
+
 service "#{node[:hadoop][:hive_service_name]}" do
   supports :status => true, :restart => true, :reload => true
   action [:enable, :start]
