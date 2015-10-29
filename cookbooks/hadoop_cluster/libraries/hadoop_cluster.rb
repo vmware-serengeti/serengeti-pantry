@@ -629,6 +629,7 @@ done
 
   # Hortonworks HMonitor vSphere HA Kit can not monitor namenode service and resourcemanager service in Hadoop HDFS2 and YARN
   def is_hortonworks_hmonitor_enabled
+    return false # This feature doesn't work on Hadoop 2.x. Will not be supported any more.
     node[:hadoop][:ha_enabled] and (is_hadoop1_distro or is_cdh4_distro)
   end
 
